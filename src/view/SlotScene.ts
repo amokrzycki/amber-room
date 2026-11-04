@@ -29,8 +29,6 @@ export class SlotScene extends Phaser.Scene {
   for(let c=0;c<5;c++){g.fillStyle(c%2?0x201920:0x19131a).fillRect(291+c*205,209,198,432);if(c<4)g.lineStyle(2,0xd8af55,.3).lineBetween(491+c*205,207,491+c*205,642);}
   this.add.text(800,142,'ORCHARD No. 7',{fontFamily:'Georgia',fontSize:'34px',fontStyle:'italic',color:'#fff2cc',letterSpacing:5}).setOrigin(.5);
   for(const x of [552,1048]){this.add.image(x,140,'cherry').setDisplaySize(45,45).setAlpha(.65);}
-  this.add.text(142,328,'5 × 3',{fontSize:'35px',color:'#d8af55'}).setOrigin(.5);
-  this.add.text(142,390,'FORTY LINES\nONE GOOD\nEVENING',{fontSize:'15px',align:'center',lineSpacing:12,color:'#c6a07b'}).setOrigin(.5);
   this.add.text(1458,400,'◆\nAMBER ROOM\n◆',{fontSize:'19px',align:'center',lineSpacing:22,color:'#d8af55'}).setOrigin(.5);
   const initial=owner.state.save.lastSpin?.outcome.grid??spin(machine,{lineCount:5,perLine:1},()=>0).grid;
   for(let c=0;c<5;c++)this.reels.push(new ReelView(this,c,initial[c]));

@@ -8,16 +8,22 @@ export class ReelView {
  private moving:Phaser.GameObjects.Container|undefined;
  private tween:Phaser.Tweens.Tween|undefined;
  private resolve:(()=>void)|undefined;
- private mask:Phaser.Display.Masks.GeometryMask;
- private maskShape:Phaser.GameObjects.Graphics;
  constructor(private scene:Phaser.Scene,private index:number,column:SymbolId[]){
   this.container=scene.add.container(t.reelX+index*t.reelGap,0);
-  this.maskShape=scene.make.graphics({x:0,y:0},false).fillStyle(0xffffff).fillRect(t.reelX+index*t.reelGap-99,207,198,435);
-  this.mask=this.maskShape.createGeometryMask();this.container.setMask(this.mask);
   this.show(column);
  }
  show(column:SymbolId[]){
   this.container.removeAll(true);this.images=column.map((symbol,row)=>this.scene.add.image(0,t.reelY+row*t.rowGap,symbol).setDisplaySize(168,168));this.container.add(this.images);
+  this.clip(this.images);
+ }
+ private clip(images:Phaser.GameObjects.Image[],offset=0){
+  for(const image of images){
+   const top=image.y+offset-image.displayHeight/2;
+   const from=Math.max(0,Math.ceil((207-top)/image.scaleY));
+   const to=Math.min(image.height,Math.floor((642-top)/image.scaleY));
+   image.setVisible(to>from);
+   if(to>from)image.setCrop(0,from,image.width,to-from);
+  }
  }
  play(column:SymbolId[],delayMs:number):Promise<void>{
   this.cancel();
@@ -28,13 +34,14 @@ export class ReelView {
    this.moving.add(this.scene.add.image(0,t.reelY+row*t.rowGap,symbol).setDisplaySize(168,168));
   }
   this.images.forEach(im=>im.setVisible(false));
+  this.clip(this.moving.list as Phaser.GameObjects.Image[]);
   const total=t.acceleration+t.cruise+delayMs+t.braking;
   const a=t.acceleration/total,b=(total-t.braking)/total;
   const integral=1-(a+1-b)/2;
   const ease=(p:number)=>p<a?p*p/(2*a*integral):p<b?(p-a/2)/integral:1-(1-p)*(1-p)/(2*(1-b)*integral);
   return new Promise(resolve=>{
    this.resolve=resolve;
-   this.tween=this.scene.tweens.add({targets:this.moving,y:-count*t.rowGap,duration:total,ease,onComplete:()=>{this.moving?.destroy();this.moving=undefined;this.show(column);this.resolve=undefined;resolve();}});
+   this.tween=this.scene.tweens.add({targets:this.moving,y:-count*t.rowGap,duration:total,ease,onUpdate:()=>{if(this.moving)this.clip(this.moving.list as Phaser.GameObjects.Image[],this.moving.y);},onComplete:()=>{this.moving?.destroy();this.moving=undefined;this.show(column);this.resolve=undefined;resolve();}});
   });
  }
  clearHighlight(){for(const image of this.images){this.scene.tweens.killTweensOf(image);image.setAlpha(1).setDisplaySize(168,168);}}
@@ -44,5 +51,5 @@ export class ReelView {
   if(reduced)return;
   for(const row of rows){const im=this.images[row];this.scene.tweens.add({targets:im,alpha:1-.12*intensity,duration:500,yoyo:true,ease:'Sine.easeInOut'});}
  }
- dispose(){this.cancel();this.container.destroy();this.mask.destroy();this.maskShape.destroy();}
+ dispose(){this.cancel();this.container.destroy();}
 }

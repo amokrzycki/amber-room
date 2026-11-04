@@ -19,3 +19,9 @@
 - Końcowa kontrola wykazała, że skip zostawiał dyskretną pętlę ambience. Browser-test oczekujący0źródeł po skip był RED; skip zatrzymuje teraz również tę pętlę, następny gest ponownie odblokowuje/startuje ambience. Zwrot mniejszy od stawki pokazuje krótką statyczną linię bez fanfary i blokowania START.
 - G4: brak błędów kodu, dwa P2 dokumentacyjne w trakcie kończenia raportu: liczby FPS po ostatnim pomiarze oraz checkboxy zadania7. Zsynchronizowano dokumenty i odznaczono wykonane kroki, zachowując jawne ograniczenia. Cztery niezależne review przeprowadzone przez czterech różnych reviewerów na domyślnym modelu, bez nowego implementera ani mocniejszego modelu.
 - Ostatnia kontrola wejścia wykryła, że działał przycisk pod własnym automatem, ale klik jego górnej części nie otwierał gry. Dodano interakcję do samego sprite; test browser-acceptance przez klik745/405odtworzył brak wejścia (RED), po poprawce sprawdza ten kanał zamiast tylko CTA. Bez dodatkowego implementera/review; mała poprawka wejścia autora, objęta rzeczywistym testem przeglądarkowym.
+
+## Poprawka po odbiorze użytkownika — przycinanie bębnów
+- Użytkownik zaakceptował płynność, zgłosił symbole wyjeżdżające poza okno podczas losowania i zbędny napis5×3. Font pozostawiony na poziomie MVP zgodnie z jego komentarzem.
+- Przyczyna: `GeometryMask`/`setMask` w Phaser4.2.1 działa tylko w Canvas; WebGL ignoruje maskę i emituje ostrzeżenie. Poprzednie testy nie porównywały obszaru obudowy w trakcie ruchu i nie wyłapywały tego warningu.
+- W ReelView zastąpiono niewspieraną maskę natywnym `Image.setCrop`, wyliczanym w jednostkach tekstury po każdym przesunięciu. Symbole całkiem poza oknem są niewidoczne, częściowe przycinają się na granicach207–642. Mechanizm obejmuje też kolumnę spoczynkową, bez dodatkowych filtrów/tekstur i bez zmiany ruchu/RNG/rozliczeń.
+- Usunięto blok5×3/FORTY LINES po lewej. Pozostała typografia bez zmian.

@@ -36,12 +36,13 @@ Powtarzalny odbiór pliku offline w lokalnym Chromium:
 
 ```sh
 node scripts/browser-acceptance.mjs
+node scripts/browser-reel-clipping.mjs
 node scripts/browser-save-business.mjs
 node scripts/browser-idle.mjs
 node scripts/browser-performance.mjs
 ```
 
-Te skrypty używają zainstalowanego `/usr/bin/chromium`; na innym systemie dostosuj `executablePath`. Nie instalują przeglądarki i nie uruchamiają serwera. Testy wymuszają wyniki przez podmianę RNG **w swoim środowisku przeglądarkowym**, bez produkcyjnego panelu ani dopisywania salda w grze. Raport wydajności jest z headless SwiftShader, nie z docelowego GPU użytkownika.
+Te skrypty używają zainstalowanego `/usr/bin/chromium`; na innym systemie dostosuj `executablePath`. Nie instalują przeglądarki i nie uruchamiają serwera. Test przycinania porównuje piksele klatek przez Python/Pillow. Testy wymuszają wyniki przez podmianę RNG **w swoim środowisku przeglądarkowym**, bez produkcyjnego panelu ani dopisywania salda w grze. Raport wydajności jest z headless SwiftShader, nie z docelowego GPU użytkownika.
 
 ## Zasoby i raport
 
