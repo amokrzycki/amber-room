@@ -18,7 +18,9 @@ export function parseSave(raw:string):SaveV1 {
   const r=s.lastSpin;
   if(!r||!integer(r.id,1)||r.id+1!==s.nextSpinId||!validBet(machine,r.bet)||r.totalStake!==r.bet.lineCount*r.bet.perLine||!r.outcome||!Array.isArray(r.outcome.stops)||r.outcome.stops.length!==5)invalid();
   let index=0;const expected=spin(machine,r.bet,()=>r.outcome.stops[index++]);
-  if(JSON.stringify(expected)!==JSON.stringify(r.outcome))invalid();
+  const o=r.outcome;
+  if(o.payout!==expected.payout||!Array.isArray(o.grid)||o.grid.length!==5||o.grid.some((c:unknown,i:number)=>!Array.isArray(c)||c.length!==3||c.some((v,j)=>v!==expected.grid[i][j]))||!Array.isArray(o.lineWins)||o.lineWins.length!==expected.lineWins.length||o.lineWins.some((w:any,i:number)=>!w||(['lineIndex','symbol','count','payout'] as const).some(k=>w[k]!==expected.lineWins[i][k])))invalid();
+  s.lastSpin={id:r.id,bet:{lineCount:r.bet.lineCount,perLine:r.bet.perLine},totalStake:r.totalStake,outcome:expected};
  } else if(s.nextSpinId!==1)invalid();
  // Reconstruct known fields so imported objects cannot add executable/config state.
  return {version:1,balance:s.balance,businesses:{barLevel:s.businesses.barLevel,extraMachines:s.businesses.extraMachines,decorLevel:s.businesses.decorLevel},lastAccrualAtMs:s.lastAccrualAtMs,remainderUnits:s.remainderUnits,nextSpinId:s.nextSpinId,lastSpin:s.lastSpin,selectedBet:{lineCount:s.selectedBet.lineCount,perLine:s.selectedBet.perLine},settings:{...s.settings}};

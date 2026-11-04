@@ -1,6 +1,6 @@
 # Juicy Fruit Salon Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Prywatny salon offline z pełnoekranowym automatem 5 × 3, zmiennymi liniami, dopracowanymi wygranymi i stonowaną ekonomią baru oraz dodatkowych maszyn.
 
@@ -82,11 +82,11 @@ Jedna referencja do bieżącej sesji jest przekazywana między scenami. Nie twor
 
 **Interfaces:** Produces `machine:MachineConfig`, `spin(config:MachineConfig,bet:Bet,rng:Rng):SpinOutcome`, `evaluate(config:MachineConfig,grid:SymbolId[][],bet:Bet):SpinOutcome['lineWins']`. Nieprawidłowy zakład/RNG powoduje `RangeError`.
 
-- [ ] **Step 1:** Utworzyć minimalny manifest z Phaser `4.2.1`, TypeScript i Vitest. Skrypty: `dev: vite`, `test: vitest run`, `typecheck: tsc --noEmit`, `build: vite build`. Przypiąć wersje w lockfile.
-- [ ] **Step 2:** Napisać czerwone testy: `catalogHas40UniquePaths` sprawdza 40 różnych ścieżek długości 5 i indeksy 0–2; `wrapsReelAtLastStop` dla stopu 11 daje kolumnę `wild,cherry,lemon`; `activePrefixOnlyPays` porównuje wynik z sumą wyłącznie pierwszych N linii dla każdego dozwolonego N; `linePriceDoesNotDependOnTotalLines` przy tej samej wygranej linii i perLine 2 daje jej identyczną wypłatę dla 5 i 40 linii; `bestWildMatchOnly` wybiera jedną najwyższą wypłatę linii; `rejectsInvalidInputs` odrzuca N=3, perLine=0, NaN i RNG poza paskiem.
-- [ ] **Step 3:** Uruchomić `npm test -- tests/engine.test.ts`; oczekiwany FAIL.
-- [ ] **Step 4:** Zaimplementować silnik według specyfikacji. Pierwsze pięć linii ustalone; pozostałe dobrać raz i zapisać w konfiguracji. RNG produkcyjne z `crypto.getRandomValues` bez biasu modulo; testy z ustalonymi indeksami.
-- [ ] **Step 5:** Uruchomić testy silnika i `npm run typecheck`; oczekiwany PASS. W zapisywalnym repozytorium commit `feat: add selectable slot paylines`.
+- [x] **Step 1:** Utworzyć minimalny manifest z Phaser `4.2.1`, TypeScript i Vitest. Skrypty: `dev: vite`, `test: vitest run`, `typecheck: tsc --noEmit`, `build: vite build`. Przypiąć wersje w lockfile.
+- [x] **Step 2:** Napisać czerwone testy: `catalogHas40UniquePaths` sprawdza 40 różnych ścieżek długości 5 i indeksy 0–2; `wrapsReelAtLastStop` dla stopu 11 daje kolumnę `wild,cherry,lemon`; `activePrefixOnlyPays` porównuje wynik z sumą wyłącznie pierwszych N linii dla każdego dozwolonego N; `linePriceDoesNotDependOnTotalLines` przy tej samej wygranej linii i perLine 2 daje jej identyczną wypłatę dla 5 i 40 linii; `bestWildMatchOnly` wybiera jedną najwyższą wypłatę linii; `rejectsInvalidInputs` odrzuca N=3, perLine=0, NaN i RNG poza paskiem.
+- [x] **Step 3:** Uruchomić `npm test -- tests/engine.test.ts`; oczekiwany FAIL.
+- [x] **Step 4:** Zaimplementować silnik według specyfikacji. Pierwsze pięć linii ustalone; pozostałe dobrać raz i zapisać w konfiguracji. RNG produkcyjne z `crypto.getRandomValues` bez biasu modulo; testy z ustalonymi indeksami.
+- [x] **Step 5:** Uruchomić testy silnika i `npm run typecheck`; oczekiwany PASS. W zapisywalnym repozytorium commit `feat: add selectable slot paylines`.
 
 ### Task 2: Wspólny portfel, niezmienny zakład obrotu i zapis
 
@@ -94,12 +94,12 @@ Jedna referencja do bieżącej sesji jest przekazywana między scenami. Nie twor
 
 **Interfaces:** Consumes kontrakty zadania 1. Produces `createSave(nowMs:number):SaveV1`, `createSession(save:SaveV1):SessionState`, `selectBet(state:SessionState,bet:Bet):SessionState`, `requestSpin(state:SessionState,rng:Rng):SpinDecision`, `reelsStopped(state:SessionState,id:number):SessionState`, `finishSpin(state:SessionState,id:number):SessionState`, `parseSave(raw:string):SaveV1`, `exportSave(save:SaveV1):string`, `loadSave(storage:Pick<Storage,'getItem'>,nowMs:number):{kind:'new'|'loaded'|'invalid'|'unavailable';save:SaveV1;originalRaw?:string}`, `writeSave(storage:Pick<Storage,'setItem'>,save:SaveV1):{ok:boolean}`. `selectBet` przy fazie innej niż ready zwraca stan bez zmian.
 
-- [ ] **Step 1:** Napisać czerwone testy: saldo 1000, zakład 5 × 1 i wynik brutto 20 kończą ekonomicznie na 1015; drugi start w ruchu jest busy; dwukrotne zakończenie nie dopisuje wypłaty. Zakład 40 × 5 przy saldzie 199 odrzucić. Zmiana linii po zakończeniu nie mutuje `lastSpin.bet` ani jego stawki; w ruchu nie zmienia `selectedBet`. Zapisać snapshot zakładu, nie współdzieloną mutowalną referencję.
-- [ ] **Step 2:** Dodać czerwone testy zapisu: reload zachowuje 1015; wadliwy JSON, nieznana wersja, zły zakład i niebezpieczne liczby nie zastępują poprawnych danych; wyjątek storage jest jawny. Uszkodzony oryginał nie jest nadpisany również po próbie nowego obrotu. Roundtrip zachowuje biznesy, resztę produkcji, ustawienia i ostatni zakład.
-- [ ] **Step 3:** Uruchomić `npm test -- tests/session.test.ts tests/save.test.ts`; oczekiwany FAIL.
-- [ ] **Step 4:** Zaimplementować jednokrotne rozliczenie i zapis pod `fruit-salon:v1`. Walidować pełne dane, zakresy, wymiary gridu i zgodność `totalStake` z zakładem; nie serializować scen. Wynik zapisać przed odtworzeniem ruchu.
-- [ ] **Step 5:** Zaimplementować eksport/import. Przy błędzie storage komunikat o braku trwałego zapisu i gra w pamięci. Przy niepoprawnym istniejącym zapisie blokować nadpisanie do świadomego resetu/poprawnego importu; umożliwić pobranie oryginału. Sam import ma być atomowy względem bieżących danych.
-- [ ] **Step 6:** Uruchomić testy sesji/zapisu i kontrolę typów; oczekiwany PASS. Commit `feat: persist shared salon state`, jeśli repozytorium dostępne. Niezależne review **G1** według workflow.
+- [x] **Step 1:** Napisać czerwone testy: saldo 1000, zakład 5 × 1 i wynik brutto 20 kończą ekonomicznie na 1015; drugi start w ruchu jest busy; dwukrotne zakończenie nie dopisuje wypłaty. Zakład 40 × 5 przy saldzie 199 odrzucić. Zmiana linii po zakończeniu nie mutuje `lastSpin.bet` ani jego stawki; w ruchu nie zmienia `selectedBet`. Zapisać snapshot zakładu, nie współdzieloną mutowalną referencję.
+- [x] **Step 2:** Dodać czerwone testy zapisu: reload zachowuje 1015; wadliwy JSON, nieznana wersja, zły zakład i niebezpieczne liczby nie zastępują poprawnych danych; wyjątek storage jest jawny. Uszkodzony oryginał nie jest nadpisany również po próbie nowego obrotu. Roundtrip zachowuje biznesy, resztę produkcji, ustawienia i ostatni zakład.
+- [x] **Step 3:** Uruchomić `npm test -- tests/session.test.ts tests/save.test.ts`; oczekiwany FAIL.
+- [x] **Step 4:** Zaimplementować jednokrotne rozliczenie i zapis pod `fruit-salon:v1`. Walidować pełne dane, zakresy, wymiary gridu i zgodność `totalStake` z zakładem; nie serializować scen. Wynik zapisać przed odtworzeniem ruchu.
+- [x] **Step 5:** Zaimplementować eksport/import. Przy błędzie storage komunikat o braku trwałego zapisu i gra w pamięci. Przy niepoprawnym istniejącym zapisie blokować nadpisanie do świadomego resetu/poprawnego importu; umożliwić pobranie oryginału. Sam import ma być atomowy względem bieżących danych.
+- [x] **Step 6:** Uruchomić testy sesji/zapisu i kontrolę typów; oczekiwany PASS. Commit `feat: persist shared salon state`, jeśli repozytorium dostępne. Niezależne review **G1** według workflow.
 
 ### Task 3: Osobny salon i pełnoekranowy automat
 

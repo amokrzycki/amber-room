@@ -27,3 +27,9 @@ it('refuses malformed ids, timestamps, settings and unreachable spin grids',()=>
   const s=createSave(0);mutate(s);expect(()=>parseSave(JSON.stringify(s))).toThrow();
  }
 });
+it('accepts JSON objects regardless of field order',()=>{
+ const r=requestSpin(createSession(createSave(0)),()=>11);if(!r.ok)throw Error();
+ const s=JSON.parse(exportSave(r.state.save));const o=s.lastSpin.outcome;
+ s.lastSpin.outcome={payout:o.payout,lineWins:o.lineWins.map((w:any)=>({payout:w.payout,count:w.count,symbol:w.symbol,lineIndex:w.lineIndex})),grid:o.grid,stops:o.stops};
+ expect(parseSave(JSON.stringify(s))).toEqual(r.state.save);
+});
