@@ -31,3 +31,9 @@ describe('slot mathematics', () => {
 });
 
 it('rare five wilds keep a jackpot meaningful against a day of business income',()=>{expect(evaluate(machine,Array.from({length:5},()=>['wild','wild','wild']),{lineCount:1,perLine:1})[0].payout).toBe(2000);});
+it('secure RNG rejects the biased tail of the uint32 range',async()=>{
+ const {vi}=await import('vitest');const {secureRng}=await import('../src/game/engine');const values=[0xffffffff,24];
+ const mock=vi.spyOn(crypto,'getRandomValues').mockImplementation((array:any)=>{array[0]=values.shift();return array;});
+ try{expect(secureRng(12)).toBe(0);}finally{mock.mockRestore();}
+ for(const bound of [0,-1,NaN,.5,4294967297])expect(()=>secureRng(bound)).toThrow(RangeError);
+});

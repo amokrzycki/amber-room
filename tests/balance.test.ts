@@ -48,19 +48,19 @@ it('measures 30/180 days idle, daily play and finite investing without hidden ca
    for(let day=1;day<=days;day++){
     const now=day*24*3600000;const accrued=accrueIncome(save,now);incomeTotal+=accrued.balance-save.balance;save=accrued;
     if(mode==='invest'){
-     while(true){const options=(Object.keys(catalog) as (keyof typeof catalog)[]).filter(key=>save.businesses[catalog[key].field]<3).sort((a,b)=>(catalog[a].prices.at(save.businesses[catalog[a].field])??Infinity)-(catalog[b].prices.at(save.businesses[catalog[b].field])??Infinity));
+     while(true){const options=(['bar','machine'] as const).filter(key=>save.businesses[catalog[key].field]<3).sort((a,b)=>(catalog[a].prices.at(save.businesses[catalog[a].field])??Infinity)-(catalog[b].prices.at(save.businesses[catalog[b].field])??Infinity));
       if(!options.length){completedDay??=day;break;}const bought=purchase(save,options[0],now);if(!bought.ok)break;save=bought.save;}
     }
     if(mode!=='idle'){
      let state=createSession(save);for(let i=0;i<100;i++){const r=requestSpin(state,rng);if(!r.ok)break;stakeTotal+=r.spin.totalStake;payoutTotal+=r.spin.outcome.payout;state=finishSpin(reelsStopped(r.state,r.spin.id),r.spin.id);}save=state.save;
     }
     if(!Number.isSafeInteger(save.balance)||save.balance<0)throw Error('Invalid long-term wallet');
-   }balances.push(save.balance);if(completedDay!==null)completed.push(completedDay);
+   }if(mode==='invest'&&save.businesses.decorLevel!==0)throw Error('Business-only strategy must not buy decor');balances.push(save.balance);if(completedDay!==null)completed.push(completedDay);
   }
-  report.longTerm.push({days,mode,seeds:100,balance:distribution(balances),averageIdleEmission:incomeTotal/100,averageStakes:stakeTotal/100,averagePayouts:payoutTotal/100,completedPurchases:completed.length,completionDays:completed.length?distribution(completed):null});
+  report.longTerm.push({days,mode,seeds:100,balance:distribution(balances),averageIdleEmission:incomeTotal/100,averageStakes:stakeTotal/100,averagePayouts:payoutTotal/100,completedBusinesses:completed.length,completionDays:completed.length?distribution(completed):null});
  }
  expect(report.longTerm.every((r:any)=>r.balance.max<1000000)).toBe(true);
- expect(report.longTerm.filter((r:any)=>r.mode==='invest').every((r:any)=>r.completedPurchases===100)).toBe(true);
+ expect(report.longTerm.filter((r:any)=>r.mode==='invest').every((r:any)=>r.completedBusinesses===100)).toBe(true);
  writeFileSync('docs/math-report.json',JSON.stringify(report,null,2));
 },120000);
 it('a day away funds 100 default spins and the smallest bet returns within an hour',()=>{

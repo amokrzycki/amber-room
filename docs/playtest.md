@@ -18,5 +18,14 @@ Niezależne review G2: jeden P2 (tweeny symboli po skip), poprawiony z testem RE
 - Enumeracja 248832 stopów × pięć ustawień linii × perLine1/5. RTP76.289223% dla wszystkich linii. Maksima przy perLine5: 1→10000,5→10400,10→11090,20→11960,40→13055; to osiągalne wartości, nie teoretyczny limit400000. Każda kwota bezpieczna, brak nieaktywnych wypłat i dokładne skalowanie5×.
 - Domyślnie zysk19.258%, big1.922%, jackpot0.08319%. Neutral oznacza zysk<=0, niekoniecznie zerową wypłatę. Jackpot przy40liniach po tuningu osiągalny, częstość0.016075%.
 - 10000 sesji po100 obrotów: 1000000 spinów,0 braków środków; średnie saldo881.2394, mediana868, min632,max3028; big19239,jackpot835. Początkowy budżet1000.
-- 100 powtarzalnych ścieżek długich sesji na wariant. Mediany salda po30/180d: bez grania16360/93160;100 obrotów/dzień bez zakupów12784/71644;z zakupami18792/192860. Pełne rozkłady i oddzielne idle/stawki/wypłaty w JSON. Skończone zakupy ukończono we wszystkich ścieżkach, dzień11–15, mediana14.
+- 100 powtarzalnych ścieżek długich sesji na wariant. Mediany salda po30/180d: bez grania16360/93160;100 obrotów/dzień bez zakupów12784/71644;z biznesami23506/197603. Pełne rozkłady i oddzielne idle/stawki/wypłaty w JSON. Skończone biznesy (bar+maszyny, bez dekoracji) ukończono we wszystkich ścieżkach, dzień7–11, mediana10. Wszystkie9 zakupów, w tym dekoracje, sprawdzono oddzielnie w przeglądarce.
 - 24h przerwy daje bazowo512 żetonów (>=500 za100 domyślnych obrotów). 1 żeton od zera po56.25s. Reszta zachowywana w jednostkach1/3600000, stare stawki do zakupu. Wzrost portfela jest liniowy i długoterminowo nieograniczony, bez konfiskaty.
+
+## Integracja zapisu i zakupów
+`browser-save-business`: PASS na rzeczywistym file:// offline. Osiem godzin limitu po imporcie24h, wszystkie9 zakupów, widoczne zmiany, round50 bez nagrody, exportdownload, poprawny import/reload, atomowe odrzucenie złego JSON, uszkodzony oryginał chroniony również po spinie, recoveryimport oraz odmowa localStorage z grą w pamięci. Pageerror0 i HTTP0.
+
+## Końcowa kontrola zachowania
+Dodatkowe regresje: Space na fokusie Settings uruchamia natywny przycisk (nie spin), skip zatrzymuje także ambience, zwrot4przy stawce5 pokazuje linię bez fanfary i bez blokowania START, główna transakcja1000−5+20utrzymuje1015także po reload. Browser-idle RED→GREEN: zamknięcie ukrytej karty nie dzieli jednej nieobecności;24h daje dokładnie512 raz.
+
+## Pomiar release
+`browser-performance`: Chromium156.0.8078.73, Linux7.3.0-4-cachyos, Ryzen7 5800X3D, viewport1600×900, ANGLE/SwiftShader (brak /dev/dri i /dev/nvidia w środowisku). Bez nagrania i równoległych benchmarków. Release,40linii×5, trafienie5wild,12powrotów scen. DOM419→419, listenery99→99 po GC. Różnica względem wcześniejszych418/100 to osadzona nota licencyjna i usunięty pagehide listener. RAF~37.98FPS; przedziały p50=33.3ms,p95=33.4ms,max50.1ms. Callback głównej pętli p95=1.4ms (nie jest to pomiar czasu GPU). **60FPS niepotwierdzone**, pomiar dotyczy software renderer; nie deklaruję osiągnięcia celu na GPU użytkownika. Pełny raport w performance-report.json. Odsłuch: NOT VERIFIED.

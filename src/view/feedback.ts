@@ -16,6 +16,6 @@ export function playWin(scene:Phaser.Scene,spin:SpinRecord,settings:SaveV1['sett
   frame.lineStyle(4,0xd8af55,.4*strength).strokeRoundedRect(263,192,1075,464,22);
   if(!settings.reducedMotion)scene.tweens.add({targets:frame,alpha:.45,duration:1100,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
  }
- const handle=createCelebration(celebrationDuration(tier),()=>{scene.tweens.killTweensOf(frame);frame.destroy();lines.destroy();});
+ const handle=createCelebration(tier==='neutral'&&spin.outcome.payout>0?900:celebrationDuration(tier),()=>{scene.tweens.killTweensOf(frame);frame.destroy();lines.destroy();});
  return handle;
 }

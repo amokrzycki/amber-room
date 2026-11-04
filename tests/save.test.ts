@@ -33,3 +33,8 @@ it('accepts JSON objects regardless of field order',()=>{
  s.lastSpin.outcome={payout:o.payout,lineWins:o.lineWins.map((w:any)=>({payout:w.payout,count:w.count,symbol:w.symbol,lineIndex:w.lineIndex})),grid:o.grid,stops:o.stops};
  expect(parseSave(JSON.stringify(s))).toEqual(r.state.save);
 });
+it('reloading a persisted gross-20 spin keeps 1015 without replaying the settlement',()=>{
+ let raw:string|null=null;const storage={getItem:()=>raw,setItem:(_k:string,value:string)=>{raw=value;}};
+ const owner=new SaveOwner(storage,0);let i=0;const result=requestSpin(owner.state,()=>[4,0,0,0,0][i++]);if(!result.ok)throw Error();owner.commit(result.state);
+ const reloaded=new SaveOwner(storage,1000);expect(reloaded.state.save.balance).toBe(1015);expect(reloaded.state.phase).toBe('ready');expect(reloaded.state.save.lastSpin?.id).toBe(1);
+});

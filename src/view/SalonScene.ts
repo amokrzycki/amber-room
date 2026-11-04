@@ -53,8 +53,8 @@ export class SalonScene extends Phaser.Scene {
    else room.add(this.add.rectangle(470+i*190,700,130,180,0xd8af55,.035).setStrokeStyle(1,0xd8af55,.1));
   }
   const g=this.add.graphics();room.add(g);
-  if(b.decorLevel>=1){g.fillStyle(0x7d2135,.8).fillRoundedRect(380,820,580,35,14);g.lineStyle(2,0xd8af55,.7).strokeRoundedRect(380,820,580,35,14);}
-  if(b.decorLevel>=2)for(const x of [100,960]){g.fillStyle(0x23513d).fillEllipse(x,550,75,120);g.fillStyle(0xb48b46).fillRect(x-23,580,46,54);}
+  if(b.decorLevel>=1){const rug=[[390,790],[920,790],[990,865],[315,865]].map(([x,y])=>new Phaser.Math.Vector2(x,y));g.fillStyle(0x6b2636,.8).fillPoints(rug,true);g.lineStyle(2,0xd8af55,.45).strokePoints(rug,true);for(let y=805;y<856;y+=12)g.lineStyle(1,0xd8af55,.1).lineBetween(380-(y-790)*.65,y,930+(y-790)*.65,y);}
+  if(b.decorLevel>=2)for(const x of [100,960]){g.lineStyle(3,0x617343).lineBetween(x,516,x,595);g.fillStyle(0x9b683b).fillPoints([[x-24,580],[x+24,580],[x+18,628],[x-18,628]].map(([px,py])=>new Phaser.Math.Vector2(px,py)),true);g.lineStyle(2,0xd8af55,.6).lineBetween(x-24,584,x+24,584);for(let leaf=0;leaf<7;leaf++){const side=leaf%2?1:-1;room.add(this.add.ellipse(x+side*(12+leaf*2),535+leaf*5,19,63,leaf%3===0?0x426744:0x244b38).setAngle(side*(28+leaf*5)));}}
   if(b.decorLevel>=3){g.lineStyle(2,0xd8af55,.8).strokeRoundedRect(580,180,330,45,20);room.add(this.add.text(745,202,'◆  THE AMBER ROOM  ◆',{fontSize:'19px',color:'#fff2cc'}).setOrigin(.5));}
   for(let i=0;i<b.barLevel;i++){g.fillStyle(0xd8af55,.8).fillCircle(180+i*50,385,6);g.fillStyle(0x35e6d1,.6).fillRoundedRect(198+i*29,440,12,25,3);}
  }

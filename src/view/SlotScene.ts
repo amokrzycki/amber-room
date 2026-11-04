@@ -13,8 +13,9 @@ import {playWin} from './feedback';
 export class SlotScene extends Phaser.Scene {
  private reels:ReelView[]=[];private audio!:GameAudio;private ui!:ReturnType<typeof mountUI>;
  private win:ReturnType<typeof playWin>|undefined;private run=0;private countTween:Phaser.Tweens.Tween|undefined;
+ private returnedLine:ReturnType<typeof playWin>|undefined;
  constructor(){super('slot');}
- init(){this.reels=[];this.win=undefined;this.run++;}
+ init(){this.reels=[];this.win=undefined;this.returnedLine=undefined;this.run++;}
  create(){
   accrue();
   this.audio=createAudio(this);this.audio.setMuted(owner.state.save.settings.muted);this.registry.set('paylines',machine.paylines);
@@ -49,7 +50,7 @@ export class SlotScene extends Phaser.Scene {
   this.input.on('pointerdown',()=>{void this.audio.unlock();if(owner.state.phase==='celebrating')this.skip();});
   const visibility=()=>{if(document.hidden){this.audio.silence();this.skip();}else this.audio.resume();};document.addEventListener('visibilitychange',visibility);
   const income=()=>this.refresh();window.addEventListener('salon-state',income);
-  this.events.once('shutdown',()=>{this.run++;this.skip();this.reels.forEach(r=>r.dispose());this.countTween?.stop();window.removeEventListener('keydown',key);window.removeEventListener('salon-state',income);document.removeEventListener('visibilitychange',visibility);this.audio.dispose();});
+  this.events.once('shutdown',()=>{this.run++;this.skip();this.returnedLine?.dispose();this.reels.forEach(r=>r.dispose());this.countTween?.stop();window.removeEventListener('keydown',key);window.removeEventListener('salon-state',income);document.removeEventListener('visibilitychange',visibility);this.audio.dispose();});
   if(import.meta.env.DEV)void import('./devScenarios').then(m=>{if(this.scene.isActive())m.installScenarios(this.ui.root,(stops)=>this.start(stops));});
  }
  private refresh(){
@@ -64,6 +65,7 @@ export class SlotScene extends Phaser.Scene {
   if(this.ui.dialog.open)return;
   if(owner.state.phase==='celebrating'){this.skip();return;}
   if(owner.state.phase!=='ready')return;
+  this.returnedLine?.dispose();this.returnedLine=undefined;
   accrue();
   let i=0;
   try{
@@ -82,7 +84,10 @@ export class SlotScene extends Phaser.Scene {
   const tier=classifyWin(spin.totalStake,spin.outcome.payout);const settings=owner.state.save.settings;
   const labels={neutral:spin.outcome.payout?'Tokens returned':'Another turn. Another chance.',small:'A little afterglow',big:'A lovely win',jackpot:'JACKPOT · This one is on the house!'};
   this.ui.root.querySelector('#win-label')!.textContent=labels[tier];
-  if(document.hidden||tier==='neutral'){this.ui.root.querySelector('#payout')!.textContent=number(spin.outcome.payout);owner.state=finishSpin(owner.state,spin.id);this.refresh();return;}
+  if(document.hidden||tier==='neutral'){
+   if(!document.hidden&&spin.outcome.payout>0)this.returnedLine=playWin(this,spin,settings);
+   this.ui.root.querySelector('#payout')!.textContent=number(spin.outcome.payout);owner.state=finishSpin(owner.state,spin.id);this.refresh();return;
+  }
   this.audio.play(tier);this.audio.duck(true);if(tier==='big'||tier==='jackpot')this.audio.play('salon-cheer');
   const featured=[...spin.outcome.lineWins].sort((a,b)=>b.payout-a.payout)[0];
   for(let c=0;c<5;c++)this.reels[c].highlight(featured&&c<featured.count?[machine.paylines[featured.lineIndex][c]]:[],settings.effectsIntensity,settings.reducedMotion);
@@ -99,6 +104,6 @@ export class SlotScene extends Phaser.Scene {
   if(owner.state.activeSpinId!==null)owner.state=finishSpin(owner.state,owner.state.activeSpinId);this.refresh();
  }
  private skip(){
-  if(this.win){this.win.skip();this.endWin();}
+  if(this.win){this.win.skip();this.endWin();this.audio.silence();}
  }
 }

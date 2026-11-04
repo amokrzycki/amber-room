@@ -141,7 +141,7 @@
       "averageIdleEmission": 15360,
       "averageStakes": 0,
       "averagePayouts": 0,
-      "completedPurchases": 0,
+      "completedBusinesses": 0,
       "completionDays": null
     },
     {
@@ -160,7 +160,7 @@
       "averageIdleEmission": 15360,
       "averageStakes": 15000,
       "averagePayouts": 11455.08,
-      "completedPurchases": 0,
+      "completedBusinesses": 0,
       "completionDays": null
     },
     {
@@ -168,26 +168,26 @@
       "mode": "invest",
       "seeds": 100,
       "balance": {
-        "min": 17460,
-        "p10": 17984,
-        "p50": 18792,
-        "p90": 19735,
-        "p99": 22128,
-        "max": 22128,
-        "mean": 18906.9
+        "min": 22284,
+        "p10": 22765,
+        "p50": 23506,
+        "p90": 24557,
+        "p99": 26761,
+        "max": 26761,
+        "mean": 23606.42
       },
-      "averageIdleEmission": 33124.48,
-      "averageStakes": 14693.4,
-      "averagePayouts": 11225.82,
-      "completedPurchases": 100,
+      "averageIdleEmission": 34843.2,
+      "averageStakes": 14773.65,
+      "averagePayouts": 11286.87,
+      "completedBusinesses": 100,
       "completionDays": {
-        "min": 11,
-        "p10": 14,
-        "p50": 14,
-        "p90": 15,
-        "p99": 15,
-        "max": 15,
-        "mean": 14.04
+        "min": 7,
+        "p10": 10,
+        "p50": 10,
+        "p90": 10,
+        "p99": 11,
+        "max": 11,
+        "mean": 9.96
       }
     },
     {
@@ -206,7 +206,7 @@
       "averageIdleEmission": 92160,
       "averageStakes": 0,
       "averagePayouts": 0,
-      "completedPurchases": 0,
+      "completedBusinesses": 0,
       "completionDays": null
     },
     {
@@ -225,7 +225,7 @@
       "averageIdleEmission": 92160,
       "averageStakes": 90000,
       "averagePayouts": 68688.57,
-      "completedPurchases": 0,
+      "completedBusinesses": 0,
       "completionDays": null
     },
     {
@@ -233,26 +233,26 @@
       "mode": "invest",
       "seeds": 100,
       "balance": {
-        "min": 189524,
-        "p10": 191124,
-        "p50": 192860,
-        "p90": 195810,
-        "p99": 198983,
-        "max": 198983,
-        "mean": 193142.47
+        "min": 194220,
+        "p10": 195741,
+        "p50": 197603,
+        "p90": 200262,
+        "p99": 203729,
+        "max": 203729,
+        "mean": 197828.81
       },
-      "averageIdleEmission": 225124.48,
-      "averageStakes": 89693.4,
-      "averagePayouts": 68461.39,
-      "completedPurchases": 100,
+      "averageIdleEmission": 226843.2,
+      "averageStakes": 89773.65,
+      "averagePayouts": 68509.26,
+      "completedBusinesses": 100,
       "completionDays": {
-        "min": 11,
-        "p10": 14,
-        "p50": 14,
-        "p90": 15,
-        "p99": 15,
-        "max": 15,
-        "mean": 14.04
+        "min": 7,
+        "p10": 10,
+        "p50": 10,
+        "p90": 10,
+        "p99": 11,
+        "max": 11,
+        "mean": 9.96
       }
     }
   ]

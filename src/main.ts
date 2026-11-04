@@ -8,4 +8,3 @@ const stage=document.querySelector('#stage')!;const ui=document.querySelector('#
 new ResizeObserver(()=>{ui.style.transform=`scale(${stage.clientWidth/1600})`;}).observe(stage);
 setInterval(()=>{if(!document.hidden)accrue();},1000);
 document.addEventListener('visibilitychange',()=>accrue());
-window.addEventListener('pagehide',()=>accrue());
