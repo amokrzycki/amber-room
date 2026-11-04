@@ -29,3 +29,5 @@ describe('slot mathematics', () => {
     for (const stop of [-1,12,NaN,0.5]) expect(()=>spin(machine,{lineCount:5,perLine:1},()=>stop)).toThrow(RangeError);
   });
 });
+
+it('rare five wilds keep a jackpot meaningful against a day of business income',()=>{expect(evaluate(machine,Array.from({length:5},()=>['wild','wild','wild']),{lineCount:1,perLine:1})[0].payout).toBe(2000);});

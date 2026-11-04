@@ -4,13 +4,13 @@ import {createSession} from './session';
 import type {SaveV1,SessionState} from './model';
 export const SAVE_KEY='fruit-salon:v1';
 export function createSave(nowMs:number):SaveV1 {
- return {version:1,balance:1000,businesses:{barLevel:0,extraMachines:0,decorLevel:0},lastAccrualAtMs:nowMs,remainderUnits:0,nextSpinId:1,lastSpin:null,selectedBet:{lineCount:5,perLine:1},settings:{muted:false,reducedMotion:false,effectsIntensity:0.65}};
+ return {version:1,balance:1000,businesses:{barLevel:0,extraMachines:0,decorLevel:0},lastAccrualAtMs:nowMs,remainderUnits:0,nextSpinId:1,lastSpin:null,selectedBet:{lineCount:5,perLine:1},settings:{muted:false,reducedMotion:false,effectsIntensity:0.4}};
 }
 const integer=(n:unknown,min=0,max=Number.MAX_SAFE_INTEGER)=>typeof n==='number'&&Number.isSafeInteger(n)&&n>=min&&n<=max;
 export function parseSave(raw:string):SaveV1 {
- if(raw.length>100000)throw new Error('Zapis jest zbyt duży');
+ if(raw.length>100000)throw new Error('Save file is too large');
  const s=JSON.parse(raw);
- const invalid=()=>{throw new Error('Nieprawidłowy lub nieobsługiwany zapis');};
+ const invalid=()=>{throw new Error('Invalid or unsupported save file');};
  if(!s||s.version!==1||!integer(s.balance)||!integer(s.lastAccrualAtMs)||!integer(s.remainderUnits,0,3599999)||!integer(s.nextSpinId,1)||!validBet(machine,s.selectedBet))invalid();
  if(!s.businesses||!['barLevel','extraMachines','decorLevel'].every(k=>integer(s.businesses[k],0,3)))invalid();
  if(!s.settings||typeof s.settings.muted!=='boolean'||typeof s.settings.reducedMotion!=='boolean'||typeof s.settings.effectsIntensity!=='number'||!Number.isFinite(s.settings.effectsIntensity)||s.settings.effectsIntensity<0||s.settings.effectsIntensity>1)invalid();
@@ -40,13 +40,13 @@ export class SaveOwner {
  constructor(private storage:Pick<Storage,'getItem'|'setItem'>,nowMs:number){
   const loaded=loadSave(storage,nowMs);this.state=createSession(loaded.save);this.originalRaw=loaded.originalRaw;
   this.blocked=loaded.kind==='invalid';
-  if(this.blocked)this.warning='Uszkodzony zapis chroniony. Gra działa w pamięci. Pobierz oryginał lub importuj poprawną kopię.';
-  else if(loaded.kind==='unavailable')this.warning='Pamięć niedostępna. Eksportuj postęp przed zamknięciem.';
+  if(this.blocked)this.warning='Damaged save protected. Playing in memory. Download the original or import a valid backup.';
+  else if(loaded.kind==='unavailable')this.warning='Storage is unavailable. Export your progress before closing.';
  }
  commit(state:SessionState){
   this.state=state;
   if(this.blocked)return;
-  this.warning=writeSave(this.storage,state.save).ok?'':'Nie udało się zapisać. Gra działa w pamięci — eksportuj postęp.';
+  this.warning=writeSave(this.storage,state.save).ok?'':'Saving failed. Playing in memory — export your progress.';
  }
  import(raw:string){
   const save=parseSave(raw);

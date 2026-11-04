@@ -4,7 +4,7 @@ import type {Bet,Rng,SaveV1,SessionState,SpinDecision} from './model';
 export const createSession=(save:SaveV1):SessionState=>({save,phase:'ready',activeSpinId:null});
 export function selectBet(state:SessionState,bet:Bet):SessionState {
   if(state.phase!=='ready')return state;
-  if(!validBet(machine,bet))throw new RangeError('Nieprawidłowy zakład');
+  if(!validBet(machine,bet))throw new RangeError('Invalid bet');
   return {...state,save:{...state.save,selectedBet:{...bet}}};
 }
 export function requestSpin(state:SessionState,rng:Rng):SpinDecision {
@@ -15,7 +15,7 @@ export function requestSpin(state:SessionState,rng:Rng):SpinDecision {
   if(state.save.balance<totalStake)return {ok:false,state,reason:'insufficient-funds'};
   const outcome=spin(machine,bet,rng);
   const balance=state.save.balance-totalStake+outcome.payout;
-  if(!Number.isSafeInteger(balance)||!Number.isSafeInteger(state.save.nextSpinId+1))throw new RangeError('Przekroczono bezpieczny zakres liczb; wyeksportuj zapis.');
+  if(!Number.isSafeInteger(balance)||!Number.isSafeInteger(state.save.nextSpinId+1))throw new RangeError('Safe number range exceeded; export your save.');
   const record={id:state.save.nextSpinId,bet,totalStake,outcome};
   return {ok:true,spin:record,state:{save:{...state.save,balance,nextSpinId:record.id+1,lastSpin:record},phase:'spinning',activeSpinId:record.id}};
 }

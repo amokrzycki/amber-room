@@ -22,3 +22,7 @@ it('ignores stale animation callbacks',()=>{
  const r=requestSpin(createSession(createSave(0)),()=>0);if(!r.ok)throw Error();
  expect(reelsStopped(r.state,999)).toBe(r.state);expect(finishSpin(r.state,r.spin.id)).toBe(r.state);
 });
+it('1000 minus default stake plus gross 20 persists as exactly 1015',()=>{
+ let i=0;const r=requestSpin(createSession(createSave(0)),()=>[8,0,0,0,0][i++]);
+ expect(r.ok).toBe(true);if(!r.ok)return;expect(r.spin.outcome.payout).toBe(20);expect(r.state.save.balance).toBe(1015);
+});

@@ -12,5 +12,5 @@ export const machine:MachineConfig={
     [2,1,1,0,0],[0,0,1,1,2],[2,2,1,1,0],[0,1,2,1,2],[2,1,0,1,0],
     [1,0,2,0,1],[1,2,0,2,1],[0,2,1,2,0],[2,0,1,0,2],[1,0,0,1,2]
   ],allowedLineCounts:[1,5,10,20,40],allowedPerLine:[1,2,5],
-  paytable:{cherry:[2,5,15],lemon:[3,8,20],plum:[4,12,35],melon:[6,20,60],seven:[12,40,120],wild:[20,80,200]}
+  paytable:{cherry:[2,5,15],lemon:[3,8,20],plum:[4,12,35],melon:[6,20,60],seven:[12,40,120],wild:[20,80,2000]}
 };
