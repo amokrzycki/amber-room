@@ -1,0 +1,259 @@
+{
+  "seed": 20261104,
+  "stops": 248832,
+  "enumeration": [
+    {
+      "lineCount": 1,
+      "rtp": 0.762892232510288,
+      "profitFrequency": 0.1076388888888889,
+      "tiers": {
+        "neutral": 0.8923611111111112,
+        "small": 0.06799768518518519,
+        "big": 0.036940586419753084,
+        "jackpot": 0.002700617283950617
+      },
+      "payout": {
+        "min": 0,
+        "p10": 0,
+        "p50": 0,
+        "p90": 2,
+        "p99": 20,
+        "max": 2000,
+        "mean": 0.762892232510288
+      },
+      "maxAtPerLine5": 10000
+    },
+    {
+      "lineCount": 5,
+      "rtp": 0.762892232510288,
+      "profitFrequency": 0.19257973251028807,
+      "tiers": {
+        "neutral": 0.807420267489712,
+        "small": 0.17252604166666666,
+        "big": 0.019221804269547324,
+        "jackpot": 0.0008318865740740741
+      },
+      "payout": {
+        "min": 0,
+        "p10": 0,
+        "p50": 0,
+        "p90": 12,
+        "p99": 40,
+        "max": 2080,
+        "mean": 3.8144611625514404
+      },
+      "maxAtPerLine5": 10400
+    },
+    {
+      "lineCount": 10,
+      "rtp": 0.762892232510288,
+      "profitFrequency": 0.2237252443415638,
+      "tiers": {
+        "neutral": 0.7762747556584362,
+        "small": 0.21007748199588477,
+        "big": 0.013555330504115226,
+        "jackpot": 0.00009243184156378601
+      },
+      "payout": {
+        "min": 0,
+        "p10": 0,
+        "p50": 3,
+        "p90": 20,
+        "p99": 64,
+        "max": 2218,
+        "mean": 7.628922325102881
+      },
+      "maxAtPerLine5": 11090
+    },
+    {
+      "lineCount": 20,
+      "rtp": 0.762892232510288,
+      "profitFrequency": 0.21541039737654322,
+      "tiers": {
+        "neutral": 0.7845896026234568,
+        "small": 0.20727237654320987,
+        "big": 0.00805764531893004,
+        "jackpot": 0.00008037551440329218
+      },
+      "payout": {
+        "min": 0,
+        "p10": 0,
+        "p50": 8,
+        "p90": 37,
+        "p99": 106,
+        "max": 2392,
+        "mean": 15.257844650205762
+      },
+      "maxAtPerLine5": 11960
+    },
+    {
+      "lineCount": 40,
+      "rtp": 0.762892232510288,
+      "profitFrequency": 0.2325585133744856,
+      "tiers": {
+        "neutral": 0.7674414866255144,
+        "small": 0.22858796296296297,
+        "big": 0.0038097993827160494,
+        "jackpot": 0.00016075102880658436
+      },
+      "payout": {
+        "min": 0,
+        "p10": 3,
+        "p50": 19,
+        "p90": 68,
+        "p99": 182,
+        "max": 2611,
+        "mean": 30.515689300411523
+      },
+      "maxAtPerLine5": 13055
+    }
+  ],
+  "sessions": {
+    "count": 10000,
+    "spins": 1000000,
+    "bankrupt": 0,
+    "big": 19239,
+    "jackpot": 835,
+    "balance": {
+      "min": 632,
+      "p10": 772,
+      "p50": 868,
+      "p90": 996,
+      "p99": 1136,
+      "max": 3028,
+      "mean": 881.2394
+    }
+  },
+  "longTerm": [
+    {
+      "days": 30,
+      "mode": "idle",
+      "seeds": 100,
+      "balance": {
+        "min": 16360,
+        "p10": 16360,
+        "p50": 16360,
+        "p90": 16360,
+        "p99": 16360,
+        "max": 16360,
+        "mean": 16360
+      },
+      "averageIdleEmission": 15360,
+      "averageStakes": 0,
+      "averagePayouts": 0,
+      "completedPurchases": 0,
+      "completionDays": null
+    },
+    {
+      "days": 30,
+      "mode": "play",
+      "seeds": 100,
+      "balance": {
+        "min": 11619,
+        "p10": 12121,
+        "p50": 12784,
+        "p90": 13579,
+        "p99": 15010,
+        "max": 15010,
+        "mean": 12815.08
+      },
+      "averageIdleEmission": 15360,
+      "averageStakes": 15000,
+      "averagePayouts": 11455.08,
+      "completedPurchases": 0,
+      "completionDays": null
+    },
+    {
+      "days": 30,
+      "mode": "invest",
+      "seeds": 100,
+      "balance": {
+        "min": 17460,
+        "p10": 17984,
+        "p50": 18792,
+        "p90": 19735,
+        "p99": 22128,
+        "max": 22128,
+        "mean": 18906.9
+      },
+      "averageIdleEmission": 33124.48,
+      "averageStakes": 14693.4,
+      "averagePayouts": 11225.82,
+      "completedPurchases": 100,
+      "completionDays": {
+        "min": 11,
+        "p10": 14,
+        "p50": 14,
+        "p90": 15,
+        "p99": 15,
+        "max": 15,
+        "mean": 14.04
+      }
+    },
+    {
+      "days": 180,
+      "mode": "idle",
+      "seeds": 100,
+      "balance": {
+        "min": 93160,
+        "p10": 93160,
+        "p50": 93160,
+        "p90": 93160,
+        "p99": 93160,
+        "max": 93160,
+        "mean": 93160
+      },
+      "averageIdleEmission": 92160,
+      "averageStakes": 0,
+      "averagePayouts": 0,
+      "completedPurchases": 0,
+      "completionDays": null
+    },
+    {
+      "days": 180,
+      "mode": "play",
+      "seeds": 100,
+      "balance": {
+        "min": 68346,
+        "p10": 69914,
+        "p50": 71644,
+        "p90": 74077,
+        "p99": 77823,
+        "max": 77823,
+        "mean": 71848.57
+      },
+      "averageIdleEmission": 92160,
+      "averageStakes": 90000,
+      "averagePayouts": 68688.57,
+      "completedPurchases": 0,
+      "completionDays": null
+    },
+    {
+      "days": 180,
+      "mode": "invest",
+      "seeds": 100,
+      "balance": {
+        "min": 189524,
+        "p10": 191124,
+        "p50": 192860,
+        "p90": 195810,
+        "p99": 198983,
+        "max": 198983,
+        "mean": 193142.47
+      },
+      "averageIdleEmission": 225124.48,
+      "averageStakes": 89693.4,
+      "averagePayouts": 68461.39,
+      "completedPurchases": 100,
+      "completionDays": {
+        "min": 11,
+        "p10": 14,
+        "p50": 14,
+        "p90": 15,
+        "p99": 15,
+        "max": 15,
+        "mean": 14.04
+      }
+    }
+  ]
+}
