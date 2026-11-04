@@ -1,0 +1,462 @@
+{
+  "schema_version": 1,
+  "purpose": "planning inventory, not a shipped asset manifest",
+  "brief": "2026-11-04-mvp-asset-brief.md",
+  "runtime_manifest": "src/assets/manifest.json",
+  "candidate_sources": [
+    {
+      "url": "https://kenney.nl/assets/casino-audio",
+      "license_on_pack_page": "CC0"
+    },
+    {
+      "url": "https://kenney.nl/assets/interface-sounds",
+      "license_on_pack_page": "CC0"
+    },
+    {
+      "url": "https://kenney.nl/assets/ui-audio",
+      "license_on_pack_page": "CC0"
+    },
+    {
+      "url": "https://freesound.org/",
+      "license_on_pack_page": "varies per file; prefer CC0"
+    }
+  ],
+  "assets": [
+    {
+      "id": "symbol-cherry",
+      "kind": "image",
+      "role": "slot symbol",
+      "planned_path": "src/assets/symbols/cherry.png",
+      "status": "planned",
+      "technical": {
+        "width": 512,
+        "height": 512,
+        "alpha": true,
+        "pivot": "center",
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "symbol-lemon",
+      "kind": "image",
+      "role": "slot symbol",
+      "planned_path": "src/assets/symbols/lemon.png",
+      "status": "planned",
+      "technical": {
+        "width": 512,
+        "height": 512,
+        "alpha": true,
+        "pivot": "center",
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "symbol-plum",
+      "kind": "image",
+      "role": "slot symbol",
+      "planned_path": "src/assets/symbols/plum.png",
+      "status": "planned",
+      "technical": {
+        "width": 512,
+        "height": 512,
+        "alpha": true,
+        "pivot": "center",
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "symbol-melon",
+      "kind": "image",
+      "role": "slot symbol",
+      "planned_path": "src/assets/symbols/melon.png",
+      "status": "planned",
+      "technical": {
+        "width": 512,
+        "height": 512,
+        "alpha": true,
+        "pivot": "center",
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "symbol-seven",
+      "kind": "image",
+      "role": "slot symbol",
+      "planned_path": "src/assets/symbols/seven.png",
+      "status": "planned",
+      "technical": {
+        "width": 512,
+        "height": 512,
+        "alpha": true,
+        "pivot": "center",
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "symbol-wild",
+      "kind": "image",
+      "role": "slot symbol",
+      "planned_path": "src/assets/symbols/wild.png",
+      "status": "planned",
+      "technical": {
+        "width": 512,
+        "height": 512,
+        "alpha": true,
+        "pivot": "center",
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "slot-cabinet",
+      "kind": "image",
+      "role": "cabinet decoration",
+      "planned_path": "src/assets/art/slot-cabinet.png",
+      "status": "planned",
+      "technical": {
+        "alpha": true,
+        "perspective": "consistent with approved scene",
+        "text_baked_in": false
+      },
+      "source": {
+        "kind": "generated-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "salon-base",
+      "kind": "image",
+      "role": "separate salon scene",
+      "planned_path": "src/assets/art/salon-base.png",
+      "status": "planned",
+      "technical": {
+        "alpha": false,
+        "perspective": "consistent with approved scene",
+        "text_baked_in": false
+      },
+      "source": {
+        "kind": "generated-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "salon-bar",
+      "kind": "image",
+      "role": "bar base sprite",
+      "planned_path": "src/assets/art/salon-bar.png",
+      "status": "planned",
+      "technical": {
+        "alpha": true,
+        "perspective": "consistent with approved scene",
+        "text_baked_in": false
+      },
+      "source": {
+        "kind": "generated-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "salon-machine",
+      "kind": "image",
+      "role": "repeatable business machine sprite",
+      "planned_path": "src/assets/art/salon-machine.png",
+      "status": "planned",
+      "technical": {
+        "alpha": true,
+        "perspective": "consistent with approved scene",
+        "text_baked_in": false
+      },
+      "source": {
+        "kind": "generated-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "audio-press",
+      "kind": "audio",
+      "planned_path": "src/assets/audio/press.wav",
+      "status": "planned",
+      "technical": {
+        "loop": false,
+        "trimmed": false,
+        "mix_checked": false
+      },
+      "source": {
+        "kind": "licensed-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "audio-reels",
+      "kind": "audio",
+      "planned_path": "src/assets/audio/reels.wav",
+      "status": "planned",
+      "technical": {
+        "loop": true,
+        "trimmed": false,
+        "mix_checked": false
+      },
+      "source": {
+        "kind": "licensed-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "audio-stop-a",
+      "kind": "audio",
+      "planned_path": "src/assets/audio/stop-a.wav",
+      "status": "planned",
+      "technical": {
+        "loop": false,
+        "trimmed": false,
+        "mix_checked": false
+      },
+      "source": {
+        "kind": "licensed-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "audio-stop-b",
+      "kind": "audio",
+      "planned_path": "src/assets/audio/stop-b.wav",
+      "status": "planned",
+      "technical": {
+        "loop": false,
+        "trimmed": false,
+        "mix_checked": false
+      },
+      "source": {
+        "kind": "licensed-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "audio-stop-c",
+      "kind": "audio",
+      "planned_path": "src/assets/audio/stop-c.wav",
+      "status": "planned",
+      "technical": {
+        "loop": false,
+        "trimmed": false,
+        "mix_checked": false
+      },
+      "source": {
+        "kind": "licensed-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "audio-payout-tick",
+      "kind": "audio",
+      "planned_path": "src/assets/audio/payout-tick.wav",
+      "status": "planned",
+      "technical": {
+        "loop": false,
+        "trimmed": false,
+        "mix_checked": false
+      },
+      "source": {
+        "kind": "licensed-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "audio-payout-end",
+      "kind": "audio",
+      "planned_path": "src/assets/audio/payout-end.wav",
+      "status": "planned",
+      "technical": {
+        "loop": false,
+        "trimmed": false,
+        "mix_checked": false
+      },
+      "source": {
+        "kind": "licensed-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "audio-win-small",
+      "kind": "audio",
+      "planned_path": "src/assets/audio/win-small.wav",
+      "status": "planned",
+      "technical": {
+        "loop": false,
+        "trimmed": false,
+        "mix_checked": false
+      },
+      "source": {
+        "kind": "licensed-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "audio-win-big",
+      "kind": "audio",
+      "planned_path": "src/assets/audio/win-big.wav",
+      "status": "planned",
+      "technical": {
+        "loop": false,
+        "trimmed": false,
+        "mix_checked": false
+      },
+      "source": {
+        "kind": "licensed-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "audio-win-jackpot",
+      "kind": "audio",
+      "planned_path": "src/assets/audio/win-jackpot.wav",
+      "status": "planned",
+      "technical": {
+        "loop": false,
+        "trimmed": false,
+        "mix_checked": false
+      },
+      "source": {
+        "kind": "licensed-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "audio-salon-ambience",
+      "kind": "audio",
+      "planned_path": "src/assets/audio/salon-ambience.wav",
+      "status": "planned",
+      "technical": {
+        "loop": true,
+        "trimmed": false,
+        "mix_checked": false
+      },
+      "source": {
+        "kind": "licensed-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "audio-salon-cheer",
+      "kind": "audio",
+      "planned_path": "src/assets/audio/salon-cheer.wav",
+      "status": "planned",
+      "technical": {
+        "loop": false,
+        "trimmed": false,
+        "mix_checked": false
+      },
+      "source": {
+        "kind": "licensed-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    },
+    {
+      "id": "audio-salon-toast",
+      "kind": "audio",
+      "planned_path": "src/assets/audio/salon-toast.wav",
+      "status": "planned",
+      "technical": {
+        "loop": false,
+        "trimmed": false,
+        "mix_checked": false
+      },
+      "source": {
+        "kind": "licensed-or-authored",
+        "selected_file": null,
+        "creator_or_tool": null,
+        "license_or_generation_record": null
+      },
+      "verified_in_game": false
+    }
+  ]
+}
