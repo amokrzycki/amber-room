@@ -46,7 +46,8 @@ export class SalonScene extends Phaser.Scene {
  private drawRoom(){
   this.room?.destroy();this.room=this.add.container(0,0);const room=this.room,b=owner.state.save.businesses;
   room.add(this.add.image(250,500,'salon-bar').setDisplaySize(400,310).setAlpha(b.barLevel?1:.18));
-  room.add(this.add.image(745,405,'salon-machine').setDisplaySize(235,320));
+  const personal=this.add.image(745,405,'salon-machine').setDisplaySize(235,320).setInteractive({useHandCursor:true});
+  personal.on('pointerdown',()=>{this.ui.unlock();this.audio.play('press');this.scene.start('slot');});room.add(personal);
   for(let i=0;i<3;i++){
    room.add(this.add.ellipse(470+i*190,800,135,25,0x000000,.3));
    if(i<b.extraMachines)room.add(this.add.image(470+i*190,680,'salon-machine').setDisplaySize(155,230));

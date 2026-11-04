@@ -158,12 +158,13 @@ Jedna referencja do bieżącej sesji jest przekazywana między scenami. Nie twor
 
 **Interfaces:** Produces `dist/index.html`, skrypt `check:offline: node scripts/check-offline.mjs`, instrukcję otwarcia i przenoszenia postępu.
 
-- [ ] **Step 1:** Skonfigurować single-file build. Osadzić kod, style, obrazy i próbki audio jako importowane dane. Nie liczyć na automatyczne osadzenie plików z `public/`. Ścieżki kluczy manifestu są wspólne dla loadera i kontroli artefaktu.
-- [ ] **Step 2:** Kontrola artefaktu odrzuca zewnętrzny skrypt, arkusz, obraz, font lub audio i brak wymaganych danych z manifestu. Fixture z zewnętrznym zasobem daje kod 1; prawidłowy build daje 0. W buildzie produkcyjnym nie ma interfejsu wymuszania wyników ani skrótów do dopisywania salda.
-- [ ] **Step 3:** Uruchomić `npm test`, `npm run typecheck`, `npm run build`, `npm run check:offline`; wszystkie kończą się kodem 0.
-- [ ] **Step 4:** Otworzyć plik przez `file://` bez sieci. Sprawdzić oba widoki, wszystkie ustawienia linii, saldo, audio od pierwszego gestu, klasy wypłat, skip, wyciszenie, reducedMotion, powrót z idle, zakupy, restart i eksport/import. Brak żądań HTTP(S), brak zdublowanych reakcji po cyklu scen.
-- [ ] **Step 5:** Zmierzyć najcięższy przypadek wypłaty i powtórne wejścia do scen; cel 60 FPS, bez narastających listenerów i pętli audio. Profilować zbudowaną grę. Zapisać urządzenie, przeglądarkę, rozdzielczość i ograniczenia pomiaru; nie zastępować odsłuchu czy oceny użytkownika testem jednostkowym.
-- [ ] **Step 6:** Niezależne końcowe review **G4** całej wersji. Naprawić istotne błędy, powtórzyć dotknięte sprawdzenia i zapisać pozostałe ograniczenia. README opisuje otwarcie, lokalny zapis, kopię i autorstwo zasobów. Commit `build: package the offline fruit salon`, jeśli dostępny.
+- [x] **Step 1:** Skonfigurować single-file build. Osadzić kod, style, obrazy i próbki audio jako importowane dane. Nie liczyć na automatyczne osadzenie plików z `public/`. Ścieżki kluczy manifestu są wspólne dla loadera i kontroli artefaktu.
+- [x] **Step 2:** Kontrola artefaktu odrzuca zewnętrzny skrypt, arkusz, obraz, font lub audio i brak wymaganych danych z manifestu. Fixture z zewnętrznym zasobem daje kod 1; prawidłowy build daje 0. W buildzie produkcyjnym nie ma interfejsu wymuszania wyników ani skrótów do dopisywania salda.
+- [x] **Step 3:** Uruchomić `npm test`, `npm run typecheck`, `npm run build`, `npm run check:offline`; wszystkie kończą się kodem 0.
+- [x] **Step 4:** Otworzyć plik przez `file://` bez sieci. Sprawdzić oba widoki, wszystkie ustawienia linii, saldo, audio od pierwszego gestu, klasy wypłat, skip, wyciszenie, reducedMotion, powrót z idle, zakupy, restart i eksport/import. Brak żądań HTTP(S), brak zdublowanych reakcji po cyklu scen.
+- [x] **Step 5:** Zmierzyć najcięższy przypadek wypłaty i powtórne wejścia do scen; cel 60 FPS, bez narastających listenerów i pętli audio. Profilować zbudowaną grę. Zapisać urządzenie, przeglądarkę, rozdzielczość i ograniczenia pomiaru; nie zastępować odsłuchu czy oceny użytkownika testem jednostkowym.
+- [x] **Step 6:** Niezależne końcowe review **G4** całej wersji. Naprawić istotne błędy, powtórzyć dotknięte sprawdzenia i zapisać pozostałe ograniczenia. README opisuje otwarcie, lokalny zapis, kopię i autorstwo zasobów. Commit `build: package the offline fruit salon`, jeśli dostępny.
+
 
 ## Samokontrola planu
 
@@ -174,3 +175,5 @@ Samo przygotowanie tego planu nie uruchamia implementacji; po zleceniu przez STA
 Przegląd dokumentów 2026-11-04: niezależny builder check specyfikacji, planu i workflow nie wykazał ważnych nierozstrzygniętych decyzji blokujących wykonanie. Sprawdzono odnośniki, spójność wymagań globalnych, siedem zadań, cztery bramki review i arytmetykę roboczego dochodu. To dowód przeglądu dokumentacji; nie uruchamiano gry, symulacji jej ekonomii ani testów nieistniejącej implementacji.
 
 Aktualizacja wykonawcza: język angielski oraz spokojniejsza oprawa zgodnie z korektą użytkownika. Zadania3–4: sprawdzono technicznie sceny i odtwarzanie/dekodowanie, ale odsłuch na słuchawkach/głośnikach i akceptacja poprawionego feelingu pozostają NOT VERIFIED, nawet przy zaznaczonym kroku wykonawczym. Pełne dowody w docs/playtest.md.
+
+G4 zakończone: brak błędów kodu; dwie uwagi dokumentacyjne (synchronizacja liczb pomiaru i checkboxy) poprawione. Cel60FPS na sprzęcie użytkownika, odsłuch oraz odbiór poprawionego feelingu nie są oznaczone PASS. Zaznaczenia kroków oznaczają wykonanie pracy/sprawdzeń w dostępnym środowisku, z ograniczeniami opisanymi powyżej i w docs/playtest.md.

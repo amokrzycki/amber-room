@@ -17,7 +17,7 @@ const force=stops=>page.evaluate(s=>{window.__stops=[...s];},stops);
 const ready=()=>page.waitForFunction(()=>document.querySelector('#spin')?.textContent.trim().startsWith('START')&&!document.querySelector('#spin').disabled);
 try{
  await page.goto('file://'+resolve('dist/index.html'));await page.locator('#enter-slot').waitFor();
- await page.screenshot({path:'docs/salon.png'});await page.click('#enter-slot');await page.locator('#spin').waitFor();
+ await page.screenshot({path:'docs/salon.png'});await page.mouse.click(745,405);await page.locator('#spin').waitFor({timeout:2000});
  await page.focus('[data-action=settings]');await page.keyboard.press('Space');assert.equal(await page.locator('dialog').evaluate(d=>d.open),true);await page.click('.close');
  for(const size of [{width:1280,height:720},{width:1600,height:900},{width:1920,height:1080}]){await page.setViewportSize(size);await page.waitForFunction(()=>Math.abs(document.querySelector('#ui').getBoundingClientRect().width-document.querySelector('#stage').clientWidth)<2);const bounds=await page.locator('#spin').boundingBox();assert(bounds.x>=0&&bounds.y>=0&&bounds.x+bounds.width<=size.width+1&&bounds.y+bounds.height<=size.height+1);await page.click('[data-action=settings]');const dialog=await page.locator('dialog').boundingBox();assert(dialog.x>=0&&dialog.y>=0&&dialog.x+dialog.width<=size.width+1&&dialog.y+dialog.height<=size.height+1);await page.click('.close');}
  await page.setViewportSize({width:1600,height:900});
@@ -45,7 +45,7 @@ try{
  console.log('audio probe after repeated transitions',await page.evaluate(()=>window.__audio));
  await page.click('#enter-slot');await page.locator('#spin').waitFor();
  await page.click('[data-action=settings]');await page.check('#muted');await page.waitForFunction(()=>window.__masterMute.gain.value===0,undefined,{timeout:2000});await page.check('#motion');await page.locator('#intensity').fill('0');await page.click('.close');
- const saved=await readSave();await page.reload();await page.locator('#enter-slot').waitFor();assert.deepEqual((await readSave()).settings,saved.settings);await page.waitForFunction(()=>window.__masterMute.gain.value===0,undefined,{timeout:2000});assert.equal((await readSave()).balance,saved.balance);
+ const saved=await readSave();await page.reload();await page.locator('#enter-slot').waitFor();assert.deepEqual((await readSave()).settings,saved.settings);assert.equal((await readSave()).balance,saved.balance);await page.click('#enter-slot');await page.locator('#spin').waitFor();await page.waitForFunction(()=>window.__masterMute.gain.value===0,undefined,{timeout:2000});
  assert.deepEqual(errors,[]);assert.deepEqual(network,[]);
  console.log('PASS: offline file, 3 resolutions, 5 line settings, 4 forced classes, save-before-motion, skip/space, repeated scenes, settings reload.');
  console.log('Audio output/headphone listening and user-device FPS: NOT VERIFIED.');
