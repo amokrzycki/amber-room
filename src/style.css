@@ -333,13 +333,22 @@ h2 {
   color: #d7bba0;
 }
 .bet-selects select {
-  background: #20131b;
+  background: #1b1116;
   border: 1px solid #896442;
   color: #fff2cc;
   border-radius: 6px;
   font-size: max(22px, calc(18px / var(--ui-scale, 1)));
   padding: 7px;
   width: 95px;
+  box-shadow:
+    inset 0 2px 3px #0009,
+    0 1px 0 #d8af5526;
+}
+.bet-selects select:disabled {
+  color: #d7bba0;
+  border-color: #69503c;
+  opacity: 1;
+  cursor: default;
 }
 .bet-selects > div {
   display: flex;
@@ -372,6 +381,24 @@ h2 {
   font-size: 23px;
   letter-spacing: 3px;
   padding: 15px;
+  border-color: #dfbd7a;
+  background: linear-gradient(#e8c986, #bd8b42);
+  box-shadow:
+    inset 0 1px 0 #fff2cc80,
+    0 4px 0 #65401f,
+    0 7px 12px #0009;
+}
+.slot-controls button:hover {
+  background: linear-gradient(#f2d89c, #c99a50);
+}
+.slot-controls button:disabled {
+  color: #d7bba0;
+  background: #392b24;
+  border-color: #896442;
+  opacity: 1;
+  box-shadow:
+    inset 0 1px 3px #0007,
+    0 2px 0 #241910;
 }
 .slot-controls button span {
   float: right;

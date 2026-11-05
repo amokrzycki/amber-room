@@ -7,6 +7,7 @@ import { requestSpin, selectBet, reelsStopped, finishSpin } from "../game/sessio
 import { classifyWin } from "../game/feedback";
 import type { Bet, SpinRecord } from "../game/model";
 import { ReelView } from "./ReelView";
+import { drawCabinet } from "./cabinet";
 import { createAudio, type GameAudio } from "./audio";
 import { mountUI } from "./ui";
 import { playWin } from "./feedback";
@@ -35,22 +36,7 @@ export class SlotScene extends Phaser.Scene {
     this.audio.setMuted(owner.state.save.settings.muted);
     this.registry.set("paylines", machine.paylines);
     this.add.rectangle(800, 450, 1600, 900, 0x171214);
-    const g = this.add.graphics();
-    g.fillGradientStyle(0x4a1b2a, 0x4a1b2a, 0x210f18, 0x210f18).fillRoundedRect(45, 105, 1510, 760, 36);
-    g.lineStyle(3, 0xd8af55, 0.6).strokeRoundedRect(45, 105, 1510, 760, 36);
-    g.lineStyle(1, 0xf8dc94, 0.25).strokeRoundedRect(54, 114, 1492, 742, 29);
-    for (const x of [76, 1524])
-      for (const y of [185, 660, 830]) {
-        g.fillStyle(0x956633).fillCircle(x, y, 5);
-        g.lineStyle(1, 0xf9d995, 0.7).lineBetween(x - 2, y - 2, x + 2, y + 2);
-      }
-    g.fillStyle(0x8c1730).fillRoundedRect(245, 175, 1110, 505, 28);
-    g.lineStyle(6, 0xd8af55).strokeRoundedRect(265, 195, 1070, 465, 20);
-    g.fillStyle(0x100d12).fillRoundedRect(280, 207, 1040, 435, 12);
-    for (let c = 0; c < 5; c++) {
-      g.fillStyle(c % 2 ? 0x201920 : 0x19131a).fillRect(291 + c * 205, 209, 198, 432);
-      if (c < 4) g.lineStyle(2, 0xd8af55, 0.3).lineBetween(491 + c * 205, 207, 491 + c * 205, 642);
-    }
+    drawCabinet(this);
     this.add
       .text(800, 142, "ORCHARD No. 7", {
         fontFamily: "Georgia",
@@ -59,12 +45,6 @@ export class SlotScene extends Phaser.Scene {
         color: "#fff2cc",
         letterSpacing: 5,
       })
-      .setOrigin(0.5);
-    for (const x of [552, 1048]) {
-      this.add.image(x, 140, "cherry").setDisplaySize(45, 45).setAlpha(0.65);
-    }
-    this.add
-      .text(1458, 400, "◆\nAMBER ROOM\n◆", { fontSize: "19px", align: "center", lineSpacing: 22, color: "#d8af55" })
       .setOrigin(0.5);
     const initial =
       owner.state.save.lastSpin?.outcome.grid ?? spin(machine, { lineCount: 5, perLine: 1 }, () => 0).grid;

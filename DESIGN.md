@@ -224,6 +224,16 @@ Control borders are generally (1px). Keyboard focus is a Mint Light outline (3px
 - **Game feedback:** show the single highest-paying winning line while reporting the full payout. Reels use acceleration (220ms), cruise (560ms), braking (380ms), and per-reel stagger (110ms), giving approximately (1160–1600ms) across the five reels. Small, big, and jackpot celebrations last up to (700ms / 2200ms / 4000ms); skip clears them immediately. Positive returns without profit get a brief static line without fanfare.
 - **Motion preferences:** CSS removes button transitions for `prefers-reduced-motion`. The in-game reduced-motion setting suppresses symbol pulses, animated cabinet glow, and the lounge toast glow, while reels and payout counting still move. Default effect intensity is (0.4); zero intensity suppresses line and frame decoration. There is no claim of a fully motion-free mode.
 
+## Phase 2 cabinet materials
+
+The playable cabinet now uses `src/view/cabinet.ts`: one cached, static Phaser CanvasTexture drawn in four sections around a native Graphics reel backing. Its brass bezel, burgundy enamel collar, lacquered side returns, fluted fittings, fan ornaments and stepped base draw directly from the lounge miniature. Highlights are narrow and warm from above left, with dark lower/right returns and contact shadows. The reel aperture, fruit scale, feedback geometry and timing are unchanged.
+
+The painter owns these illustration tones rather than treating them as interface colors: wood `#623823` to `#21130f`; enamel `#7b2935` to `#2b1118`; brass highlights `#f0d398`, midtones `#c39a56` / `#aa7738`, returns `#725025` / `#5b3b20`; dark deck `#25171b` to `#1d1217`. This is material shading, not a new semantic palette.
+
+Native slot selects gain a recessed surface (`#1b1116`) and inset shadow. The slot START/SKIP button uses a quieter brass ramp (`#e8c986` to `#bd8b42`) with a physical lower edge. Disabled slot controls retain opaque, readable text (`#d7bba0`) on dark surfaces instead of fading the entire control. Their existing sizing, placement, focus ring, labels and input behavior remain intact. The lounge's controls retain their existing treatment.
+
+Phase 1 scale-compensated type, gross payout hierarchy and recorded-stake outcome breakdown remain authoritative. Decoration must stay outside functional text and must never require moving the fruit or redefining paylines. The cabinet remains a landscape adaptation of the portrait reference, not a replica of its physical dimensions.
+
 ## Do's and Don'ts
 
 ### Do:

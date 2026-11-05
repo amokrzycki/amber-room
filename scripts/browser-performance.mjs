@@ -2,6 +2,7 @@ import { chromium } from "playwright";
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import os from "node:os";
+const [artifact = "dist/index.html", reportPath = "docs/performance-report.json"] = process.argv.slice(2);
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
@@ -12,6 +13,16 @@ const page = await context.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 await page.addInitScript(() => {
+  window.__cabinetUploads = [];
+  for (const renderer of [WebGLRenderingContext, WebGL2RenderingContext]) {
+    const upload = renderer.prototype.texImage2D;
+    renderer.prototype.texImage2D = function (...args) {
+      const source = args.at(-1);
+      if (source instanceof HTMLCanvasElement && source.width === 1530 && source.height === 780)
+        window.__cabinetUploads.push(performance.now());
+      return upload.apply(this, args);
+    };
+  }
   const raf = requestAnimationFrame.bind(window);
   window.__frames = [];
   window.__callbacks = [];
@@ -48,7 +59,7 @@ const stats = (values) => {
   };
 };
 try {
-  await page.goto(`file://${resolve("dist/index.html")}`);
+  await page.goto(`file://${resolve(artifact)}`);
   await page.locator("#enter-slot").waitFor();
   await page.click("#enter-slot");
   await page.locator("#spin").waitFor();
@@ -91,6 +102,7 @@ try {
   const values = await page.evaluate(() => ({
     frames: window.__frames,
     callbacks: window.__callbacks,
+    cabinetUploads: window.__cabinetUploads,
     renderer: (() => {
       const gl =
         document.querySelector("canvas").getContext("webgl2") || document.querySelector("canvas").getContext("webgl");
@@ -106,6 +118,8 @@ try {
     cpu: os.cpus()[0].model,
     cpus: os.cpus().length,
     viewport: { width: 1600, height: 900 },
+    artifact,
+    cabinetUploads: values.cabinetUploads,
     renderer: values.renderer,
     softwareRendering: true,
     recordVideo: false,
@@ -122,7 +136,7 @@ try {
     limits:
       "Headless Chromium + SwiftShader. No user hardware, GPU timing or acoustic listening. RAF is not a guarantee of perceived 60FPS.",
   };
-  writeFileSync("docs/performance-report.json", `${JSON.stringify(report, null, 2)}\n`);
+  writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
   console.log(JSON.stringify(report, null, 2));
   if (errors.length || after.jsEventListeners > before.jsEventListeners + 5) process.exitCode = 1;
 } finally {
