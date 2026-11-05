@@ -96,7 +96,10 @@ try {
   await page.goto(`file://${resolve("dist/index.html")}`);
   await page.click("#enter-slot");
   await ready();
-  assert.equal(await page.locator("#back").innerText(), "BACK TO LOUNGE");
+  assert.equal(await page.locator("#back").innerText(), "Lounge");
+  assert.equal(await page.locator("#back").getAttribute("aria-label"), "Back to lounge");
+  assert.equal(await page.locator(".topbar nav #back").count(), 1); // navigation, not part of the machine
+  assert.equal(await page.locator(".slot-hud #back, .machine-name ~ #back").count(), 0);
   assert.equal(await page.locator("#cashout-note").count(), 0);
   for (const id of ["balance", "payout"])
     assert.match(await page.locator(`#${id}`).evaluate((e) => getComputedStyle(e).fontVariantNumeric), /tabular-nums/);

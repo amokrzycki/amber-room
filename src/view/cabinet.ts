@@ -101,7 +101,7 @@ export function drawCabinet(scene: Phaser.Scene) {
 
     // A flush metal plate, fastened to the enamel canopy.
     round(594, 125, 412, 44, 5, "#180e0c");
-    round(595, 126, 410, 42, 4, gradient(595, 126, 410, 42, ["#c8aa76", "#a78756", "#80603b"]));
+    round(595, 126, 410, 42, 4, gradient(595, 126, 410, 42, ["#c8aa76", "#b69561", "#a88650"]));
     line(
       [
         [598, 127],
@@ -144,7 +144,8 @@ export function drawCabinet(scene: Phaser.Scene) {
       2,
     );
     round(61, 871, 1478, 9, 4, gradient(61, 871, 0, 9, ["#69313a", "#230e14"]));
-    for (const x of [104, 1496]) for (const y of [169, lip - 7, 819]) screw(x, y);
+    // Fasteners belong to the enamel frame; none on the instrument deck, where they read as stray dots beside the HUD.
+    for (const x of [104, 1496]) for (const y of [169, lip - 7]) screw(x, y);
 
     texture.refresh();
   }

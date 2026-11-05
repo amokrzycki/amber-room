@@ -24,12 +24,12 @@ colors:
   warning: '#ffc078'
 typography:
   display:
-    fontFamily: Libre Caslon Text, Georgia, serif
+    fontFamily: Marcellus, Georgia, serif
     fontSize: 57px
     fontWeight: 400
     lineHeight: 1.03
   headline:
-    fontFamily: Libre Caslon Text, Georgia, serif
+    fontFamily: Marcellus, Georgia, serif
     fontSize: 35px
     fontWeight: 400
     lineHeight: 1.2
@@ -51,9 +51,9 @@ typography:
     fontFamily: Source Sans 3, Arial, sans-serif
     fontSize: 16px
   brand:
-    fontFamily: Source Sans 3, Arial, sans-serif
+    fontFamily: Marcellus, Georgia, serif
     fontSize: 24px
-    fontWeight: 600
+    fontWeight: 400
     letterSpacing: 2px
   balance:
     fontFamily: Source Sans 3, Arial, sans-serif
@@ -68,10 +68,10 @@ typography:
     fontFamily: Source Sans 3, Arial, sans-serif
     fontSize: 22px
   spin:
-    fontFamily: Source Sans 3, Arial, sans-serif
-    fontSize: 25px
-    fontWeight: 600
-    letterSpacing: 1px
+    fontFamily: Marcellus, Georgia, serif
+    fontSize: 27px
+    fontWeight: 400
+    letterSpacing: 2px
 rounded:
   field: 6px
   button: 8px
@@ -139,7 +139,7 @@ Wine-colored cabinet surfaces, Antique Gold trim, and Candlelit Cream type conne
 
 - Illustrated lounge artwork and glossy fruit symbols.
 - Wine-colored surfaces, brass edges, warm text, and selective mint signals.
-- Libre Caslon Text display paired with Source Sans 3 controls and tabular lining numerals.
+- Marcellus (engraved, Roman-inscription capitals) for the wordmark, nameplate, headings and SPIN, paired with Source Sans 3 for every label, control and figure.
 - A fixed landscape stage with calm, skippable win effects.
 
 This records the incumbent implementation, using the user's confirmed descriptive language. Source authority: `src/style.css`, `src/view/SlotScene.ts`, `src/view/SalonScene.ts`, `src/view/ReelView.ts`, `src/view/feedback.ts`, and `src/view/tuning.ts`. Existing `docs/evidence/salon.png` and `docs/evidence/slot.png` were inspected for visual context; current code resolves any differences. No fresh browser capture was made for this documentation pass.
@@ -158,7 +158,7 @@ The palette combines warm metal and wine-colored surfaces with cream text and a 
 
 ### Tertiary
 
-- **Mint Light** (`mint-light`): keyboard focus, active payline borders and paths, winning-line outlines, and lounge feedback.
+- **Mint Light** (`mint-light`): keyboard focus, the focused payline's path (drawn behind the symbols, never as an outline around one), and lounge feedback.
 
 ### Neutral
 
@@ -174,14 +174,14 @@ The sidecar's eight-step tonal ramps are generated swatch previews, not addition
 
 ## Typography
 
-**Display font:** Libre Caslon Text, with Georgia fallback. **UI and numeric font:** Source Sans 3, with Arial fallback. Both primary families are embedded, with real variable weights and tabular lining data figures. Values are logical stage pixels before scaling; functional UI sizes retain the existing laptop compensation.
+**Display font:** Marcellus (single 400 weight, SIL OFL 1.1, shipped unmodified because of its Reserved Font Name), with Georgia fallback. **UI and numeric font:** Source Sans 3, with Arial fallback. Both primary families are embedded; the two roles are the CSS tokens `--font-display` and `--font-ui` (plus `--display-weight`), so the pairing is changed in one place. Figures are always Source Sans 3: Marcellus has no tabular figures. Display role covers only: masthead wordmark, machine nameplate, lounge/shop/dialog headings and the SPIN/SKIP label. Values are logical stage pixels before scaling; functional UI sizes retain the existing laptop compensation.
 
 - **Display / headline:** `display` is the lounge title; `headline` is the base secondary heading. The shop overrides its heading to (32px), and dialogs to (33px).
 - **Title / body:** `title` describes purchase headings; `body` describes the lounge paragraph. Shop introductory copy uses (16px, line-height 1.6), and purchase descriptions (15px).
-- **Label / brand / navigation:** `label` is the bold tracked eyebrow; wallet and machine labels use (13px, tracking 2px). `brand` is the uppercase masthead, with a subtitle at (10px, tracking 3px). Navigation uses `navigation`.
+- **Label / brand / navigation:** `label` is the bold tracked eyebrow; wallet and machine labels use (13px, tracking 2px). `brand` is the uppercase Marcellus masthead, with a Source Sans 600 subtitle at (12px floor, tracking 3px). Navigation uses `navigation`.
 - **Balance / payout:** `balance` is the machine balance; the lounge wallet uses (46px). `payout` is the larger central result. Machine HUD numbers request tabular numerals.
 - **Select / spin:** `select` describes native bet controls; `spin` describes the single SPIN/SKIP control (SPIN when idle or settled, SKIP while the reels turn). The lounge entry action uses (20px) instead.
-- **Cabinet title:** DOM-rendered Libre Caslon Text 400 at (27px), with (2px) tracking and a subtle offset engraving highlight.
+- **Cabinet title:** DOM-rendered Marcellus 400 at (28px), with (3.5px) tracking balanced by an equal text indent and a subtle offset engraving highlight.
 
 ## Layout
 
@@ -214,27 +214,28 @@ Control borders are generally (1px). Keyboard focus is a Mint Light outline (3px
 
 **Character:** Comfortable and traditional — familiar controls within the arcade cabinet. The sidecar includes nine self-contained HTML/CSS samples of implemented patterns. Samples show appearance and native controls; they do not implement purchases, game transitions, or save operations.
 
-- **Primary action:** the lounge entry retains its raised gold material, (350px) width and (21px) padding. The cabinet SPIN uses a burgundy switch surface, muted brass rim, fixed (240×64px) footprint and (3px) pressed depression.
+- **Primary action:** the lounge entry retains its raised gold material, (350px) width and (21px) padding. The cabinet SPIN uses a burgundy switch surface, muted brass rim, fixed (220×64px) footprint and (3px) pressed depression.
 - **Secondary button:** dark plum fill, cream text, fine brass border, and rounded corners from `button-secondary`. Hover uses `button-secondary-hover` and a brighter brass border. Disabled buttons use opacity (0.5) and the default cursor.
-- **Navigation:** two transparent outlined header buttons in a horizontal group with `navigation-gap`. The later header rule preserves their transparent fill and muted border on hover; keyboard focus remains visible. The lounge back action is borderless and transparent at rest.
+- **Navigation:** two transparent outlined header buttons in a horizontal group with `navigation-gap`. The later header rule preserves their transparent fill and muted border on hover; keyboard focus remains visible. The way back to the lounge (`← Lounge`, Phase 3.2) is the first item of the machine view's header navigation: icon-and-text, borderless at rest, a muted brass border on hover, a short hairline after it, accessible name "Back to lounge". It is application navigation and is not part of the cabinet.
 - **Selectors and settings:** native selects use `bet-select` with a contextual field border. Checkboxes are (22×22px), ranges (240px) wide, and both use Antique Gold accents. Preserve native keyboard behavior and the shared focus outline.
 - **Purchase rows:** flat rows with a fine brass divider, a bold title and level on one line, benefit text, and a full-width dark button with the price aligned right. They are not independently raised cards.
 - **Dialogs:** a dark rounded panel with brass edge, deep shadow, viewport limits, close button, and scrollable content. Settings and payouts reuse this shell; do not infer additional modal variants.
+- **Win marks (Phase 3.2):** a feathered warm plate behind each winning cell (strongest on the focused line, faint on others; only the focused line above 9 cells) and the focused payline as a 3px Mint Light thread at 50% opacity, behind the symbols. Nothing is outlined around a symbol, so WILD's own gold border is the only border it has; opaque tiles simply sit in front of the thread. The part of the path beyond the winning count is drawn at 16%.
 - **Payline tiles:** dark rounded tiles with a line number and inline SVG path. Inactive tiles have opacity (0.45); active tiles use full opacity and a Mint Light border and path.
 - **Game feedback:** show the single highest-paying winning line while reporting the full payout. Reels use acceleration (220ms), cruise (560ms), braking (380ms), and per-reel stagger (110ms), giving approximately (1160–1600ms) across the five reels. Small, big, and jackpot celebrations last up to (700ms / 2200ms / 4000ms); skip clears them immediately. Positive returns without profit get a brief static line without fanfare.
 - **Motion preferences:** CSS removes button transitions for `prefers-reduced-motion`. The in-game reduced-motion setting suppresses symbol pulses, animated cabinet glow, and the lounge toast glow, while reels and payout counting still move. Default effect intensity is (0.4); zero intensity suppresses line and frame decoration. There is no claim of a fully motion-free mode.
 
 ## Phase 2.1 corrective direction
 
-The machine display name is **THE ORCHARD**. Its flush brass nameplate has two fasteners, dark Libre Caslon Text 400 lettering, 27px type and 2px tracking. Georgia was compared in the same rendered cabinet; Caslon's wider, quieter capitals were selected. The lounge uses the same display family without changing its composition or artwork.
+The machine display name is **THE ORCHARD**. Its flush brass nameplate has two fasteners and dark Marcellus 400 lettering, 28px type and 3.5px tracking (Phase 3.2; Phases 2.1–3.1 used Libre Caslon Text, 27px, 2px). The lounge uses the same display family without changing its composition or artwork.
 
 Source Sans 3 supplies UI type and numeric counters. Use real 400 and 600 variable-font weights, no synthetic bold/italic, tabular lining figures for balance, payout, stake and net. Base line height is 1.25; slot HUD balance and returned 52px/1 (shrinking only if the digit count would overflow the column); the lounge wallet stays 46px. Font files and SIL OFL 1.1 licenses are embedded in the standalone build. The existing scale compensation keeps functional detail at least 14 physical pixels on the requested laptop sizes.
 
-The static cabinet painter retains burgundy enamel, warm wood returns, a narrow structural brass perimeter, one recessed reel bezel, dark instrument deck and fastening screws. Fan/shell motifs, fluted rails, arbitrary vertical strokes, extra enamel collar and duplicated plinth highlights have been removed. No replacement ornaments were added.
+The static cabinet painter retains burgundy enamel, warm wood returns, a narrow structural brass perimeter, one recessed reel bezel, dark instrument deck and fastening screws on the enamel frame only (none on the instrument deck). Fan/shell motifs, fluted rails, arbitrary vertical strokes, extra enamel collar and duplicated plinth highlights have been removed. No replacement ornaments were added.
 
-SPIN/SKIP is a fixed 220×64px burgundy physical control (the cap is a pseudo-element, so pressing depresses it without moving the button box), 25px/600 lettering, 1px tracking, 16px corners and a muted brass rim. Idle, hover, pressed (3px depression), spinning/disabled, celebration/skip and mint keyboard-focus states preserve its footprint. No bounce or glow. Native bet selectors retain the dark recessed treatment and keyboard behavior.
+SPIN/SKIP is a fixed 220×64px burgundy physical control (the cap is a pseudo-element, so pressing depresses it without moving the button box), 27px Marcellus lettering, 2px tracking, 16px corners and a muted brass rim. Idle, hover, pressed (3px depression), spinning/disabled, celebration/skip and mint keyboard-focus states preserve its footprint. No bounce or glow. Native bet selectors retain the dark recessed treatment and keyboard behavior.
 
-CASH OUT · Lounge ends a session after the reels stop, including during a celebration. Adjacent copy states that payouts are already in the balance. It never credits money. Spinning disables this control until the saved result has been presented.
+`← Lounge` (header navigation) ends the machine session after the reels stop, including during a celebration; it is disabled while the reels turn. Copy elsewhere states that payouts are already in the balance. It never credits money.
 
 Display-only counters use 320ms cubic ease-out for balance, payout and net. New targets interrupt from the visible integer; skip, navigation and hiding finish or dispose the relevant work. Both the OS reduced-motion preference and game setting bypass counter motion. Screen readers get a single final outcome including the authoritative balance, with no animated frames or reload announcement. The last completed result remains statically readable after reload. Reel timing, RNG, paylines and settlement are unchanged.
 
@@ -255,3 +256,7 @@ The `.impeccable/design.json` sidecar predates these changes and has not been re
 - **Don't** claim that scaling is mobile reflow or that reduced motion removes reel movement.
 - **Don't** replace fonts, artwork, palette, or control behavior as part of documenting this system.
 - **Don't** add card shadows, pressed animations, type-scale ratios, or breakpoints that the code does not define.
+
+## Phase 3.2 refinement
+
+Typeface pairing changed from Libre Caslon Text + Source Sans 3 to Marcellus + Source Sans 3 after side-by-side captures of identical states (`docs/reviews/2026-11-05-phase32-typography.md`). Win marks moved behind the symbols and lost their outlines (see Components). BACK TO LOUNGE left the cabinet for the shared header as `← Lounge`. Two stray fasteners were removed from the instrument deck. No new ornaments, shells, glows or art were added.

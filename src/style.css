@@ -1,7 +1,7 @@
 @font-face {
-  font-family: "Libre Caslon Text";
-  src: url("./assets/fonts/LibreCaslonText.ttf") format("truetype");
-  font-weight: 400 700;
+  font-family: "Marcellus";
+  src: url("./assets/fonts/Marcellus.ttf") format("truetype");
+  font-weight: 400;
   font-display: swap;
 }
 @font-face {
@@ -11,7 +11,11 @@
   font-display: swap;
 }
 :root {
-  font-family: "Source Sans 3", Arial, sans-serif;
+  /* Two roles: display (wordmark, nameplate, headings, SPIN) and UI (labels, controls, every figure). */
+  --font-display: "Marcellus", Georgia, serif;
+  --font-ui: "Source Sans 3", Arial, sans-serif;
+  --display-weight: 400;
+  font-family: var(--font-ui);
   font-synthesis: none;
   line-height: 1.25;
   color: #fff2cc;
@@ -111,16 +115,20 @@ canvas {
   border-bottom: 1px solid #d8af5533;
 }
 .brand {
+  font-family: var(--font-display);
   font-size: 24px;
-  font-weight: 600;
+  font-weight: var(--display-weight);
   letter-spacing: 2px;
 }
 .brand i {
   color: #d8af55;
+  font-family: var(--font-ui);
   font-style: normal;
 }
 .brand small {
-  font-size: 10px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: max(12px, calc(11px / var(--ui-scale, 1)));
   letter-spacing: 3px;
   display: block;
   margin: 6px 0 0 31px;
@@ -136,6 +144,25 @@ canvas {
   padding: 11px 17px;
   font-size: var(--control-size);
 }
+.topbar .nav-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 12px;
+  padding-right: 20px;
+  border-color: transparent;
+  color: #d7bba0;
+  /* A hairline inside the box (so nothing overflows) separates the way back from the two panels. */
+  background-image: linear-gradient(#d8af5533, #d8af5533);
+  background-size: 1px 60%;
+  background-position: right center;
+  background-repeat: no-repeat;
+}
+.topbar .nav-back:hover:not(:disabled) {
+  color: #fff2cc;
+  border-color: #73503d80;
+  background-color: transparent;
+}
 .eyebrow {
   font-size: 13px;
   letter-spacing: 3px;
@@ -144,8 +171,8 @@ canvas {
 }
 h1,
 h2 {
-  font-family: "Libre Caslon Text", Georgia, serif;
-  font-weight: 400;
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
 }
 h1 {
   font-size: 57px;
@@ -207,9 +234,7 @@ h2 {
   color: #d8af55;
 }
 .salon-wallet strong {
-  font:
-    400 46px "Source Sans 3",
-    sans-serif;
+  font: 400 46px var(--font-ui);
   font-variant-numeric: lining-nums tabular-nums;
   margin: 8px 0;
 }
@@ -279,28 +304,16 @@ h2 {
   color: #35e6d1;
   line-height: 1.4;
 }
-.back {
-  position: absolute;
-  left: 66px;
-  top: 126px;
-  border: 1px solid #99754d;
-  background: #29171c;
-  font-size: var(--control-size);
-  padding: 8px 16px;
-  border-radius: 4px;
-}
-.back span {
-  color: #d7bba0;
-}
 .machine-name {
   position: absolute;
   left: 620px;
   top: 126px;
   width: 360px;
   margin: 0;
-  font-size: 27px;
+  font-size: 28px;
   line-height: 42px;
-  letter-spacing: 2px;
+  letter-spacing: 3.5px;
+  text-indent: 3.5px; /* balances the tracking after the last letter so the title centres optically */
   color: #281b14;
   text-shadow:
     0 1px 0 #f5dca8b3,
@@ -329,6 +342,10 @@ h2 {
 .hud-group:first-child {
   padding-left: 0;
 }
+.hud-group:last-child {
+  /* Mirrors the left edge: SPIN's right inset equals BALANCE's left inset on the deck. */
+  padding-right: 0;
+}
 .hud-group + .hud-group {
   border-left: 1px solid #d8af5530;
 }
@@ -353,9 +370,7 @@ h2 {
 }
 .hud-figure strong {
   /* 0.6em is a safe tabular-digit advance; --len is the character count set with the text. */
-  font:
-    400 min(52px, calc(100cqi / (var(--len, 1) * 0.6))) / 1 "Source Sans 3",
-    sans-serif;
+  font: 400 min(52px, calc(100cqi / (var(--len, 1) * 0.6))) / 1 var(--font-ui);
   font-variant-numeric: lining-nums tabular-nums;
   white-space: nowrap;
   flex: 1;
@@ -507,9 +522,7 @@ h2 {
   cursor: default;
 }
 .bet-row .total strong {
-  font:
-    400 34px / 1.35 "Source Sans 3",
-    sans-serif;
+  font: 400 34px / 1.35 var(--font-ui);
   font-variant-numeric: lining-nums tabular-nums;
   color: #fff2cc;
 }
@@ -521,9 +534,9 @@ h2 {
   width: 220px;
   height: 64px;
   padding: 0;
-  font-size: 25px;
+  font-size: 27px; /* Marcellus has a lower cap height than the old face: 27px matches 25px of Caslon */
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   color: #fff0d5;
   background: none;
   border: 0;
@@ -550,7 +563,10 @@ h2 {
 #spin .face {
   position: relative;
   display: block;
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
   line-height: 64px;
+  text-indent: 2px; /* balances the tracking after the last letter */
   transition: transform 80ms;
 }
 #spin:hover::before {

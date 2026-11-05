@@ -4,7 +4,7 @@ import { SalonScene } from "./view/SalonScene";
 import { SlotScene } from "./view/SlotScene";
 import { accrue } from "./runtime";
 await Promise.all([
-  document.fonts.load('400 27px "Libre Caslon Text"'),
+  document.fonts.load('400 27px "Marcellus"'),
   document.fonts.load('400 18px "Source Sans 3"'),
   document.fonts.load('600 25px "Source Sans 3"'),
 ]).catch(() => undefined);
