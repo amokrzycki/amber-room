@@ -90,7 +90,22 @@ export function drawCabinet(scene: Phaser.Scene) {
     round(70, 119, 1460, 752, 26, gradient(70, 119, 0, 752, ["#682431", "#481620", "#2b1118"]));
 
     // A flush metal plate, fastened to the enamel canopy.
+    round(594, 125, 412, 44, 5, "#180e0c");
     round(595, 126, 410, 42, 4, gradient(595, 126, 410, 42, ["#c8aa76", "#a78756", "#80603b"]));
+    line(
+      [
+        [598, 127],
+        [1001, 127],
+      ],
+      "#f0d6a177",
+    );
+    line(
+      [
+        [598, 167],
+        [1001, 167],
+      ],
+      "#4b321a99",
+    );
     screw(607, 147);
     screw(993, 147);
 

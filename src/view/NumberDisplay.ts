@@ -1,3 +1,4 @@
+import { tuning } from "./tuning";
 /** Display only: settlement always belongs to the saved session. */
 export class NumberDisplay {
   private frame = 0;
@@ -11,7 +12,7 @@ export class NumberDisplay {
   }
   to(target: number, reducedMotion: boolean) {
     if (target === this.target) {
-      if (reducedMotion) this.finish();
+      if (reducedMotion || !this.frame) this.finish();
       return;
     }
     this.dispose();
@@ -23,7 +24,7 @@ export class NumberDisplay {
     const from = this.value;
     const started = performance.now();
     const update = (now: number) => {
-      const progress = Math.min(1, Math.max(0, (now - started) / 320));
+      const progress = Math.min(1, Math.max(0, (now - started) / tuning.counter));
       const eased = 1 - (1 - progress) ** 3;
       this.value = progress === 1 ? target : Math.round(from * (1 - eased) + target * eased);
       this.render(this.value);

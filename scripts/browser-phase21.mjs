@@ -77,7 +77,7 @@ try {
       const layout = await page.evaluate(() =>
         [
           ...document.querySelectorAll(
-            ".machine-name,#cashout-note,#back,#spin,.balance-block,.payout-block,.bet-block,#spin-breakdown",
+            ".machine-name,#back,#spin,.balance-block,.payout-block,.bet-block,#spin-breakdown",
           ),
         ].map((element) => {
           const r = element.getBoundingClientRect();
@@ -254,8 +254,8 @@ try {
       assert(changes.payout.some((v) => v !== "0" && v !== "15"));
       assert(changes.net.some((v) => v && !v.endsWith("Net +10")));
     } else {
-      assert(changes.balance.every((v) => v === "1,000" || v === "1,010"));
-      assert(changes.payout.every((v) => v === "0" || v === "15"));
+      assert(changes.balance.every((v) => v === "1,000" || v === "995" || v === "1,010"));
+      assert(changes.payout.every((v) => v === "—" || v === "0" || v === "15"));
       assert(changes.net.every((v) => !v || v.endsWith("Net +10")));
     }
     assert.equal(changes.announcement.filter(Boolean).length, 1);

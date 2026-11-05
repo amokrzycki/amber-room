@@ -130,7 +130,36 @@ it("clips visible pixels to the reel window throughout motion and restores the f
     }
   }
   tween.onComplete();
+  const settle = tweens[1];
+  expect(settle.y).toBe(tween.y + 2);
+  settle.targets.y = settle.y;
+  settle.onComplete();
   await done;
   expect(containers[0].list.map((image: any) => image.texture.key)).toEqual(["wild", "seven", "melon"]);
   reel.dispose();
+});
+
+it("finishes or cancels mid-spin once, with exact symbols and no delayed stop effect", async () => {
+  for (const finish of [true, false]) {
+    const { scene, containers } = renderer();
+    const reel = new ReelView(scene, 0, ["cherry", "lemon", "plum"]);
+    let stops = 0;
+    const done = reel.play(["wild", "seven", "melon"], 0, 0, false, () => stops++);
+    if (finish) reel.finish();
+    else reel.cancel();
+    await done;
+    expect(stops).toBe(0);
+    const column = containers[0].list.filter((image: any) => image.texture).map((image: any) => image.texture.key);
+    expect(column).toEqual(finish ? ["wild", "seven", "melon"] : ["cherry", "lemon", "plum"]);
+    reel.dispose();
+  }
+});
+
+it("reduced motion creates no moving container or tween and shows the saved outcome", async () => {
+  const { scene, tweens, containers } = renderer();
+  const reel = new ReelView(scene, 0, ["cherry", "lemon", "plum"]);
+  await reel.play(["wild", "seven", "melon"], 0, 0, true);
+  expect(tweens).toHaveLength(0);
+  expect(containers).toHaveLength(1);
+  expect(containers[0].list.map((image: any) => image.texture.key)).toEqual(["wild", "seven", "melon"]);
 });

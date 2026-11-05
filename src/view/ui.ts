@@ -3,7 +3,7 @@ import sourceLicense from "../assets/fonts/SourceSans3-OFL.txt?raw";
 import type Phaser from "phaser";
 import { owner, number } from "../runtime";
 import { machine } from "../game/machine";
-import type { GameAudio } from "./audio";
+import { audioMix, type GameAudio } from "./audio";
 export function download(raw: string, name: string) {
   const url = URL.createObjectURL(new Blob([raw], { type: "application/json" }));
   const a = document.createElement("a");
@@ -26,7 +26,7 @@ export function mountUI(scene: Phaser.Scene, audio: GameAudio, content: string) 
   warning();
   const settings = () => {
     const s = owner.state.save.settings;
-    body.innerHTML = `<h2>Make yourself at home</h2><label class="setting"><input type="checkbox" id="muted" ${s.muted ? "checked" : ""}> Mute all audio</label><label class="setting"><input type="checkbox" id="motion" ${s.reducedMotion ? "checked" : ""}> Reduce motion & lights</label><label class="setting" for="intensity">Effect intensity <input id="intensity" type="range" min="0" max="1" step="0.05" value="${s.effectsIntensity}"></label><hr><h3>Keep your progress</h3><p>Your progress stays on this device. Export a backup before moving this HTML file.</p><div class="save-actions"><button id="export">Export JSON</button><label class="file-button">Import JSON<input type="file" id="import" accept=".json,application/json"></label>${owner.originalRaw !== undefined ? '<button id="original">Download damaged original</button>' : ""}</div><p id="import-status" role="status"></p><p class="fine">One currency: play tokens. A private game, with no accounts or real money.</p><details class="font-licenses"><summary>Typeface credits & licenses</summary><pre></pre></details>`;
+    body.innerHTML = `<h2>Make yourself at home</h2><label class="setting"><input type="checkbox" id="muted" ${s.muted ? "checked" : ""}> Mute all audio</label><label class="setting" for="music-volume">Music / room ambience <input id="music-volume" type="range" min="0" max="1" step="0.05" value="${audioMix.music}"></label><label class="setting" for="effects-volume">Machine effects <input id="effects-volume" type="range" min="0" max="1" step="0.05" value="${audioMix.effects}"></label><p class="fine">Volume levels last for this session.</p><label class="setting"><input type="checkbox" id="motion" ${s.reducedMotion ? "checked" : ""}> Reduce motion & lights</label><label class="setting" for="intensity">Effect intensity <input id="intensity" type="range" min="0" max="1" step="0.05" value="${s.effectsIntensity}"></label><hr><h3>Keep your progress</h3><p>Your progress stays on this device. Export a backup before moving this HTML file.</p><div class="save-actions"><button id="export">Export JSON</button><label class="file-button">Import JSON<input type="file" id="import" accept=".json,application/json"></label>${owner.originalRaw !== undefined ? '<button id="original">Download damaged original</button>' : ""}</div><p id="import-status" role="status"></p><p class="fine">One currency: play tokens. A private game, with no accounts or real money.</p><details class="font-licenses"><summary>Typeface credits & licenses</summary><pre></pre></details>`;
     body.querySelector(".font-licenses pre")!.textContent = `${caslonLicense}\n\n${sourceLicense}`;
     const change = () => {
       owner.commit({
@@ -41,6 +41,8 @@ export function mountUI(scene: Phaser.Scene, audio: GameAudio, content: string) 
         },
       });
       audio.setMuted(owner.state.save.settings.muted);
+      audio.setVolume("music", Number((body.querySelector("#music-volume") as HTMLInputElement).value));
+      audio.setVolume("effects", Number((body.querySelector("#effects-volume") as HTMLInputElement).value));
       warning();
     };
     body.querySelectorAll("input:not([type=file])").forEach((el) => {

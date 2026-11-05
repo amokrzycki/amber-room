@@ -22,3 +22,37 @@ for name,duration in spec.items():
   data.append(max(-.8,min(.8,value*max(0,edge))))
  with wave.open(str(out/f'{name}.wav'),'wb') as w:w.setparams((1,2,sr,0,'NONE','not compressed'));w.writeframes(struct.pack('<'+'h'*n,*[int(x*32767) for x in data]))
 print('created',len(spec),'original WAVs; peaks below -1.9dBFS')
+
+# Phase 3: one damped wood/metal voice, without scales or casino fanfares.
+mechanical = {'press': .075, 'reels': .8, 'stop-a': .12, 'stop-b': .13,
+              'stop-c': .14, 'payout-tick': .07, 'payout-end': .22,
+              'win-small': .4, 'win-big': .65, 'win-jackpot': .85}
+for name, duration in mechanical.items():
+    rng = random.Random(20261105 + sum(map(ord, name)))
+    samples = []
+    low = 0.
+    for i in range(int(sr * duration)):
+        t = i / sr
+        low += .2 * (rng.uniform(-1, 1) - low)
+        if name == 'reels':
+            # 24 evenly spaced detents in one loop; pitch/gain follow the reel lifecycle.
+            pulse = (t % (duration / 24)) / (duration / 24)
+            value = .12 * low + .055 * math.sin(2 * math.pi * pulse) * math.exp(-pulse * 5)
+        elif name == 'press' or name.startswith('stop'):
+            body = 135 if name == 'press' else 170 + 8 * 'abc'.index(name[-1])
+            value = (.8 * low + .24 * math.sin(2 * math.pi * body * t)
+                     + .08 * math.sin(2 * math.pi * 437 * t)) * math.exp(-t * 48)
+        else:
+            hits = 3 if name == 'win-jackpot' else 2 if name == 'win-big' else 1
+            value = 0.
+            for hit in range(hits):
+                age = t - hit * .12
+                if age >= 0:
+                    value += .12 * sum(math.sin(2 * math.pi * f * age) * math.exp(-age * decay)
+                                       for f, decay in [(660, 18), (937, 26), (1561, 38)])
+        edge = 1 if name == 'reels' else max(0, min(1, t / .002, (duration - t) / .012))
+        samples.append(int(max(-.6, min(.6, value * edge)) * 32767))
+    with wave.open(str(out / f'{name}.wav'), 'wb') as w:
+        w.setparams((1, 2, sr, 0, 'NONE', 'not compressed'))
+        w.writeframes(struct.pack('<' + 'h' * len(samples), *samples))
+print('mechanical voices: deterministic, damped, peak ceiling -4.4 dBFS')

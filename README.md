@@ -4,12 +4,12 @@ A private offline game with a 5×3 slot machine and a separate lounge with a bar
 
 ## Play the game
 
-Double-click [dist/index.html](dist/index.html) to open it in a current browser with WebGL support (tested in Chromium 156). You do not need a server or an internet connection. The file is about 6.6 MB and includes all 22 image and audio assets, code, and styles. Your first click enables audio.
+Double-click [dist/index.html](dist/index.html) to open it in a current browser with WebGL support (tested in Chromium 156). You do not need a server or an internet connection. The file is about 7.5 MB and includes all 22 image and audio assets, code, and styles. Your first click enables audio.
 
 - `Play The Orchard` opens the slot machine. Press `SPIN` or Space to spin once. Holding the button or key does not trigger automatic spins.
 - `Bet / line` × `Lines` = `TOTAL BET`. Choose the first 1, 5, 10, 20, or 40 paylines. `Lines & payouts` shows their exact paths and the payout table.
-- Press `SKIP` or Space to shorten a win celebration without placing another bet. `← Lounge` returns to the lounge once the reels stop.
-- `Settings & save` lets you mute audio, reduce motion, adjust effect intensity, and back up your progress. Use Tab/Shift+Tab to move between standard buttons and Enter/Space to activate them. Keyboard focus is visible.
+- Press `SKIP` or Space to shorten a win celebration without placing another bet. `BACK TO LOUNGE` returns to the lounge once the reels stop. `Skip motion` reveals the saved result immediately.
+- `Settings & save` lets you mute audio, adjust independent music/room and machine-effects volume for the session, reduce motion, adjust effect intensity, and back up your progress. Use Tab/Shift+Tab to move between standard buttons and Enter/Space to activate them. Keyboard focus is visible.
 - The lounge earns income automatically in both views and credits up to 8 hours of income when you return from an absence. Each purchase has three upgrade levels. `Buy the room a round` costs 50 and triggers a brief reaction with no other benefit.
 
 ## Back up and transfer saves
@@ -45,6 +45,7 @@ node scripts/browser-reel-clipping.mjs
 node scripts/browser-save-business.mjs
 node scripts/browser-idle.mjs
 node scripts/browser-performance.mjs
+node scripts/browser-phase3.mjs
 ```
 
 These scripts use an existing `/usr/bin/chromium` installation. Adjust `executablePath` on other systems. They do not install a browser or start a server. The reel-clipping test compares frame pixels using Python/Pillow.
@@ -61,6 +62,8 @@ For asset details, sources, and modifications, see the [runtime manifest](src/as
 
 Further documentation covers [tests and limitations](docs/playtest.md), [design decisions](docs/decisions.md), [exact game math](docs/math-report.json), and [performance measurements](docs/performance-report.json). Independent reviews are in `docs/reviews/`.
 
-User approval of the revised visuals, listening checks on headphones and speakers, and confirmation of 60 FPS on the player's computer remain unverified. Code checks and headless measurements do not establish those results.
+The owner accepted the Phase 2.1 visual direction. Phase 3 listening checks on headphones/speakers, screen-reader output, and other browsers remain unverified. Hardware-reported shared-preview measurements are documented separately from headless SwiftShader results.
 
-Phase 2.1: **CASH OUT · Lounge** returns to the lounge without another spin. Each payout is already saved in the token balance before reel playback; cash out never credits it again. Balance, payout and net use display-only 320ms counters, disabled by either reduced-motion preference. Font files and licenses are embedded for offline use.
+Phase 3 uses display-only debit/credit counting, smooth reel acceleration and braking, staggered stops, a small mechanical settle, and subdued machine sounds. Gross/returned/net share one counter; the full settlement remains saved before playback. Reduced-motion preferences and hidden tabs settle directly to the recorded grid. Winning line numbers remain available after the visual highlight ends. No RNG, economy, progression, or save-schema changes were made.
+
+See the [Phase 3 report](docs/reviews/2026-11-05-phase3-motion.md) and [independent recording review](docs/reviews/2026-11-05-phase3-independent.md) for recordings, measurements, test coverage, and remaining listening/device limitations.

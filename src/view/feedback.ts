@@ -1,5 +1,5 @@
 import type Phaser from "phaser";
-import { classifyWin, celebrationDuration, createCelebration } from "../game/feedback";
+import { classifyWin, celebrationDuration } from "../game/feedback";
 import type { SaveV1, SpinRecord } from "../game/model";
 import { tuning as t } from "./tuning";
 export function playWin(scene: Phaser.Scene, spin: SpinRecord, settings: SaveV1["settings"]) {
@@ -27,13 +27,23 @@ export function playWin(scene: Phaser.Scene, spin: SpinRecord, settings: SaveV1[
     if (!settings.reducedMotion)
       scene.tweens.add({ targets: frame, alpha: 0.45, duration: 1100, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
   }
-  const handle = createCelebration(
-    tier === "neutral" && spin.outcome.payout > 0 ? 900 : celebrationDuration(tier),
-    () => {
-      scene.tweens.killTweensOf(frame);
-      frame.destroy();
-      lines.destroy();
-    },
+  let finished = false;
+  let resolve!: () => void;
+  const done = new Promise<void>((r) => {
+    resolve = r;
+  });
+  const skip = () => {
+    if (finished) return;
+    finished = true;
+    timer.remove(false);
+    scene.tweens.killTweensOf(frame);
+    frame.destroy();
+    lines.destroy();
+    resolve();
+  };
+  const timer = scene.time.delayedCall(
+    settings.reducedMotion ? 900 : tier === "neutral" && spin.outcome.payout > 0 ? 900 : celebrationDuration(tier),
+    skip,
   );
-  return handle;
+  return { done, skip, dispose: skip };
 }

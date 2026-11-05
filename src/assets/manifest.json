@@ -59,26 +59,26 @@
       "id": "payout-end",
       "kind": "audio",
       "path": "src/assets/audio/payout-end.wav",
-      "sha256": "1009b4e7206c3688587019a51e7c48aa31cb028e2e88f12174707501230b81f2",
+      "sha256": "34d64c095bf7deb3f670709183d59539a270bfcd9007d44f6b9262d91f227b91",
       "status": "decode-verified",
       "verified_in_game": false,
       "creator_or_tool": "Original artwork / deterministic Python synthesis by Codex",
       "license_or_generation_record": "CC0-1.0, original project assets",
       "source": "scripts/make-audio.py",
       "modifications": "original authored asset",
-      "duration": 0.32,
+      "duration": 0.22,
       "sample_rate": 22050,
       "channels": 1,
       "loop": false,
       "mix_checked": false,
       "decoded_in_game": true,
-      "qa": "decoded and started/stopped in Phaser WebAudio; acoustic listening NOT VERIFIED"
+      "qa": "Lifecycle and gain checked automatically; human speaker/headphone review pending"
     },
     {
       "id": "payout-tick",
       "kind": "audio",
       "path": "src/assets/audio/payout-tick.wav",
-      "sha256": "a577e180e418f531210f7df8121ba0d56c3337c1cfad99067ebd8d425fa03e5a",
+      "sha256": "1a3b8e26a78171e25e8c1dd501dff6342cbec2b4cccef456e51145e70fcab4d3",
       "status": "decode-verified",
       "verified_in_game": false,
       "creator_or_tool": "Original artwork / deterministic Python synthesis by Codex",
@@ -91,13 +91,13 @@
       "loop": false,
       "mix_checked": false,
       "decoded_in_game": true,
-      "qa": "decoded and started/stopped in Phaser WebAudio; acoustic listening NOT VERIFIED"
+      "qa": "Lifecycle and gain checked automatically; human speaker/headphone review pending"
     },
     {
       "id": "press",
       "kind": "audio",
       "path": "src/assets/audio/press.wav",
-      "sha256": "3236e2938707b3af9073b5012c16ade8aa88ccfb8325b93b3a07a5e4742ad8db",
+      "sha256": "92cf63b55083f35f84f417466b3412812c03801413139c0f9de8712722d091eb",
       "status": "decode-verified",
       "verified_in_game": false,
       "creator_or_tool": "Original artwork / deterministic Python synthesis by Codex",
@@ -110,13 +110,13 @@
       "loop": false,
       "mix_checked": false,
       "decoded_in_game": true,
-      "qa": "decoded and started/stopped in Phaser WebAudio; acoustic listening NOT VERIFIED"
+      "qa": "Lifecycle and gain checked automatically; human speaker/headphone review pending"
     },
     {
       "id": "reels",
       "kind": "audio",
       "path": "src/assets/audio/reels.wav",
-      "sha256": "872b365d309ee9d281a95390e28b7a830ded014ce8272d2b6517888bdefff76c",
+      "sha256": "d76eae47e7e4f065e8354f8319070312986193dfa9be0161035116cd0e5b6d30",
       "status": "decode-verified",
       "verified_in_game": false,
       "creator_or_tool": "Original artwork / deterministic Python synthesis by Codex",
@@ -129,7 +129,7 @@
       "loop": true,
       "mix_checked": false,
       "decoded_in_game": true,
-      "qa": "decoded and started/stopped in Phaser WebAudio; acoustic listening NOT VERIFIED"
+      "qa": "Lifecycle and gain checked automatically; human speaker/headphone review pending"
     },
     {
       "id": "salon-ambience",
@@ -148,7 +148,7 @@
       "loop": true,
       "mix_checked": false,
       "decoded_in_game": true,
-      "qa": "decoded and started/stopped in Phaser WebAudio; acoustic listening NOT VERIFIED"
+      "qa": "Lifecycle and gain checked automatically; human speaker/headphone review pending"
     },
     {
       "id": "salon-cheer",
@@ -167,7 +167,7 @@
       "loop": false,
       "mix_checked": false,
       "decoded_in_game": true,
-      "qa": "decoded and started/stopped in Phaser WebAudio; acoustic listening NOT VERIFIED"
+      "qa": "Lifecycle and gain checked automatically; human speaker/headphone review pending"
     },
     {
       "id": "salon-toast",
@@ -186,13 +186,13 @@
       "loop": false,
       "mix_checked": false,
       "decoded_in_game": true,
-      "qa": "decoded and started/stopped in Phaser WebAudio; acoustic listening NOT VERIFIED"
+      "qa": "Lifecycle and gain checked automatically; human speaker/headphone review pending"
     },
     {
       "id": "stop-a",
       "kind": "audio",
       "path": "src/assets/audio/stop-a.wav",
-      "sha256": "4831cf890e58f4958253926b457019aaaacb2ec27ea151fa69ec522d4e8122da",
+      "sha256": "ff90eb22f64f25f0aa08277d544b08f8225ca2311c3b9f8e19f49c97d970fdf7",
       "status": "decode-verified",
       "verified_in_game": false,
       "creator_or_tool": "Original artwork / deterministic Python synthesis by Codex",
@@ -205,13 +205,13 @@
       "loop": false,
       "mix_checked": false,
       "decoded_in_game": true,
-      "qa": "decoded and started/stopped in Phaser WebAudio; acoustic listening NOT VERIFIED"
+      "qa": "Lifecycle and gain checked automatically; human speaker/headphone review pending"
     },
     {
       "id": "stop-b",
       "kind": "audio",
       "path": "src/assets/audio/stop-b.wav",
-      "sha256": "d70900dadd69c02fa28fd30dc5e7e4aa3d3b3d753d4872ff2df8cfd2bbbe3ab7",
+      "sha256": "1ed89c56d3a4f14485ec49582d99b24ea9e267fb1cb12e948c5251d74e8d948f",
       "status": "decode-verified",
       "verified_in_game": false,
       "creator_or_tool": "Original artwork / deterministic Python synthesis by Codex",
@@ -224,13 +224,13 @@
       "loop": false,
       "mix_checked": false,
       "decoded_in_game": true,
-      "qa": "decoded and started/stopped in Phaser WebAudio; acoustic listening NOT VERIFIED"
+      "qa": "Lifecycle and gain checked automatically; human speaker/headphone review pending"
     },
     {
       "id": "stop-c",
       "kind": "audio",
       "path": "src/assets/audio/stop-c.wav",
-      "sha256": "3ad552d471f2b19fac14147f8037111788189854762def58d8a735089a960116",
+      "sha256": "cd09fc3a6b89d625b1fc4b314a1c598bb0d0e9475711a5735ba7b02d346153d8",
       "status": "decode-verified",
       "verified_in_game": false,
       "creator_or_tool": "Original artwork / deterministic Python synthesis by Codex",
@@ -243,51 +243,13 @@
       "loop": false,
       "mix_checked": false,
       "decoded_in_game": true,
-      "qa": "decoded and started/stopped in Phaser WebAudio; acoustic listening NOT VERIFIED"
+      "qa": "Lifecycle and gain checked automatically; human speaker/headphone review pending"
     },
     {
       "id": "win-big",
       "kind": "audio",
       "path": "src/assets/audio/win-big.wav",
-      "sha256": "e0a8b237935d73b4816b6ad561acd39f04285d3ec0f4a7991d8278bce29c52fd",
-      "status": "decode-verified",
-      "verified_in_game": false,
-      "creator_or_tool": "Original artwork / deterministic Python synthesis by Codex",
-      "license_or_generation_record": "CC0-1.0, original project assets",
-      "source": "scripts/make-audio.py",
-      "modifications": "original authored asset",
-      "duration": 1.8,
-      "sample_rate": 22050,
-      "channels": 1,
-      "loop": false,
-      "mix_checked": false,
-      "decoded_in_game": true,
-      "qa": "decoded and started/stopped in Phaser WebAudio; acoustic listening NOT VERIFIED"
-    },
-    {
-      "id": "win-jackpot",
-      "kind": "audio",
-      "path": "src/assets/audio/win-jackpot.wav",
-      "sha256": "84d63faec9fb192c6afc930b8d8fb5d009f473e4d2298711d91c487e97e4b829",
-      "status": "decode-verified",
-      "verified_in_game": false,
-      "creator_or_tool": "Original artwork / deterministic Python synthesis by Codex",
-      "license_or_generation_record": "CC0-1.0, original project assets",
-      "source": "scripts/make-audio.py",
-      "modifications": "original authored asset",
-      "duration": 3.3,
-      "sample_rate": 22050,
-      "channels": 1,
-      "loop": false,
-      "mix_checked": false,
-      "decoded_in_game": true,
-      "qa": "decoded and started/stopped in Phaser WebAudio; acoustic listening NOT VERIFIED"
-    },
-    {
-      "id": "win-small",
-      "kind": "audio",
-      "path": "src/assets/audio/win-small.wav",
-      "sha256": "a7933da49f93cd39759756252f9bbfc06c4eebbbc4c2526630b567936b0a6ba0",
+      "sha256": "608d032da0dfc70c84bb6c8f891c574b23c421f78a62630396ad4161ea0c82c5",
       "status": "decode-verified",
       "verified_in_game": false,
       "creator_or_tool": "Original artwork / deterministic Python synthesis by Codex",
@@ -300,7 +262,45 @@
       "loop": false,
       "mix_checked": false,
       "decoded_in_game": true,
-      "qa": "decoded and started/stopped in Phaser WebAudio; acoustic listening NOT VERIFIED"
+      "qa": "Lifecycle and gain checked automatically; human speaker/headphone review pending"
+    },
+    {
+      "id": "win-jackpot",
+      "kind": "audio",
+      "path": "src/assets/audio/win-jackpot.wav",
+      "sha256": "7c3f3adcf1bc25438d43eb3791a02af46e8abcfd09c2e128ee0dac49195dec7b",
+      "status": "decode-verified",
+      "verified_in_game": false,
+      "creator_or_tool": "Original artwork / deterministic Python synthesis by Codex",
+      "license_or_generation_record": "CC0-1.0, original project assets",
+      "source": "scripts/make-audio.py",
+      "modifications": "original authored asset",
+      "duration": 0.8499773242630385,
+      "sample_rate": 22050,
+      "channels": 1,
+      "loop": false,
+      "mix_checked": false,
+      "decoded_in_game": true,
+      "qa": "Lifecycle and gain checked automatically; human speaker/headphone review pending"
+    },
+    {
+      "id": "win-small",
+      "kind": "audio",
+      "path": "src/assets/audio/win-small.wav",
+      "sha256": "2b7730a3fd69b6d60b204206c134fb3b2b4288813290dab33c1b53270289fb00",
+      "status": "decode-verified",
+      "verified_in_game": false,
+      "creator_or_tool": "Original artwork / deterministic Python synthesis by Codex",
+      "license_or_generation_record": "CC0-1.0, original project assets",
+      "source": "scripts/make-audio.py",
+      "modifications": "original authored asset",
+      "duration": 0.4,
+      "sample_rate": 22050,
+      "channels": 1,
+      "loop": false,
+      "mix_checked": false,
+      "decoded_in_game": true,
+      "qa": "Lifecycle and gain checked automatically; human speaker/headphone review pending"
     },
     {
       "id": "cherry",
