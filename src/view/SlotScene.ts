@@ -11,10 +11,11 @@ import { drawCabinet } from "./cabinet";
 import { createAudio, type GameAudio } from "./audio";
 import { mountUI } from "./ui";
 import { playWin } from "./feedback";
-import { describeSpinResult, resultWord, signed, symbolNames } from "./spinResult";
+import { describeSpinResult, resultWord, signed } from "./spinResult";
 import { NumberDisplay } from "./NumberDisplay";
 import { idleGrid } from "./idleGrid";
 import { createWinMarks } from "./winMarks";
+import { showResultDetails } from "./resultDetails";
 
 /** After SKIP, ignore further activations briefly so a double-click or echoed key cannot start a new wager. */
 const SKIP_REARM_MS = 350;
@@ -68,7 +69,7 @@ export class SlotScene extends Phaser.Scene {
     this.ui = mountUI(
       this,
       this.audio,
-      `<h1 class="machine-name">THE ORCHARD</h1><div class="slot-hud"><section class="hud-group balance-block" aria-labelledby="hud-balance"><span class="hud-label" id="hud-balance">BALANCE</span><div class="hud-figure"><strong id="balance" aria-hidden="true">${number(owner.state.save.balance)}</strong></div><span class="hud-note">tokens</span><span class="sr-only" id="balance-final">${number(owner.state.save.balance)} tokens</span></section><section class="hud-group returned-block" aria-labelledby="hud-returned"><div class="hud-head"><span class="hud-label" id="hud-returned">RETURNED</span><details class="win-details" data-empty><summary></summary><div class="win-panel"><p class="win-title"></p><div class="win-list"></div></div></details></div><div class="hud-figure payout"><strong id="payout" aria-hidden="true">${lastSpin ? number(lastSpin.outcome.payout) : "—"}</strong></div><p class="hud-note" id="spin-status"><span id="result-word"></span><span id="net-wrap" aria-hidden="true" hidden> · Net <strong id="net"></strong></span></p></section><section class="hud-group bet-block" aria-labelledby="hud-bet"><span class="hud-label" id="hud-bet">BET &amp; SPIN</span><div class="bet-row"><label><span>Per line</span><select id="per-line">${options([1, 2, 5], bet.perLine)}</select></label><span class="op" aria-hidden="true">×</span><label><span>Lines</span><select id="line-count">${options([1, 5, 10, 20, 40], bet.lineCount)}</select></label><span class="op" aria-hidden="true">=</span><div class="total"><span>Total bet</span><strong id="stake">${bet.lineCount * bet.perLine}</strong></div><button id="spin" class="primary" data-state="idle" aria-label="Spin reels" aria-keyshortcuts="Space"><span class="face">SPIN</span></button></div></section></div><p class="sr-only" id="result-summary">${lastSpin ? describeSpinResult(lastSpin).announcement : ""}</p><p class="sr-only" id="result-announcement" role="status" aria-live="polite" aria-atomic="true"></p>`,
+      `<h1 class="machine-name">THE ORCHARD</h1><div class="slot-hud"><section class="hud-group balance-block" aria-labelledby="hud-balance"><span class="hud-label" id="hud-balance">BALANCE</span><div class="hud-figure"><strong id="balance" aria-hidden="true">${number(owner.state.save.balance)}</strong></div><span class="hud-note">tokens</span><span class="sr-only" id="balance-final">${number(owner.state.save.balance)} tokens</span></section><section class="hud-group returned-block" aria-labelledby="hud-returned"><div class="hud-head"><span class="hud-label" id="hud-returned">RETURNED</span><button type="button" class="win-details" aria-haspopup="dialog" hidden></button></div><div class="hud-figure payout"><strong id="payout" aria-hidden="true">${lastSpin ? number(lastSpin.outcome.payout) : "—"}</strong></div><p class="hud-note" id="spin-status"><span id="result-word"></span><span id="net-wrap" aria-hidden="true" hidden> · Net <strong id="net"></strong></span></p></section><section class="hud-group bet-block" aria-labelledby="hud-bet"><span class="hud-label" id="hud-bet">BET &amp; SPIN</span><div class="bet-row"><label><span>Per line</span><select id="per-line">${options([1, 2, 5], bet.perLine)}</select></label><span class="op" aria-hidden="true">×</span><label><span>Lines</span><select id="line-count">${options([1, 5, 10, 20, 40], bet.lineCount)}</select></label><span class="op" aria-hidden="true">=</span><div class="total"><span>Total bet</span><strong id="stake">${bet.lineCount * bet.perLine}</strong></div><button id="spin" class="primary" data-state="idle" aria-label="Spin reels" aria-keyshortcuts="Space"><span class="face">SPIN</span></button></div></section></div><p class="sr-only" id="result-summary">${lastSpin ? describeSpinResult(lastSpin).announcement : ""}</p><p class="sr-only" id="result-announcement" role="status" aria-live="polite" aria-atomic="true"></p>`,
       { back: true },
     );
     const root = this.ui.root;
@@ -121,31 +122,13 @@ export class SlotScene extends Phaser.Scene {
     root.querySelectorAll("select").forEach((el) => {
       el.addEventListener("change", change);
     });
-    const details = q<HTMLDetailsElement>(".win-details");
-    const closeDetails = () => {
-      details.open = false;
-    };
-    const preview = (event: Event) => {
+    q(".win-details").addEventListener("click", () => {
       const spin = owner.state.save.lastSpin;
-      const line = (event.target as Element).closest<HTMLElement>("[data-line]");
-      if (!spin || !line) return;
-      const wins = spin.outcome.lineWins;
-      this.marks.show(
-        wins,
-        event.type === "mouseout" || event.type === "focusout"
-          ? undefined
-          : wins.find((w) => w.lineIndex === Number(line.dataset.line)),
-      );
-    };
-    const panel = q(".win-panel");
-    panel.addEventListener("focusin", preview);
-    panel.addEventListener("focusout", preview);
-    panel.addEventListener("mouseover", preview);
-    panel.addEventListener("mouseout", preview);
+      if (spin && owner.state.phase !== "spinning") showResultDetails(this.ui.dialog, spin);
+    });
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape" && !this.ui.dialog.open) {
-        if (details.open) closeDetails();
-        else if (owner.state.phase === "celebrating") this.skip();
+        if (owner.state.phase === "celebrating") this.skip();
         return;
       }
       const target = e.target instanceof Element ? e.target : null;
@@ -239,6 +222,11 @@ export class SlotScene extends Phaser.Scene {
       this.settleReels(); // The committed outcome is already saved; this only ends the animation.
       return;
     }
+    if (owner.state.phase === "celebrating") {
+      this.armedAt = now + SKIP_REARM_MS;
+      this.skip();
+      return;
+    }
     void this.start();
   }
   private refresh() {
@@ -256,7 +244,10 @@ export class SlotScene extends Phaser.Scene {
     const spin = root.querySelector<HTMLButtonElement>("#spin")!;
     const skipping = s.phase === "spinning";
     spin.querySelector(".face")!.textContent = skipping ? "SKIP" : "SPIN";
-    spin.setAttribute("aria-label", skipping ? "Skip to result" : "Spin reels");
+    spin.setAttribute(
+      "aria-label",
+      skipping ? "Skip to result" : s.phase === "celebrating" ? "Dismiss celebration" : "Spin reels",
+    );
     spin.dataset.state = s.phase === "ready" ? "idle" : s.phase === "celebrating" ? "settled" : "spinning";
     this.ui.warning();
   }
@@ -278,34 +269,21 @@ export class SlotScene extends Phaser.Scene {
     this.renderDetails(spin);
   }
   private renderDetails(spin: SpinRecord) {
-    const details = this.ui.root.querySelector<HTMLDetailsElement>(".win-details")!;
+    const details = this.ui.root.querySelector<HTMLButtonElement>(".win-details")!;
     const wins = spin.outcome.lineWins;
-    details.open = false;
-    details.toggleAttribute("data-empty", wins.length === 0);
-    details.inert = wins.length === 0;
-    details.querySelector("summary")!.textContent = `${wins.length} winning line${wins.length === 1 ? "" : "s"}`;
-    details.querySelector(".win-title")!.textContent =
-      `Stake ${number(spin.totalStake)} · Returned ${number(spin.outcome.payout)}`;
-    details.querySelector(".win-list")!.replaceChildren(
-      ...wins.map((w) => {
-        const row = document.createElement("button");
-        row.type = "button";
-        row.dataset.line = String(w.lineIndex);
-        row.innerHTML = `<b>Line ${w.lineIndex + 1}</b><span>${symbolNames[w.symbol]} ×${w.count}</span><em>${number(w.payout)}</em>`;
-        return row;
-      }),
-    );
+    details.hidden = wins.length === 0;
+    details.textContent = `${wins.length} winning line${wins.length === 1 ? "" : "s"}`;
   }
   private async start(forced?: number[]) {
     if (this.leaving || this.ui.dialog.open) return;
-    if (owner.state.phase === "celebrating") this.skip(); // End the win overlay, then take the new deliberate spin.
+    if (owner.state.phase === "celebrating") {
+      this.skip();
+      return;
+    }
     if (owner.state.phase !== "ready") return;
     this.finishNumbers();
     this.marks.clear();
-    const stale = this.ui.root.querySelector<HTMLDetailsElement>(".win-details")!;
-    stale.open = false;
-    stale.toggleAttribute("data-empty", true);
-    stale.inert = true; // The previous spin's lines are not this spin's; hide them until it settles.
+    this.ui.root.querySelector<HTMLButtonElement>(".win-details")!.hidden = true;
     accrue();
     let i = 0;
     try {
@@ -427,6 +405,7 @@ export class SlotScene extends Phaser.Scene {
   }
   private skip() {
     if (this.win) {
+      this.armedAt = performance.now() + SKIP_REARM_MS;
       this.win.skip();
       this.endWin();
       this.audio.silence();

@@ -169,6 +169,8 @@ async function test(name, fn) {
     results.push({ name, ok: false, error: e.message });
     console.log(`FAIL ${name}\n  ${e.message.split("\n").slice(0, 6).join("\n  ")}`);
     process.exitCode = 1;
+  } finally {
+    for (const context of browser.contexts()) await context.close();
   }
 }
 const reelPixels = (page) => {
@@ -286,7 +288,7 @@ await test("Space: held key spins once; keyup never skips; fresh Space skips; do
   await context.close();
 });
 
-await test("pointer: SPIN, SKIP, immediate extra clicks are swallowed; a later click spins again", async () => {
+await test("pointer: SKIP then dismiss celebration without a wager; a distinct activation spins again", async () => {
   const { context, page } = await open();
   const before = await saved(page);
   await force(page, STOPS.big);
@@ -303,7 +305,11 @@ await test("pointer: SPIN, SKIP, immediate extra clicks are swallowed; a later c
   assert.equal(await state(page), "settled");
   await page.waitForTimeout(450);
   await force(page, STOPS.loss);
-  await page.click("#spin"); // deliberate: SETTLED → SPIN
+  await page.click("#spin"); // First activation dismisses the still-active celebration.
+  assert.equal((await saved(page)).nextSpinId, before.nextSpinId + 1);
+  assert.equal(await state(page), "idle");
+  await page.waitForTimeout(400);
+  await page.click("#spin"); // A later distinct activation places the next wager.
   assert.equal((await saved(page)).nextSpinId, before.nextSpinId + 2);
   assert.equal(await state(page), "spinning");
   await settleAll(page);
@@ -350,19 +356,25 @@ await test("SKIP is immediate: reels settle within two frames of the activation"
   await force(page, STOPS.small);
   await page.click("#spin");
   await page.waitForTimeout(300);
-  const ms = await page.evaluate(
+  const timing = await page.evaluate(
     () =>
       new Promise((done) => {
         const t0 = performance.now();
+        let frames = 0;
         document.querySelector("#spin").click();
-        const check = () =>
-          document.querySelector("#spin").dataset.state !== "spinning"
-            ? done(performance.now() - t0)
-            : requestAnimationFrame(check);
+        const check = () => {
+          if (document.querySelector("#spin").dataset.state !== "spinning")
+            done({ ms: performance.now() - t0, frames });
+          else
+            requestAnimationFrame(() => {
+              frames++;
+              check();
+            });
+        };
         check();
       }),
   );
-  assert(ms < 100, `settled after ${ms}ms`);
+  assert(timing.frames <= 2, `settled after ${timing.frames} frames / ${timing.ms}ms`);
   await context.close();
 });
 
@@ -432,7 +444,7 @@ await test("HUD and canvas boxes never move or resize through loss / partial / e
   }
 });
 
-await test("long result text and 40-line win details are bounded: HUD unchanged, panel scrolls inside the stage", async () => {
+await test("long result text and 40-line result dialog are bounded: HUD unchanged, list scrolls inside the stage", async () => {
   const { context, page } = await open({ bet: { lineCount: 40, perLine: 5 } });
   await force(page, STOPS.long);
   await track(page);
@@ -442,17 +454,17 @@ await test("long result text and 40-line win details are bounded: HUD unchanged,
   await page.waitForFunction(() => document.querySelector("#spin").dataset.state !== "spinning");
   await page.keyboard.press("Escape");
   await settleAll(page);
-  const summary = await page.locator(".win-details summary").innerText();
+  const summary = await page.locator(".win-details").innerText();
   const lines = Number.parseInt(summary, 10);
   assert(lines >= 10, `expected a long list, got "${summary}"`);
-  await page.click(".win-details summary");
-  const panel = page.locator(".win-panel");
+  await page.click(".win-details");
+  const panel = page.locator(".result-dialog");
   assert(await panel.isVisible());
-  assert.equal(await panel.locator("button").count(), lines);
+  assert.equal(await panel.locator(".win-list button").count(), lines);
   const geo = await page.evaluate(() => {
-    const p = document.querySelector(".win-panel").getBoundingClientRect();
+    const p = document.querySelector(".result-dialog").getBoundingClientRect();
     const s = document.querySelector("#stage").getBoundingClientRect();
-    const el = document.querySelector(".win-panel");
+    const el = document.querySelector(".win-list");
     return {
       inside: p.top >= s.top && p.bottom <= s.bottom && p.left >= s.left && p.right <= s.right,
       scrolls: el.scrollHeight > el.clientHeight,
@@ -460,12 +472,11 @@ await test("long result text and 40-line win details are bounded: HUD unchanged,
     };
   });
   assert(geo.inside, "panel stays inside the stage");
-  assert(geo.hudBottom >= 0, "panel does not cover the HUD");
   if (lines > 12) assert(geo.scrolls, "long content scrolls rather than growing");
   await page.locator(".win-list button").nth(2).hover();
   await page.waitForTimeout(150);
   await page.keyboard.press("Escape");
-  assert.equal(await page.locator(".win-details").evaluate((d) => d.open), false);
+  assert.equal((await page.locator(".result-dialog[open]").count()) > 0, false);
   await page.waitForTimeout(300);
   assert.match(await page.locator("#spin-status").innerText(), /Net \+/);
   assertStable(await untrack(page), "long result");
@@ -531,6 +542,11 @@ await test("number-animation interruptions: skip, new spin, back to lounge and r
     if (how === "spin-during-count") {
       await page.waitForTimeout(400);
       await force(page, STOPS.loss);
+      const beforeDismiss = await saved(page);
+      await page.click("#spin");
+      assert.equal((await saved(page)).nextSpinId, beforeDismiss.nextSpinId);
+      assert.equal((await saved(page)).balance, beforeDismiss.balance);
+      await page.waitForTimeout(400);
       await page.click("#spin");
       assert.equal((await saved(page)).lastSpin.outcome.payout, 0);
     }
@@ -568,7 +584,7 @@ await test("reload and navigation restore the last result without a new wager; m
   assert.equal(await page.locator("#balance").innerText(), mid.balance.toLocaleString("en-GB"));
   assert.equal(await page.locator("#payout").innerText(), "15");
   assert.match(await page.locator("#spin-status").innerText(), /^Last spin · Net \+10$/);
-  assert.match(await page.locator(".win-details summary").innerText(), /winning line/);
+  assert.match(await page.locator(".win-details").innerText(), /winning line/);
   assert.equal(await page.locator("#result-announcement").innerText(), "");
   for (let i = 0; i < 3; i++) {
     await page.click("#back");
@@ -667,7 +683,7 @@ await test("reduced motion (OS and in-game): no SKIP stage, no reel motion or co
   }
 });
 
-await test("keyboard and assistive semantics: labelled groups, focus ring, Tab order, summary Space does not spin", async () => {
+await test("keyboard and assistive semantics: labelled groups, focus ring, Tab order, result trigger Space does not spin", async () => {
   const { context, page } = await open();
   assert.equal(await page.locator(".slot-hud section").count(), 3);
   for (const id of ["hud-balance", "hud-returned", "hud-bet"]) assert.equal(await page.locator(`#${id}`).count(), 1);
@@ -676,12 +692,13 @@ await test("keyboard and assistive semantics: labelled groups, focus ring, Tab o
   await force(page, STOPS.small);
   await page.click("#spin");
   await settleAll(page);
-  await page.locator(".win-details summary").focus();
+  await page.locator(".win-details").focus();
   const before = (await saved(page)).nextSpinId;
-  await page.keyboard.press("Space"); // toggles the disclosure, must not start a spin
-  assert.equal(await page.locator(".win-details").evaluate((d) => d.open), true);
+  await page.keyboard.press("Space"); // opens the result dialog, must not start a spin
+  assert.equal((await page.locator(".result-dialog[open]").count()) > 0, true);
   await page.keyboard.press("Space");
   assert.equal((await saved(page)).nextSpinId, before);
+  await page.keyboard.press("Escape");
   await page.focus("#spin");
   const ring = await page
     .locator("#spin")

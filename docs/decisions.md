@@ -26,3 +26,9 @@
 - Przyczyna: `GeometryMask`/`setMask` w Phaser4.2.1 działa tylko w Canvas; WebGL ignoruje maskę i emituje ostrzeżenie. Poprzednie testy nie porównywały obszaru obudowy w trakcie ruchu i nie wyłapywały tego warningu.
 - W ReelView zastąpiono niewspieraną maskę natywnym `Image.setCrop`, wyliczanym w jednostkach tekstury po każdym przesunięciu. Symbole całkiem poza oknem są niewidoczne, częściowe przycinają się na granicach207–642. Mechanizm obejmuje też kolumnę spoczynkową, bez dodatkowych filtrów/tekstur i bez zmiany ruchu/RNG/rozliczeń.
 - Usunięto blok5×3/FORTY LINES po lewej. Pozostała typografia bez zmian.
+
+## 2026-11-05 · Phase 3.3 closure / Phase 4.0 experiment
+
+Owner-directed corrections replace the reel-obscuring win popover with a named result dialog and independent 5×3 diagram, warm the win thread to brass, remove the lower enamel screw pair, and make the first SPIN during an active celebration dismiss only. The existing settlement and 350ms input re-arm guard are retained. Typography and SPIN position are unchanged. Technical checks are recorded in `reviews/2026-11-05-phase33-closure.md`; aesthetic acceptance remains the owner's decision.
+
+P1 has been modeled using actual costs/rates and real seeded slot outcomes. A separate virtual-time accounting lab lives under `prototypes/`; it has no production import or save-key writes. Recommendation is REVISE before integration; clock correction, attendance rules and human cadence playtests remain open. Details: `phase40-opening-hours.md`. No P2, P3, broader progression redesign, commit, push or publication was authorized or performed.

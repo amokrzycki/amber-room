@@ -153,6 +153,7 @@ try {
       await page.keyboard.press("Escape");
       assert.equal((await readSave()).nextSpinId, settled.nextSpinId, "Escape must not place another bet");
       await ready();
+      await page.waitForTimeout(400); // A distinct activation must follow the celebration-dismiss re-arm window.
       await page.waitForFunction(() => window.__audio.active === 0, undefined, { timeout: 2000 });
       assert.equal((await readSave()).nextSpinId, settled.nextSpinId);
       assert.equal((await readSave()).balance, settled.balance);

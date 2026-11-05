@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Opening hours accounting lab · isolated prototype</title>
+    <style>
+    body {
+      max-width: 760px;
+      margin: 40px auto;
+      padding: 0 24px;
+      font:
+        18px / 1.5 system-ui,
+        sans-serif;
+      background: #21161d;
+      color: #fff2cc;
+    }
+    h1 {
+      font-size: 28px;
+    }
+    button,
+    select {
+      font: inherit;
+      padding: 8px 12px;
+      margin: 4px;
+    }
+    button:focus-visible,
+    select:focus-visible {
+      outline: 3px solid #e6bc70;
+      outline-offset: 3px;
+    }
+    dt {
+      color: #e6bc70;
+    }
+    dd {
+      margin: 0 0 16px;
+      font-variant-numeric: tabular-nums;
+    }
+    #balance {
+      font-size: 32px;
+    }
+    fieldset {
+      margin: 20px 0;
+    }
+    #error {
+      color: #ffc078;
+    }
+    </style>
+  </head>
+  <body>
+    <h1>Opening hours accounting lab</h1>
+    <p>
+      Isolated P1 prototype with a virtual clock. No slot play or production economy changes. Ticks and reloads share a
+      single earnings budget; only explicit attendance renews it.
+    </p>
+    <dl>
+      <dt>Tokens</dt>
+      <dd id="balance"></dd>
+      <dt>Current strategy and income</dt>
+      <dd id="rate"></dd>
+      <dt>Budget consumed</dt>
+      <dd id="budget"></dd>
+      <dt>Accounting clock (hours from Unix epoch)</dt>
+      <dd id="clock"></dd>
+    </dl>
+    <fieldset>
+      <legend>Future strategy</legend>
+      <label for="mode">Opening hours</label
+      ><select id="mode">
+        <option value="brisk">Brisk · 1.5× · 4 hours</option>
+        <option value="standard">Standard · 1× · 8 hours</option>
+        <option value="long">Long nights · 0.75× · 12 hours</option>
+      </select><button id="attend" type="button">Attend and apply strategy</button>
+    </fieldset>
+    <fieldset>
+      <legend>Simulate time without interaction</legend>
+      <button data-hours="1" type="button">1 hour</button><button data-hours="8" type="button">8 hours</button
+      ><button data-hours="24" type="button">24 hours</button><button data-hours="48" type="button">48 hours</button
+      ><button data-hours="0" type="button">Same time again</button
+      ><button data-hours="-24" type="button">Clock back 24 hours</button>
+    </fieldset>
+    <p>
+      <button id="copy" type="button">Copy existing v1 save into lab</button
+      ><button id="reset" type="button">Reset lab only</button>
+    </p>
+    <p id="error" role="status"></p>
+    <p>
+      The lab uses a separate storage key. Copying settles the old eight-hour rules first and leaves the original
+      untouched. A forward clock jump can spend the remaining budget early; rollback cannot repay it and may stall
+      earnings until the clock catches up. Trusted offline elapsed time is unresolved.
+    </p>
+    <script type="module" src="./opening-hours-lab.ts"></script>
+  </body>
+</html>

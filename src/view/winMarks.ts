@@ -11,8 +11,8 @@ const PLATE = "win-plate";
 const PLATE_W = win.colW - 14;
 const PLATE_H = win.rowGap - 16;
 const FEATHER = 16;
-/** Line path: mint is the app's selection colour and matches the "winning line" link that drives the preview. */
-const PATH = 0x35e6d1;
+/** A warm brass thread; its connected path also identifies the line without relying on hue. */
+const PATH = 0xe6bc70;
 
 /** A feathered plate, baked once: nested rounded rectangles of rising alpha, so there is no edge to outline. */
 function bakePlate(scene: Phaser.Scene) {

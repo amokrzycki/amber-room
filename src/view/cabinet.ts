@@ -144,8 +144,8 @@ export function drawCabinet(scene: Phaser.Scene) {
       2,
     );
     round(61, 871, 1478, 9, 4, gradient(61, 871, 0, 9, ["#69313a", "#230e14"]));
-    // Fasteners belong to the enamel frame; none on the instrument deck, where they read as stray dots beside the HUD.
-    for (const x of [104, 1496]) for (const y of [169, lip - 7]) screw(x, y);
+    // Only the upper enamel fasteners remain; the lower pair added decoration beside the reels.
+    for (const x of [104, 1496]) screw(x, 169);
 
     texture.refresh();
   }

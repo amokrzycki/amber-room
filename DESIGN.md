@@ -260,3 +260,12 @@ The `.impeccable/design.json` sidecar predates these changes and has not been re
 ## Phase 3.2 refinement
 
 Typeface pairing changed from Libre Caslon Text + Source Sans 3 to Marcellus + Source Sans 3 after side-by-side captures of identical states (`docs/reviews/2026-11-05-phase32-typography.md`). Win marks moved behind the symbols and lost their outlines (see Components). BACK TO LOUNGE left the cabinet for the shared header as `← Lounge`. Two stray fasteners were removed from the instrument deck. No new ornaments, shells, glows or art were added.
+
+
+## Phase 3.3 closure
+
+The settled-result thread and result-details trigger now use warm brass `#e6bc70`; mint remains the existing keyboard-focus color. Result selection is also conveyed through a connected path, paying-cell dots, an underlined selected button, explicit rows, symbols and amounts. No symbol receives a stroked outline; WILD retains only its own asset border. The two lower enamel fasteners were removed; the upper frame and nameplate fasteners remain.
+
+The former HUD popover is replaced by a button showing the winning-line count. It opens the shared native dialog shell with a separate 5×3 diagram and a scrolling line list. Pointer selection, arrows and Home/End update only that diagram. Escape/Close restores trigger focus; Tab wraps within the modal. The result dialog is 960 stage pixels wide; the live HUD and SPIN geometry are unchanged. The selected list surface `#4a3030` is a local wine tone for contrast with brass and cream.
+
+While an unskipped celebration is active, SPIN dismisses it without a wager. A subsequent distinct activation after the 350ms re-arm interval may spin. The button still reads SPIN after the reels stop; its accessible name is "Dismiss celebration" while that action applies. Marcellus + Source Sans 3, existing SPIN placement, reel timing and payout settlement are preserved. Technical evidence is in `docs/reviews/2026-11-05-phase33-closure.md`; aesthetic acceptance remains with the owner.

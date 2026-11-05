@@ -69,6 +69,7 @@ const settle = async (page, stops) => {
 const cx = (c) => 157 + 127 + c * 258;
 const cy = (r) => 209 + 78 + r * 156;
 const isMint = (r, g, b) => g > 90 && b > 90 && r < 75 && Math.abs(g - b) < 45 && g > r + 45;
+const isBrass = (r, g, b) => r > 80 && r > g && g > b * 1.3;
 async function pixels(page, rect) {
   const buf = await page.screenshot({ clip: rect });
   return page.evaluate(
@@ -204,41 +205,33 @@ try {
   const tile = { x: cx(0) - 62, y: cy(0) - 62, width: 124, height: 124 };
   const gap = { x: cx(0) + 76, y: cy(0) - 4, width: cx(1) - cx(0) - 152, height: 8 };
   check("WILD tile has no mint over it", mintCount(await pixels(page, tile)) === 0);
-  const gapMint = mintCount(await pixels(page, gap));
-  check("line thread visible between WILD tiles", gapMint > 80, gapMint);
+  const gapPixels = await pixels(page, gap);
+  let brass = 0;
+  for (let i = 0; i < gapPixels.length; i += 4) if (isBrass(gapPixels[i], gapPixels[i + 1], gapPixels[i + 2])) brass++;
+  check("warm brass thread visible between WILD tiles", brass > 80, brass);
   await page.screenshot({ path: `${evidence}/check-wild-five.png` });
   const top = await page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.tagName, [cx(2), cy(1)]);
   check("overlay leaves the canvas hit-testable", top === "CANVAS", top);
   await settle(page, [9, 6, 0, 0, 0]); // two lines share one WILD cell
   const reels = { x: 150, y: 200, width: 1300, height: 500 };
-  await page.locator(".win-details summary").click();
-  await page.mouse.move(5, 450);
-  await page.waitForTimeout(120);
-  const rest = await pixels(page, reels); // panel open, pointer elsewhere: the strongest line
-  await page.locator(".win-list button").nth(1).hover();
-  await page.waitForTimeout(120);
-  const hovered = await pixels(page, reels);
-  const diff = (a, b) => {
-    let n = 0;
-    for (let i = 0; i < a.length; i += 4) if (a[i] !== b[i] || a[i + 1] !== b[i + 1] || a[i + 2] !== b[i + 2]) n++;
-    return n;
-  };
-  check("hover preview changes the marks", diff(rest, hovered) > 400, diff(rest, hovered));
-  await page.mouse.move(5, 450);
-  await page.waitForTimeout(120);
-  // Moving the pointer away previews the strongest line again, so the marks return to the resting set.
-  const left = await pixels(page, reels);
-  check("pointer leave restores the marks", diff(rest, left) < diff(rest, hovered) * 0.1, diff(rest, left));
-  await page.locator(".win-details summary").focus();
-  await page.keyboard.press("Tab");
-  await page.waitForTimeout(120);
-  const focused = await pixels(page, reels);
+  const rest = await pixels(page, reels);
+  await page.locator(".win-details").click();
+  await page.locator(".win-list button").nth(1).click();
   check(
-    "keyboard focus previews a line",
-    await page.evaluate(() => document.activeElement?.dataset.line !== undefined),
+    "dialog selection changes its own diagram",
+    (await page.locator('.win-list button[aria-pressed="true"]').getAttribute("data-line")) !== null,
   );
-  check("focus preview differs from other line", diff(hovered, focused) > 400, diff(hovered, focused));
   await page.keyboard.press("Escape");
+  await page.waitForTimeout(120);
+  const left = await pixels(page, reels);
+  check(
+    "dialog selection preserves live machine marks",
+    rest.every((v, i) => v === left[i]),
+  );
+  check(
+    "Escape restores result trigger focus",
+    await page.locator(".win-details").evaluate((e) => e === document.activeElement),
+  );
   await context.close();
 } finally {
   await browser.close();

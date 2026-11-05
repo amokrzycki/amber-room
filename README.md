@@ -8,7 +8,7 @@ Double-click [dist/index.html](dist/index.html) to open it in a current browser 
 
 - `Play The Orchard` opens the slot machine. Press `SPIN` or Space to spin once. Holding the button or key does not trigger automatic spins.
 - `Bet / line` × `Lines` = `TOTAL BET`. Choose the first 1, 5, 10, 20, or 40 paylines. `Lines & payouts` shows their exact paths and the payout table.
-- One button does both jobs: `SPIN` (or Space) starts a spin, the same button reads `SKIP` while the reels turn and reveals the already-saved result at once, and reads `SPIN` again when they stop. After a skip, extra presses within about a third of a second are ignored so a double-click cannot place another bet. Escape (or clicking the machine) ends a win celebration without placing a bet. `BACK TO LOUNGE` returns to the lounge once the reels stop.
+- One button does both jobs: `SPIN` (or Space) starts a spin, the same button reads `SKIP` while the reels turn and reveals the already-saved result at once, and reads `SPIN` again when they stop. While a win celebration is still active, the first SPIN activation dismisses it without placing a wager; a later distinct activation starts the next spin. After dismissing or skipping, extra presses within about a third of a second are ignored so a double-click cannot place another bet. Holding Space or Enter does not repeat. Escape (or clicking the machine) also ends a win celebration without placing a bet. `← Lounge` returns to the lounge once the reels stop.
 - `Settings & save` lets you mute audio, adjust independent music/room and machine-effects volume for the session, reduce motion, adjust effect intensity, and back up your progress. Use Tab/Shift+Tab to move between standard buttons and Enter/Space to activate them. Keyboard focus is visible.
 - The lounge earns income automatically in both views and credits up to 8 hours of income when you return from an absence. Each purchase has three upgrade levels. `Buy the room a round` costs 50 and triggers a brief reaction with no other benefit.
 
@@ -67,3 +67,11 @@ The owner accepted the Phase 2.1 visual direction. Phase 3 listening checks on h
 Phase 3 uses display-only debit/credit counting, smooth reel acceleration and braking, staggered stops, a small mechanical settle, and subdued machine sounds. Gross/returned/net share one counter; the full settlement remains saved before playback. Reduced-motion preferences and hidden tabs settle directly to the recorded grid. Winning line numbers remain available after the visual highlight ends. No RNG, economy, progression, or save-schema changes were made.
 
 See the [Phase 3 report](docs/reviews/2026-11-05-phase3-motion.md) and [independent recording review](docs/reviews/2026-11-05-phase3-independent.md) for recordings, measurements, test coverage, and remaining listening/device limitations.
+
+## Phase 3.3 / isolated Phase 4 lab
+
+The compact winning-line count opens a result-details dialog with its own 5×3 diagram. Select a line with the pointer or arrow keys; Home/End select the first/last line. Tab stays in the dialog; Escape or Close returns focus to the result trigger. Line numbers and payouts come from the recorded outcome.
+
+P1 is **not enabled in the normal game**. With `npm run dev`, open `/prototypes/opening-hours.html` for the virtual-time accounting lab. It uses `amber-room:prototype:opening-hours:v1`; copying a v1 save never overwrites `fruit-salon:v1`. The normal standalone build contains neither the lab nor its accounting module.
+
+See [P1 model, migration and integration recommendation](docs/phase40-opening-hours.md) and [Phase 3.3 verification](docs/reviews/2026-11-05-phase33-closure.md). Reproduce with `npm test`, `node scripts/browser-phase33.mjs`, `node scripts/browser-phase32.mjs`, `node scripts/browser-idle-baseline.mjs` (after building), and `node scripts/browser-opening-hours.mjs` (with the dev server running). Chromium uses `/usr/bin/chromium`.

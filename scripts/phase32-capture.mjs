@@ -111,16 +111,16 @@ try {
       await crop(sc.name);
       // Pointer and keyboard line previews on spins with a win-details list.
       if (["wild-overlap", "fruit-multi"].includes(sc.name)) {
-        await page.locator(".win-details summary").click();
+        await page.locator(".win-details").click();
         const rows = page.locator(".win-list button");
-        await rows.nth(1).hover();
+        await rows.nth(1).click();
         await page.waitForTimeout(150);
         await shot(`${sc.name}-hover`);
         await crop(`${sc.name}-hover`);
         await page.mouse.move(5, 450);
         await page.waitForTimeout(100);
-        await page.locator(".win-details summary").focus();
-        await page.keyboard.press("Tab");
+        await rows.first().focus();
+        await page.keyboard.press("ArrowDown");
         await page.waitForTimeout(150);
         await shot(`${sc.name}-keyfocus`);
         await crop(`${sc.name}-keyfocus`);

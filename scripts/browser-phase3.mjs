@@ -193,7 +193,7 @@ try {
     assert.equal(await page.evaluate(() => window.__announcements.filter(Boolean).length), 1);
     assert(await page.evaluate(() => window.__coherence.length > 0 && window.__coherence.every(Boolean)));
     assert.match(await page.locator("#result-summary").innerText(), /Spin .* complete/);
-    if (payout) assert.match(await page.locator(".win-details summary").innerText(), /winning line/);
+    if (payout) assert.match(await page.locator(".win-details").innerText(), /winning line/);
     assert.match(await page.locator("#spin-status").innerText(), /Net/);
     // Phaser time is frame-driven; allow the 900ms line overlay to expire even under SwiftShader.
     await page.waitForTimeout(payout > 0 && payout <= 5 ? 2500 : 150);

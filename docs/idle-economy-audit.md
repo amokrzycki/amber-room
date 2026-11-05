@@ -244,3 +244,7 @@ My recommendation, as a hypothesis for the owner to overrule: P1 first because i
 ## 7. Open question for the owner
 
 The product record promises a single eight-hour absence limit (PRODUCT.md). P1 changes it per mode and P2 changes what "income" means. Choose **one** of the three, or none; I will not implement any until told.
+
+## Phase 4.0 follow-up (2026-11-05)
+
+The previously inferred visible-tab behavior is now reproduced with controlled browser time and the installed timer callback. See [verified baseline, P1 model, isolated prototype and REVISE recommendation](phase40-opening-hours.md). P1 has distinct cadence winners but does not solve the finite progression horizon or trusted-clock recovery. No production economy change, P2 or P3 was integrated.
