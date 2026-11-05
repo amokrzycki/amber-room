@@ -94,7 +94,7 @@ export class SlotScene extends Phaser.Scene {
     });
     const key = (e: KeyboardEvent) => {
       if (
-        e.code !== "Space" ||
+        (e.code !== "Space" && !(e.key === "Enter" && e.target === root.querySelector("#spin"))) ||
         this.ui.dialog.open ||
         e.target instanceof HTMLSelectElement ||
         e.target instanceof HTMLInputElement

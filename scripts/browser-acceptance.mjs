@@ -70,10 +70,12 @@ try {
   await page.screenshot({ path: "docs/evidence/salon.png" });
   await page.mouse.click(745, 405);
   await page.locator("#spin").waitFor({ timeout: 2000 });
-  await page.focus("[data-action=settings]");
-  await page.keyboard.press("Space");
-  assert.equal(await page.locator("dialog").evaluate((d) => d.open), true);
-  await page.click(".close");
+  for (const key of ["Space", "Enter"]) {
+    await page.focus("[data-action=settings]");
+    await page.keyboard.press(key);
+    assert.equal(await page.locator("dialog").evaluate((d) => d.open), true);
+    await page.click(".close");
+  }
   for (const size of [
     { width: 1280, height: 720 },
     { width: 1600, height: 900 },
@@ -126,7 +128,10 @@ try {
   for (const [tier, stops, payout] of cases) {
     const before = await readSave();
     await force(stops);
-    await page.click("#spin");
+    if (tier === "jackpot") {
+      await page.focus("#spin");
+      await page.keyboard.press("Enter");
+    } else await page.click("#spin");
     const settled = await readSave();
     assert.equal(settled.balance, before.balance - 5 + payout);
     assert.equal(settled.nextSpinId, before.nextSpinId + 1);
@@ -137,9 +142,12 @@ try {
     if (tier !== "neutral" && tier !== "return") {
       assert.match(await page.locator("#spin").innerText(), /SKIP/);
       await page.screenshot({ path: `docs/evidence/win-${tier}.png` });
-      await page.keyboard.down("Space");
-      await page.keyboard.down("Space");
-      await page.keyboard.up("Space");
+      const key = { small: "Space", big: "Enter", jackpot: "NumpadEnter" }[tier];
+      await page.focus("#spin");
+      await page.keyboard.down(key);
+      await page.keyboard.down(key);
+      await page.keyboard.up(key);
+      assert.equal((await readSave()).nextSpinId, settled.nextSpinId, `Held ${key} must not place another bet`);
       await ready();
       await page.waitForFunction(() => window.__audio.active === 0, undefined, { timeout: 2000 });
       assert.equal((await readSave()).nextSpinId, settled.nextSpinId);
@@ -179,7 +187,7 @@ try {
   assert.deepEqual(errors, []);
   assert.deepEqual(network, []);
   console.log(
-    "PASS: offline file, 3 resolutions, 5 line settings, 4 forced classes, save-before-motion, skip/space, repeated scenes, settings reload.",
+    "PASS: offline file, 3 resolutions, 5 line settings, 4 forced classes, save-before-motion, skip/space/held-enter, repeated scenes, settings reload.",
   );
   console.log("Audio output/headphone listening and user-device FPS: NOT VERIFIED.");
 } finally {
