@@ -61,7 +61,7 @@ typography:
     fontWeight: 400
   payout:
     fontFamily: Source Sans 3, Arial, sans-serif
-    fontSize: 56px
+    fontSize: 52px
     fontWeight: 400
     lineHeight: 1
   select:
@@ -96,7 +96,7 @@ components:
     typography: '{typography.spin}'
     rounded: '{rounded.button}'
     padding: 15px
-    width: 240px
+    width: 220px
   button-navigation:
     backgroundColor: transparent
     textColor: '{colors.candlelit-cream}'
@@ -180,7 +180,7 @@ The sidecar's eight-step tonal ramps are generated swatch previews, not addition
 - **Title / body:** `title` describes purchase headings; `body` describes the lounge paragraph. Shop introductory copy uses (16px, line-height 1.6), and purchase descriptions (15px).
 - **Label / brand / navigation:** `label` is the bold tracked eyebrow; wallet and machine labels use (13px, tracking 2px). `brand` is the uppercase masthead, with a subtitle at (10px, tracking 3px). Navigation uses `navigation`.
 - **Balance / payout:** `balance` is the machine balance; the lounge wallet uses (46px). `payout` is the larger central result. Machine HUD numbers request tabular numerals.
-- **Select / spin:** `select` describes native bet controls; `spin` describes SPIN/SPINNING/SKIP. The lounge entry action uses (20px) instead.
+- **Select / spin:** `select` describes native bet controls; `spin` describes the single SPIN/SKIP control (SPIN when idle or settled, SKIP while the reels turn). The lounge entry action uses (20px) instead.
 - **Cabinet title:** DOM-rendered Libre Caslon Text 400 at (27px), with (2px) tracking and a subtle offset engraving highlight.
 
 ## Layout
@@ -189,7 +189,7 @@ The game uses a centered landscape stage (1600×900, 16:9), fitted to the viewpo
 
 The shared header is (90px) high with horizontal inset `header-inset`. The lounge's art is full-stage, with a dark shop overlay on the right; its shop column is positioned at (1100px, 128px) and sized (435px). Purchase rows use the final shop-specific padding from `purchase-row`, overriding an earlier generic row rule.
 
-The machine uses a separate cabinet view. Its HUD grid places balance left, gross payout center, and bet controls right, with columns (330px / remaining space / 410px) and gap (35px). Reels use column spacing (205px), row spacing (145px), and symbol display size (168×168px). Texture cropping keeps symbols inside the window from y (207px) through (642px), including during movement.
+The machine uses a separate cabinet view. Its HUD sits on the instrument deck at x (125px), y (723px), 1350×144px, as three fixed grid tracks (270px / remaining space / 640px) named BALANCE, RETURNED, and BET & SPIN; every row inside is a fixed track, so results never move the box. Reels fill 1286px of the 1508px cabinet face (85%): column spacing (258px), row spacing (156px), symbol display size (184×184px), all defined once in `reelWindow`/`tuning`. Texture cropping keeps symbols inside the window from y (207px) through (678px), including during movement.
 
 Spacing tokens record recurring observed roles, not a new uniform spacing scale. The payline catalog is an eight-column grid with gap (10px). Dialogs have viewport guards of viewport width minus (40px) and the lesser of (800px) or viewport height minus (40px); content scrolls within the dialog.
 
@@ -228,11 +228,11 @@ Control borders are generally (1px). Keyboard focus is a Mint Light outline (3px
 
 The machine display name is **THE ORCHARD**. Its flush brass nameplate has two fasteners, dark Libre Caslon Text 400 lettering, 27px type and 2px tracking. Georgia was compared in the same rendered cabinet; Caslon's wider, quieter capitals were selected. The lounge uses the same display family without changing its composition or artwork.
 
-Source Sans 3 supplies UI type and numeric counters. Use real 400 and 600 variable-font weights, no synthetic bold/italic, tabular lining figures for balance, payout, stake and net. Base line height is 1.25; balance 46px/1.1, gross payout 56px/1. Font files and SIL OFL 1.1 licenses are embedded in the standalone build. The existing scale compensation keeps functional detail at least 14 physical pixels on the requested laptop sizes.
+Source Sans 3 supplies UI type and numeric counters. Use real 400 and 600 variable-font weights, no synthetic bold/italic, tabular lining figures for balance, payout, stake and net. Base line height is 1.25; slot HUD balance and returned 52px/1 (shrinking only if the digit count would overflow the column); the lounge wallet stays 46px. Font files and SIL OFL 1.1 licenses are embedded in the standalone build. The existing scale compensation keeps functional detail at least 14 physical pixels on the requested laptop sizes.
 
 The static cabinet painter retains burgundy enamel, warm wood returns, a narrow structural brass perimeter, one recessed reel bezel, dark instrument deck and fastening screws. Fan/shell motifs, fluted rails, arbitrary vertical strokes, extra enamel collar and duplicated plinth highlights have been removed. No replacement ornaments were added.
 
-SPIN is a fixed 240×64px burgundy physical control, 25px/600 lettering, 1px tracking, 16px corners and a muted brass rim. Idle, hover, pressed (3px depression), spinning/disabled, celebration/skip and mint keyboard-focus states preserve its footprint. No bounce or glow. Native bet selectors retain the dark recessed treatment and keyboard behavior.
+SPIN/SKIP is a fixed 220×64px burgundy physical control (the cap is a pseudo-element, so pressing depresses it without moving the button box), 25px/600 lettering, 1px tracking, 16px corners and a muted brass rim. Idle, hover, pressed (3px depression), spinning/disabled, celebration/skip and mint keyboard-focus states preserve its footprint. No bounce or glow. Native bet selectors retain the dark recessed treatment and keyboard behavior.
 
 CASH OUT · Lounge ends a session after the reels stop, including during a celebration. Adjacent copy states that payouts are already in the balance. It never credits money. Spinning disables this control until the saved result has been presented.
 

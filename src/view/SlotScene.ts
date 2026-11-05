@@ -11,9 +11,21 @@ import { drawCabinet } from "./cabinet";
 import { createAudio, type GameAudio } from "./audio";
 import { mountUI } from "./ui";
 import { playWin } from "./feedback";
-import { describeSpinResult } from "./spinResult";
+import { describeSpinResult, resultWord, signed, symbolNames } from "./spinResult";
 import { NumberDisplay } from "./NumberDisplay";
 import { idleGrid } from "./idleGrid";
+import { createWinMarks } from "./winMarks";
+
+/** After SKIP, ignore further activations briefly so a double-click or echoed key cannot start a new wager. */
+const SKIP_REARM_MS = 350;
+/** A synthetic click right after a keyboard activation is that activation echoing, not a second one. */
+const KEY_ECHO_MS = 400;
+
+/** Digits are fitted to their column from the character count, so long balances shrink instead of clipping. */
+function figure(el: Element, text: string) {
+  el.textContent = text;
+  (el as HTMLElement).style.setProperty("--len", String(text.length));
+}
 export class SlotScene extends Phaser.Scene {
   private reels: ReelView[] = [];
   private audio!: GameAudio;
@@ -23,7 +35,9 @@ export class SlotScene extends Phaser.Scene {
   private balanceDisplay!: NumberDisplay;
   private payoutDisplay!: NumberDisplay;
   private leaving = false;
-  private returnedLine: ReturnType<typeof playWin> | undefined;
+  private marks!: ReturnType<typeof createWinMarks>;
+  private armedAt = 0;
+  private keyAt = -Infinity;
   private announcedSpinId = 0;
   constructor() {
     super("slot");
@@ -32,7 +46,8 @@ export class SlotScene extends Phaser.Scene {
     this.reels = [];
     this.leaving = false;
     this.win = undefined;
-    this.returnedLine = undefined;
+    this.armedAt = 0;
+    this.keyAt = -Infinity;
     this.run++;
   }
   create() {
@@ -44,39 +59,36 @@ export class SlotScene extends Phaser.Scene {
     drawCabinet(this);
     const initial = owner.state.save.lastSpin?.outcome.grid ?? idleGrid;
     for (let c = 0; c < 5; c++) this.reels.push(new ReelView(this, c, initial[c]));
+    this.marks = createWinMarks(this);
     const bet = owner.state.save.selectedBet;
     const lastSpin = owner.state.save.lastSpin;
     this.announcedSpinId = lastSpin?.id ?? 0;
+    const options = (values: number[], current: number) =>
+      values.map((n) => `<option ${n === current ? "selected" : ""}>${n}</option>`).join("");
     this.ui = mountUI(
       this,
       this.audio,
-      `<h1 class="machine-name">THE ORCHARD</h1><button class="back" id="back">BACK TO LOUNGE</button><div class="slot-hud"><div class="balance-block"><span>BALANCE</span><strong id="balance" aria-hidden="true">${number(owner.state.save.balance)}</strong><small>tokens</small><span class="sr-only" id="balance-final">${number(owner.state.save.balance)} tokens</span></div><div class="payout-block"><span>GROSS PAYOUT</span><strong id="payout" aria-hidden="true">${lastSpin ? number(lastSpin.outcome.payout) : "—"}</strong><small id="win-label">${lastSpin ? "Last payout · credited automatically" : "Ready to play"}</small><small id="spin-breakdown" aria-hidden="true">${lastSpin ? describeSpinResult(lastSpin).breakdown : "Choose your bet, then press SPIN."}</small></div><div class="bet-block"><div class="bet-selects"><label>Bet / line<select id="per-line">${[1, 2, 5].map((n) => `<option ${n === bet.perLine ? "selected" : ""}>${n}</option>`).join("")}</select></label><label>Lines<select id="line-count">${[1, 5, 10, 20, 40].map((n) => `<option ${n === bet.lineCount ? "selected" : ""}>${n}</option>`).join("")}</select></label><div><span>TOTAL BET</span><strong id="stake">${bet.lineCount * bet.perLine}</strong></div></div></div></div><div class="slot-controls"><p id="spin-status">SPACE to spin · take it at your own pace</p><button id="skip-motion" hidden>Skip motion</button><button id="spin" class="primary" data-state="idle">SPIN</button></div><p class="sr-only" id="result-summary">${lastSpin ? describeSpinResult(lastSpin).announcement : ""}</p><p class="sr-only" id="result-announcement" role="status" aria-live="polite" aria-atomic="true"></p>`,
+      `<h1 class="machine-name">THE ORCHARD</h1><button class="back" id="back">BACK TO LOUNGE</button><div class="slot-hud"><section class="hud-group balance-block" aria-labelledby="hud-balance"><span class="hud-label" id="hud-balance">BALANCE</span><div class="hud-figure"><strong id="balance" aria-hidden="true">${number(owner.state.save.balance)}</strong></div><span class="hud-note">tokens</span><span class="sr-only" id="balance-final">${number(owner.state.save.balance)} tokens</span></section><section class="hud-group returned-block" aria-labelledby="hud-returned"><div class="hud-head"><span class="hud-label" id="hud-returned">RETURNED</span><details class="win-details" data-empty><summary></summary><div class="win-panel"><p class="win-title"></p><div class="win-list"></div></div></details></div><div class="hud-figure payout"><strong id="payout" aria-hidden="true">${lastSpin ? number(lastSpin.outcome.payout) : "—"}</strong></div><p class="hud-note" id="spin-status"><span id="result-word"></span><span id="net-wrap" aria-hidden="true" hidden> · Net <strong id="net"></strong></span></p></section><section class="hud-group bet-block" aria-labelledby="hud-bet"><span class="hud-label" id="hud-bet">BET &amp; SPIN</span><div class="bet-row"><label><span>Per line</span><select id="per-line">${options([1, 2, 5], bet.perLine)}</select></label><span class="op" aria-hidden="true">×</span><label><span>Lines</span><select id="line-count">${options([1, 5, 10, 20, 40], bet.lineCount)}</select></label><span class="op" aria-hidden="true">=</span><div class="total"><span>Total bet</span><strong id="stake">${bet.lineCount * bet.perLine}</strong></div><button id="spin" class="primary" data-state="idle" aria-label="Spin reels" aria-keyshortcuts="Space"><span class="face">SPIN</span></button></div></section></div><p class="sr-only" id="result-summary">${lastSpin ? describeSpinResult(lastSpin).announcement : ""}</p><p class="sr-only" id="result-announcement" role="status" aria-live="polite" aria-atomic="true"></p>`,
     );
     const root = this.ui.root;
-    if (lastSpin?.outcome.lineWins.length)
-      root.querySelector("#spin-status")!.textContent =
-        `Winning lines: ${lastSpin.outcome.lineWins.map((win) => win.lineIndex + 1).join(", ")} · Lines & payouts shows each path`;
+    const q = <T extends Element>(selector: string) => root.querySelector<T>(selector)!;
+    if (lastSpin) {
+      this.showResult(lastSpin, "Last spin");
+      this.marks.show(lastSpin.outcome.lineWins);
+    } else q("#result-word").textContent = "Choose a bet · SPACE to spin";
     this.balanceDisplay = new NumberDisplay(owner.state.save.balance, (value) => {
-      root.querySelector("#balance")!.textContent = number(value);
+      figure(q("#balance"), number(value));
     });
     this.payoutDisplay = new NumberDisplay(lastSpin?.outcome.payout ?? 0, (value) => {
-      root.querySelector("#payout")!.textContent = number(value);
-      const net = root.querySelector("#net");
-      const returned = root.querySelector("#returned");
-      const spin = owner.state.save.lastSpin;
-      if (net && spin && owner.state.phase !== "spinning") {
-        const profit = value - spin.totalStake;
-        net.textContent = `${profit > 0 ? "+" : ""}${number(profit)}`;
-        if (returned) returned.textContent = number(value);
-      }
+      figure(q("#payout"), number(value));
     });
-    root.querySelector("#back")!.addEventListener("click", () => this.cashOut());
-    root.querySelector<HTMLButtonElement>("#back")!.addEventListener("keydown", (event) => {
+    q("#back").addEventListener("click", () => this.cashOut());
+    q<HTMLButtonElement>("#back").addEventListener("keydown", (event) => {
       if ((event.key === "Enter" || event.code === "Space") && event.repeat) event.preventDefault();
     });
-    const spinButton = root.querySelector<HTMLButtonElement>("#spin")!;
+    const spinButton = q<HTMLButtonElement>("#spin");
     const press = () => {
-      if (spinButton.disabled || this.ui.dialog.open) return;
+      if (this.ui.dialog.open) return;
       spinButton.classList.add("is-pressed");
       const run = this.run;
       void this.audio
@@ -92,13 +104,15 @@ export class SlotScene extends Phaser.Scene {
     });
     window.addEventListener("pointerup", release);
     window.addEventListener("pointercancel", release);
-    spinButton.addEventListener("click", () => this.start());
-    root.querySelector("#skip-motion")!.addEventListener("click", () => this.settleReels());
+    spinButton.addEventListener("click", (event) => {
+      if (event.detail === 0 && performance.now() - this.keyAt < KEY_ECHO_MS) return;
+      this.activate();
+    });
     const change = () => {
       owner.commit(
         selectBet(owner.state, {
-          lineCount: Number((root.querySelector("#line-count") as HTMLSelectElement).value),
-          perLine: Number((root.querySelector("#per-line") as HTMLSelectElement).value),
+          lineCount: Number(q<HTMLSelectElement>("#line-count").value),
+          perLine: Number(q<HTMLSelectElement>("#per-line").value),
         } as Bet),
       );
       this.refresh();
@@ -106,23 +120,53 @@ export class SlotScene extends Phaser.Scene {
     root.querySelectorAll("select").forEach((el) => {
       el.addEventListener("change", change);
     });
+    const details = q<HTMLDetailsElement>(".win-details");
+    const closeDetails = () => {
+      details.open = false;
+    };
+    const preview = (event: Event) => {
+      const spin = owner.state.save.lastSpin;
+      const line = (event.target as Element).closest<HTMLElement>("[data-line]");
+      if (!spin || !line) return;
+      const wins = spin.outcome.lineWins;
+      this.marks.show(
+        wins,
+        event.type === "mouseout" || event.type === "focusout"
+          ? undefined
+          : wins.find((w) => w.lineIndex === Number(line.dataset.line)),
+      );
+    };
+    const panel = q(".win-panel");
+    panel.addEventListener("focusin", preview);
+    panel.addEventListener("focusout", preview);
+    panel.addEventListener("mouseover", preview);
+    panel.addEventListener("mouseout", preview);
     const key = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !this.ui.dialog.open) {
+        if (details.open) closeDetails();
+        else if (owner.state.phase === "celebrating") this.skip();
+        return;
+      }
+      const target = e.target instanceof Element ? e.target : null;
+      const interactive = target?.closest("button, select, input, summary, a, dialog");
       if (
-        (e.code !== "Space" && !(e.key === "Enter" && e.target === root.querySelector("#spin"))) ||
+        (e.code !== "Space" && !(e.key === "Enter" && target === spinButton)) ||
         this.ui.dialog.open ||
-        e.target instanceof HTMLSelectElement ||
-        e.target instanceof HTMLInputElement
+        (interactive && interactive !== spinButton)
       )
         return;
-      if (e.target instanceof HTMLButtonElement && e.target.id !== "spin") return;
       e.preventDefault();
       if (e.repeat) return;
-      if (spinButton.disabled) return;
+      this.keyAt = performance.now();
       press();
-      void this.start();
+      this.activate();
     };
     const releaseKey = (event: KeyboardEvent) => {
-      if (event.code === "Space" || event.key === "Enter") release();
+      if (event.code === "Space" || event.key === "Enter") {
+        release();
+        // Browsers fire the button's click on Space keyup; the keydown already acted.
+        if (event.target === spinButton) event.preventDefault();
+      }
     };
     window.addEventListener("keydown", key);
     window.addEventListener("keyup", releaseKey);
@@ -146,8 +190,6 @@ export class SlotScene extends Phaser.Scene {
         release();
         this.audio.silence();
         this.settleReels();
-        this.returnedLine?.dispose();
-        this.returnedLine = undefined;
         this.skip();
         this.finishNumbers();
       } else this.audio.resume();
@@ -164,7 +206,7 @@ export class SlotScene extends Phaser.Scene {
         const id = owner.state.activeSpinId;
         owner.state = finishSpin(reelsStopped(owner.state, id), id);
       }
-      this.returnedLine?.dispose();
+      this.marks.dispose();
       this.reels.forEach((r) => {
         r.dispose();
       });
@@ -180,10 +222,23 @@ export class SlotScene extends Phaser.Scene {
       document.removeEventListener("visibilitychange", visibility);
       this.audio.dispose();
     });
+    this.refresh();
     if (import.meta.env.DEV)
       void import("./devScenarios").then((m) => {
         if (this.scene.isActive()) m.installScenarios(this.ui.root, (stops) => this.start(stops));
       });
+  }
+  /** The single SPIN/SKIP gesture: every pointer, key and assistive activation lands here. */
+  private activate() {
+    if (this.leaving || this.ui.dialog.open) return;
+    const now = performance.now();
+    if (now < this.armedAt) return;
+    if (owner.state.phase === "spinning") {
+      this.armedAt = now + SKIP_REARM_MS;
+      this.settleReels(); // The committed outcome is already saved; this only ends the animation.
+      return;
+    }
+    void this.start();
   }
   private refresh() {
     const root = this.ui.root;
@@ -197,34 +252,70 @@ export class SlotScene extends Phaser.Scene {
       el.disabled = s.phase !== "ready";
     });
     (root.querySelector("#back") as HTMLButtonElement).disabled = s.phase === "spinning";
-    (root.querySelector("#spin") as HTMLButtonElement).disabled = s.phase === "spinning";
     const spin = root.querySelector<HTMLButtonElement>("#spin")!;
-    spin.textContent = s.phase === "spinning" ? "SPINNING" : s.phase === "celebrating" ? "SKIP" : "SPIN";
-    spin.dataset.state = s.phase === "ready" ? "idle" : s.phase;
-    root.querySelector<HTMLButtonElement>("#skip-motion")!.hidden = s.phase !== "spinning";
+    const skipping = s.phase === "spinning";
+    spin.querySelector(".face")!.textContent = skipping ? "SKIP" : "SPIN";
+    spin.setAttribute("aria-label", skipping ? "Skip to result" : "Spin reels");
+    spin.dataset.state = s.phase === "ready" ? "idle" : s.phase === "celebrating" ? "settled" : "spinning";
     this.ui.warning();
+  }
+  private note(text: string) {
+    const root = this.ui.root;
+    root.querySelector("#result-word")!.textContent = text;
+    root.querySelector<HTMLElement>("#net-wrap")!.hidden = true;
+  }
+  /** Result line: a word for the outcome plus signed net. The net is final at once; only RETURNED counts up. */
+  private showResult(spin: SpinRecord, word: string) {
+    const root = this.ui.root;
+    const net = spin.outcome.payout - spin.totalStake;
+    root.querySelector("#result-word")!.textContent = word;
+    const wrap = root.querySelector<HTMLElement>("#net-wrap")!;
+    wrap.hidden = false;
+    wrap.dataset.sign = net > 0 ? "gain" : net < 0 ? "loss" : "even";
+    root.querySelector("#net")!.textContent = signed(net);
+    root.querySelector<HTMLElement>("#spin-status")!.title = describeSpinResult(spin).breakdown;
+    this.renderDetails(spin);
+  }
+  private renderDetails(spin: SpinRecord) {
+    const details = this.ui.root.querySelector<HTMLDetailsElement>(".win-details")!;
+    const wins = spin.outcome.lineWins;
+    details.open = false;
+    details.toggleAttribute("data-empty", wins.length === 0);
+    details.inert = wins.length === 0;
+    details.querySelector("summary")!.textContent = `${wins.length} winning line${wins.length === 1 ? "" : "s"}`;
+    details.querySelector(".win-title")!.textContent =
+      `Stake ${number(spin.totalStake)} · Returned ${number(spin.outcome.payout)}`;
+    details.querySelector(".win-list")!.replaceChildren(
+      ...wins.map((w) => {
+        const row = document.createElement("button");
+        row.type = "button";
+        row.dataset.line = String(w.lineIndex);
+        row.innerHTML = `<b>Line ${w.lineIndex + 1}</b><span>${symbolNames[w.symbol]} ×${w.count}</span><em>${number(w.payout)}</em>`;
+        return row;
+      }),
+    );
   }
   private async start(forced?: number[]) {
     if (this.leaving || this.ui.dialog.open) return;
-    if (owner.state.phase === "celebrating") {
-      this.skip();
-      return;
-    }
+    if (owner.state.phase === "celebrating") this.skip(); // End the win overlay, then take the new deliberate spin.
     if (owner.state.phase !== "ready") return;
     this.finishNumbers();
-    this.returnedLine?.dispose();
-    this.returnedLine = undefined;
+    this.marks.clear();
+    const stale = this.ui.root.querySelector<HTMLDetailsElement>(".win-details")!;
+    stale.open = false;
+    stale.toggleAttribute("data-empty", true);
+    stale.inert = true; // The previous spin's lines are not this spin's; hide them until it settles.
     accrue();
     let i = 0;
     try {
       const result = requestSpin(owner.state, forced ? () => forced[i++] : secureRng);
       if (!result.ok) {
-        this.ui.root.querySelector("#spin-status")!.textContent =
+        const message =
           result.reason === "insufficient-funds"
-            ? "Not enough tokens. Your lounge keeps earning — try a smaller bet."
-            : "Please wait for the spin to finish.";
-        this.ui.root.querySelector("#result-announcement")!.textContent =
-          this.ui.root.querySelector("#spin-status")!.textContent;
+            ? "Not enough tokens · try a smaller bet"
+            : "Please wait for the spin to finish";
+        this.note(message);
+        this.ui.root.querySelector("#result-announcement")!.textContent = message;
         return;
       }
       owner.commit(result.state);
@@ -244,11 +335,9 @@ export class SlotScene extends Phaser.Scene {
         })
         .catch(() => this.ui.unlock());
       this.payoutDisplay.to(0, true);
-      this.ui.root.querySelector("#payout")!.textContent = "—";
+      figure(this.ui.root.querySelector("#payout")!, "—");
       this.ui.root.querySelector("#result-summary")!.textContent = "";
-      this.ui.root.querySelector("#win-label")!.textContent = "Reels turning";
-      this.ui.root.querySelector("#spin-breakdown")!.textContent = "";
-      this.ui.root.querySelector("#spin-status")!.textContent = `Stake ${number(spin.totalStake)} tokens · debited`;
+      this.note("Reels turning");
       await Promise.all(
         this.reels.map((reel, c) =>
           reel.play(spin.outcome.grid[c], c * tuning.stagger, spin.outcome.stops[c], this.reducedMotion(), () => {
@@ -263,31 +352,18 @@ export class SlotScene extends Phaser.Scene {
       if (document.hidden || this.reducedMotion()) this.finishNumbers();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not start the spin";
-      this.ui.root.querySelector("#spin-status")!.textContent = message;
+      this.note(message);
       this.ui.root.querySelector("#result-announcement")!.textContent = message;
     }
   }
   private celebrate(spin: SpinRecord) {
     const tier = classifyWin(spin.totalStake, spin.outcome.payout);
     const settings = { ...owner.state.save.settings, reducedMotion: this.reducedMotion() };
-    const labels = {
-      neutral:
-        spin.outcome.payout === spin.totalStake
-          ? "Break-even"
-          : spin.outcome.payout
-            ? "Tokens returned"
-            : "No return this time",
-      small: "Win",
-      big: "Big win",
-      jackpot: "Jackpot",
-    };
-    this.ui.root.querySelector("#win-label")!.textContent =
-      `${labels[tier]}${spin.outcome.payout ? " · credited automatically" : ""}`;
+    this.showResult(spin, resultWord(spin, tier));
     this.completeResult(spin);
+    this.marks.show(spin.outcome.lineWins);
     this.payoutDisplay.to(spin.outcome.payout, this.reducedMotion() || document.hidden);
     if (document.hidden || settings.reducedMotion || tier === "neutral") {
-      if (!document.hidden && spin.outcome.payout > 0) this.returnedLine = playWin(this, spin, settings);
-
       owner.state = finishSpin(owner.state, spin.id);
       this.refresh();
       return;
@@ -319,25 +395,7 @@ export class SlotScene extends Phaser.Scene {
     this.refresh();
   }
   private completeResult(spin: SpinRecord) {
-    const breakdown = this.ui.root.querySelector("#spin-breakdown")!;
-    if (!breakdown.querySelector("#net")) {
-      breakdown.replaceChildren(document.createTextNode(`Stake ${number(spin.totalStake)} · Returned `));
-      const returned = document.createElement("span");
-      returned.id = "returned";
-      returned.style.width = `${Math.max(1, number(spin.outcome.payout).length)}ch`;
-      returned.textContent = "0";
-      breakdown.append(returned, document.createTextNode(" · Net "));
-      const net = document.createElement("span");
-      net.id = "net";
-      net.style.width = `${Math.max(4, number(spin.outcome.payout - spin.totalStake).length + (spin.outcome.payout > spin.totalStake ? 1 : 0))}ch`;
-      net.textContent = number(-spin.totalStake);
-      breakdown.append(net);
-    }
     this.ui.root.querySelector("#result-summary")!.textContent = this.resultAnnouncement(spin);
-    const lines = spin.outcome.lineWins.map((win) => win.lineIndex + 1);
-    this.ui.root.querySelector("#spin-status")!.textContent = lines.length
-      ? `Winning lines: ${lines.join(", ")} · Lines & payouts shows each path`
-      : "No winning lines · SPACE to spin again";
     if (spin.id !== this.announcedSpinId) {
       this.ui.root.querySelector("#result-announcement")!.textContent = this.resultAnnouncement(spin);
       this.announcedSpinId = spin.id;

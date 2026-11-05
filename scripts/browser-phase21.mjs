@@ -20,9 +20,7 @@ const ready = (page) =>
     const payout = document.querySelector("#payout");
     const net = document.querySelector("#net");
     return (
-      spin &&
-      spin.textContent === "SPIN" &&
-      !spin.disabled &&
+      spin?.dataset.state === "idle" &&
       (!save?.lastSpin ||
         (payout.textContent === save.lastSpin.outcome.payout.toLocaleString("en-GB") &&
           (!net ||
@@ -77,7 +75,7 @@ try {
       const layout = await page.evaluate(() =>
         [
           ...document.querySelectorAll(
-            ".machine-name,#back,#spin,.balance-block,.payout-block,.bet-block,#spin-breakdown",
+            ".machine-name,#back,#spin,.balance-block,.returned-block,.bet-block,#spin-status",
           ),
         ].map((element) => {
           const r = element.getBoundingClientRect();
@@ -85,7 +83,10 @@ try {
           return {
             id: element.id || element.className,
             rect: r.toJSON(),
-            fits: element.scrollWidth <= element.clientWidth + 1 && element.scrollHeight <= element.clientHeight + 1,
+            // The pressed cap shifts 3px by transform, which counts as scrollable overflow of its group, never clipping.
+            fits:
+              element.scrollWidth <= element.clientWidth + 1 &&
+              (element.closest(".slot-hud") || element.scrollHeight <= element.clientHeight + 1),
             inside:
               r.left >= stage.left && r.right <= stage.right + 1 && r.top >= stage.top && r.bottom <= stage.bottom + 1,
           };
@@ -118,13 +119,13 @@ try {
       window.__stops = [3, 0, 0, 0, 0];
     });
     await page.mouse.down();
+    // The cap and its label depress 3px by transform; the button's own box does not move.
     await page.waitForFunction(() => {
-      const transform = getComputedStyle(document.querySelector("#spin")).transform;
+      const transform = getComputedStyle(document.querySelector("#spin .face")).transform;
       return transform !== "none" && Math.abs(new DOMMatrix(transform).m42 - 3) < 0.01;
     });
     const pressed = await page.locator("#spin").boundingBox();
-    assert(Math.abs(pressed.y - idle.y - (3 * width) / 1600) < 1, JSON.stringify({ width, idle, pressed }));
-    assert.equal(pressed.width, idle.width);
+    assert.deepEqual(pressed, idle, "the pressed button keeps its exact box");
     await capture("pressed");
     await page.mouse.up();
     await page.waitForTimeout(150);
@@ -236,7 +237,7 @@ try {
       for (const [key, selector] of Object.entries({
         balance: "#balance",
         payout: "#payout",
-        net: "#spin-breakdown",
+        net: "#net",
         announcement: "#result-announcement",
       })) {
         new MutationObserver(() => window.__changes[key].push(document.querySelector(selector).textContent)).observe(
@@ -252,11 +253,14 @@ try {
     if (preference === "normal") {
       assert(changes.balance.some((v) => v !== "1,000" && v !== "1,010"));
       assert(changes.payout.some((v) => v !== "0" && v !== "15"));
-      assert(changes.net.some((v) => v && !v.endsWith("Net +10")));
+      assert(
+        changes.net.every((v) => !v || v === "+10"),
+        "net is final the moment it appears",
+      );
     } else {
       assert(changes.balance.every((v) => v === "1,000" || v === "995" || v === "1,010"));
       assert(changes.payout.every((v) => v === "—" || v === "0" || v === "15"));
-      assert(changes.net.every((v) => !v || v.endsWith("Net +10")));
+      assert(changes.net.every((v) => !v || v === "+10"));
     }
     assert.equal(changes.announcement.filter(Boolean).length, 1);
     results.push({ preference, changes });

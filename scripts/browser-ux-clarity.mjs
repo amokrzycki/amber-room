@@ -37,8 +37,7 @@ const ready = () =>
     const saved = JSON.parse(localStorage.getItem("fruit-salon:v1"));
     const net = document.querySelector("#net");
     return (
-      spin?.textContent === "SPIN" &&
-      !spin.disabled &&
+      spin?.dataset.state === "idle" &&
       (!saved?.lastSpin ||
         (document.querySelector("#payout").textContent === saved.lastSpin.outcome.payout.toLocaleString("en-GB") &&
           (!net ||
@@ -52,7 +51,7 @@ const checkLayout = async (screen) => {
     const scale = document.querySelector("#ui").getBoundingClientRect().width / 1600;
     const elements = [
       ...document.querySelectorAll(
-        ".topbar button,.salon-wallet,.purchase button,.purchase p,.purchase small,#round,#round-purpose,#salon-message,.balance-block,.payout-block,.bet-block,#spin,#spin-status,#back",
+        ".topbar button,.salon-wallet,.purchase button,.purchase p,.purchase small,#round,#round-purpose,#salon-message,.balance-block,.returned-block,.bet-block,#spin,#spin-status,#back",
       ),
     ].filter((element) => element.textContent.trim());
     const rects = elements.map((element) => {
@@ -75,9 +74,8 @@ const checkLayout = async (screen) => {
     });
     const overlaps = [];
     for (const [a, b] of [
-      [".payout-block", ".bet-block"],
-      [".bet-block", "#spin"],
-      [".balance-block", "#spin-status"],
+      [".balance-block", ".returned-block"],
+      [".returned-block", ".bet-block"],
       ["#round-purpose", "#salon-message"],
     ]) {
       const first = document.querySelector(a),
@@ -114,17 +112,15 @@ const spinOnce = async (stops, skip = false) => {
   assert.equal(await page.locator("#line-count").isDisabled(), true);
   assert.equal(await page.evaluate(() => window.__resultUpdates.length), completed);
   await page.waitForFunction(() => !document.querySelector("#back").disabled);
-  if (skip && (await page.locator("#spin").textContent()).includes("SKIP")) {
+  if (skip && (await page.locator("#spin").getAttribute("data-state")) === "settled") {
     await page.waitForFunction(() => Number(document.querySelector("#payout").textContent.replaceAll(",", "")) > 0);
     assert.equal(
       await page.evaluate(() => window.__resultUpdates.length),
       completed + 1,
       "Counting frames must announce the final authoritative outcome once",
     );
-    await page.focus("#spin");
-    await page.keyboard.down("Space");
-    await page.keyboard.down("Space");
-    await page.keyboard.up("Space");
+    // Escape ends the celebration without a wager; focus stays on the one SPIN/SKIP button.
+    await page.keyboard.press("Escape");
     assert.equal(await page.evaluate(() => document.activeElement.id), "spin");
   }
   await ready();
@@ -134,9 +130,10 @@ const spinOnce = async (stops, skip = false) => {
   const net = outcome.payout - totalStake;
   assert.equal(await page.locator("#payout").innerText(), number(outcome.payout));
   assert.equal(
-    await page.locator("#spin-breakdown").innerText(),
+    await page.locator("#spin-status").getAttribute("title"),
     `Stake ${number(totalStake)} · Returned ${number(outcome.payout)} · Net ${net > 0 ? "+" : ""}${number(net)}`,
   );
+  assert.equal(await page.locator("#net").innerText(), `${net > 0 ? "+" : ""}${number(net)}`);
   const announcement = await page.locator("#result-announcement").textContent();
   assert.equal(
     announcement,
@@ -156,7 +153,7 @@ try {
   assert.match(await page.locator("#benefit-machine").innerText(), /\+20 tokens/);
   await page.click("#enter-slot");
   await page.locator("#spin").waitFor();
-  assert.equal(await page.locator("#win-label").innerText(), "Ready to play");
+  assert.equal(await page.locator("#spin-status").innerText(), "Choose a bet · SPACE to spin");
   assert.equal(await page.locator("#payout").innerText(), "—");
   assert.equal(await page.locator("#result-announcement").textContent(), "");
   assert.equal(await page.locator("#result-announcement").getAttribute("aria-live"), "polite");
@@ -206,22 +203,22 @@ try {
   }
   for (const lineCount of [1, 5, 10, 20, 40])
     for (const perLine of [1, 2, 5]) {
-      const previous = await page.locator("#spin-breakdown").innerText();
+      const previous = await page.locator("#spin-status").getAttribute("title");
       await page.selectOption("#line-count", String(lineCount));
       await page.selectOption("#per-line", String(perLine));
       assert.equal(await page.locator("#stake").innerText(), String(lineCount * perLine));
-      assert.equal(await page.locator("#spin-breakdown").innerText(), previous);
+      assert.equal(await page.locator("#spin-status").getAttribute("title"), previous);
       await spinOnce([1, 0, 0, 0, 0], true);
     }
   const last = await save(),
-    breakdown = await page.locator("#spin-breakdown").innerText();
+    breakdown = await page.locator("#spin-status").getAttribute("title");
   await page.selectOption("#line-count", "1");
   await page.selectOption("#per-line", "1");
   await page.reload();
   await page.locator("#enter-slot").waitFor();
   await page.click("#enter-slot");
   await page.locator("#spin").waitFor();
-  assert.equal(await page.locator("#spin-breakdown").innerText(), breakdown);
+  assert.equal(await page.locator("#spin-status").getAttribute("title"), breakdown);
   assert.equal(
     await page.locator("#result-announcement").textContent(),
     "",

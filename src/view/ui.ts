@@ -4,6 +4,7 @@ import type Phaser from "phaser";
 import { owner, number } from "../runtime";
 import { machine } from "../game/machine";
 import { audioMix, type GameAudio } from "./audio";
+import { symbolNames } from "./spinResult";
 export function download(raw: string, name: string) {
   const url = URL.createObjectURL(new Blob([raw], { type: "application/json" }));
   const a = document.createElement("a");
@@ -79,11 +80,13 @@ export function mountUI(scene: Phaser.Scene, audio: GameAudio, content: string) 
     dialog.showModal();
   });
   root.querySelector("[data-action=table]")!.addEventListener("click", () => {
-    const names = { cherry: "Cherries", lemon: "Lemon", plum: "Plum", melon: "Melon", seven: "Seven", wild: "7 WILD" };
-    body.innerHTML = `<h2>Lines & payouts</h2><p>Match 3–5 symbols from the left. WILD substitutes for any symbol. Each line pays its single best match × bet per line.</p><table><thead><tr><th>Symbol</th><th>3</th><th>4</th><th>5</th></tr></thead><tbody>${Object.entries(
+    body.innerHTML = `<h2>Lines & payouts</h2><p>Match 3–5 symbols from the left. WILD substitutes for any symbol. Each line pays its single best match × bet per line. Winnings are credited automatically.</p><table><thead><tr><th>Symbol</th><th>3</th><th>4</th><th>5</th></tr></thead><tbody>${Object.entries(
       machine.paytable,
     )
-      .map(([s, p]) => `<tr><th>${names[s as keyof typeof names]}</th>${p.map((n) => `<td>${n}</td>`).join("")}</tr>`)
+      .map(
+        ([s, p]) =>
+          `<tr><th>${symbolNames[s as keyof typeof symbolNames]}</th>${p.map((n) => `<td>${n}</td>`).join("")}</tr>`,
+      )
       .join(
         "",
       )}</tbody></table><p>Active: first ${owner.state.save.selectedBet.lineCount} lines. Total bet: ${number(owner.state.save.selectedBet.lineCount * owner.state.save.selectedBet.perLine)} tokens.</p><div class="line-catalog">${machine.paylines.map((path, i) => `<div class="line ${i < owner.state.save.selectedBet.lineCount ? "active" : ""}"><span>${i + 1}</span><svg viewBox="0 0 100 54" aria-label="Line ${i + 1}: ${path.join(",")}"><polyline points="${path.map((r, c) => `${8 + c * 21},${9 + r * 18}`).join(" ")}"/></svg></div>`).join("")}</div>`;

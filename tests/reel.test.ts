@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import { ReelView } from "../src/view/ReelView";
+import { reelWindow, tuning } from "../src/view/tuning";
 
 function renderer() {
   const active = new Set<any>(),
@@ -108,7 +109,7 @@ it("clears all symbol effects and restores rest state immediately", () => {
   reel.clearHighlight();
   expect(active.size).toBe(0);
   expect(images[0].alpha).toBe(1);
-  expect(images[0].scaleX).toBe(168 / 512);
+  expect(images[0].scaleX).toBe(tuning.symbol / 512);
 });
 
 it("clips visible pixels to the reel window throughout motion and restores the final column", async () => {
@@ -125,8 +126,8 @@ it("clips visible pixels to the reel window throughout motion and restores the f
     for (const image of visible) {
       const crop = image.crop ?? [0, 0, image.width, image.height];
       const top = image.y + offset - image.displayHeight / 2 + crop[1] * image.scaleY;
-      expect(top).toBeGreaterThanOrEqual(207);
-      expect(top + crop[3] * image.scaleY).toBeLessThanOrEqual(642);
+      expect(top).toBeGreaterThanOrEqual(reelWindow.clipTop);
+      expect(top + crop[3] * image.scaleY).toBeLessThanOrEqual(reelWindow.clipBottom);
     }
   }
   tween.onComplete();

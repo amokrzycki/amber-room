@@ -92,8 +92,7 @@ try {
   await page.click("[data-action=settings]");
   assert.equal(await page.locator("#original").count(), 1);
   await page.click(".close");
-  await page.waitForFunction(() => !document.querySelector("#spin").disabled);
-  if ((await page.locator("#spin").innerText()).includes("SKIP")) await page.click("#spin");
+  await page.waitForFunction(() => document.querySelector("#spin").dataset.state === "idle");
   await page.click("#back");
   await page.locator("#enter-slot").waitFor();
   await input(exported);

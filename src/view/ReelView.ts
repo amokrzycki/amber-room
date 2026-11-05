@@ -1,7 +1,7 @@
 import type Phaser from "phaser";
 import type { SymbolId } from "../game/model";
 import { machine } from "../game/machine";
-import { reelEase, tuning as t } from "./tuning";
+import { reelEase, reelWindow, tuning as t } from "./tuning";
 export class ReelView {
   private images: Phaser.GameObjects.Image[] = [];
   private container: Phaser.GameObjects.Container;
@@ -20,7 +20,7 @@ export class ReelView {
   show(column: SymbolId[]) {
     this.container.removeAll(true);
     this.images = column.map((symbol, row) =>
-      this.scene.add.image(0, t.reelY + row * t.rowGap, symbol).setDisplaySize(168, 168),
+      this.scene.add.image(0, t.reelY + row * t.rowGap, symbol).setDisplaySize(t.symbol, t.symbol),
     );
     this.container.add(this.images);
     this.clip(this.images);
@@ -28,8 +28,8 @@ export class ReelView {
   private clip(images: Phaser.GameObjects.Image[], offset = 0) {
     for (const image of images) {
       const top = image.y + offset - image.displayHeight / 2;
-      const from = Math.max(0, Math.ceil((207 - top) / image.scaleY));
-      const to = Math.min(image.height, Math.floor((642 - top) / image.scaleY));
+      const from = Math.max(0, Math.ceil((reelWindow.clipTop - top) / image.scaleY));
+      const to = Math.min(image.height, Math.floor((reelWindow.clipBottom - top) / image.scaleY));
       image.setVisible(to > from);
       if (to > from) image.setCrop(0, from, image.width, to - from);
     }
@@ -52,7 +52,7 @@ export class ReelView {
           : row < 3
             ? this.images[row].texture.key
             : strip[(stop + row - count + strip.length * 3) % strip.length];
-      this.moving.add(this.scene.add.image(0, t.reelY + row * t.rowGap, symbol).setDisplaySize(168, 168));
+      this.moving.add(this.scene.add.image(0, t.reelY + row * t.rowGap, symbol).setDisplaySize(t.symbol, t.symbol));
     }
     this.images.forEach((im) => {
       im.setVisible(false);
@@ -88,7 +88,7 @@ export class ReelView {
   clearHighlight() {
     for (const image of this.images) {
       this.scene.tweens.killTweensOf(image);
-      image.setAlpha(1).setDisplaySize(168, 168);
+      image.setAlpha(1).setDisplaySize(t.symbol, t.symbol);
     }
   }
   cancel() {

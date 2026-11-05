@@ -75,7 +75,7 @@ const ready = () =>
     const save = JSON.parse(localStorage.getItem("fruit-salon:v1")),
       button = document.querySelector("#spin");
     return (
-      button?.textContent === "SPIN" &&
+      button?.dataset.state === "idle" &&
       document.querySelector("#balance").textContent === save.balance.toLocaleString("en-GB") &&
       (!save.lastSpin ||
         (document.querySelector("#payout").textContent === save.lastSpin.outcome.payout.toLocaleString("en-GB") &&
@@ -130,14 +130,14 @@ try {
       window.__coherence = [];
       window.__moneyObserver?.disconnect();
       window.__moneyObserver = new MutationObserver(() => {
-        const net = document.querySelector("#net"),
-          returned = document.querySelector("#returned");
-        if (!net || !returned) return;
+        const net = document.querySelector("#net");
+        if (!net || document.querySelector("#net-wrap").hidden) return;
         const value = (el) => Number(el.textContent.replaceAll(",", ""));
         const spin = JSON.parse(localStorage.getItem("fruit-salon:v1")).lastSpin;
+        // The net is final as soon as it appears; only RETURNED counts up, never past the settled payout.
         window.__coherence.push(
-          value(returned) === value(document.querySelector("#payout")) &&
-            value(net) === value(returned) - spin.totalStake,
+          value(net) === spin.outcome.payout - spin.totalStake &&
+            value(document.querySelector("#payout")) <= spin.outcome.payout,
         );
       });
       window.__moneyObserver.observe(document.querySelector("#payout"), { childList: true });
@@ -158,10 +158,7 @@ try {
     await page.keyboard.down("Space");
     for (let i = 0; i < 10; i++) await page.keyboard.down("Space");
     await page.evaluate(() => {
-      for (let i = 0; i < 20; i++) {
-        document.querySelector("#spin").click();
-        document.querySelector("#back").click();
-      }
+      for (let i = 0; i < 20; i++) document.querySelector("#back").click();
     });
     await page.waitForTimeout(400);
     assert.equal(await page.locator("#balance").innerText(), (before.balance - 5).toLocaleString("en-GB"));
@@ -172,11 +169,9 @@ try {
     assert.deepEqual(await page.evaluate(() => window.__announcements), []);
     await page.keyboard.up("Space");
     await page.waitForFunction(() => !document.querySelector("#back").disabled);
-    if (payout <= 5) assert.equal(await page.locator("#spin").innerText(), "SPIN");
-    else {
-      assert.equal(await page.locator("#spin").innerText(), "SKIP");
-      await page.click("#spin");
-    }
+    // Reels have stopped: the single button is SPIN again; a win overlay ends without another wager.
+    assert.equal(await page.locator("#spin").innerText(), "SPIN");
+    if (payout > 5) await page.keyboard.press("Escape");
     await ready();
     const stopEvents = await page.evaluate(
       (start) => window.__audio.events.slice(start).filter((e) => e.duration >= 0.119 && e.duration <= 0.141),
@@ -195,10 +190,11 @@ try {
     assert.equal(await page.evaluate(() => window.__announcements.filter(Boolean).length), 1);
     assert(await page.evaluate(() => window.__coherence.length > 0 && window.__coherence.every(Boolean)));
     assert.match(await page.locator("#result-summary").innerText(), /Spin .* complete/);
-    if (payout) assert.match(await page.locator("#spin-status").innerText(), /Winning lines:/);
+    if (payout) assert.match(await page.locator(".win-details summary").innerText(), /winning line/);
+    assert.match(await page.locator("#spin-status").innerText(), /Net/);
     // Phaser time is frame-driven; allow the 900ms line overlay to expire even under SwiftShader.
     await page.waitForTimeout(payout > 0 && payout <= 5 ? 2500 : 150);
-    const clip = { x: 291, y: 209, width: 1019, height: 431 };
+    const clip = { x: 158, y: 209, width: 1285, height: 468 };
     const animated = await page.screenshot({ clip });
     await page.reload();
     await page.click("#enter-slot");
@@ -223,7 +219,10 @@ try {
     await force([3, 0, 0, 0, 0]);
     const before = await saved();
     await page.click("#spin");
-    if (interruption === "skip") await page.click("#skip-motion");
+    if (interruption === "skip") {
+      assert.equal(await page.locator("#spin").innerText(), "SKIP");
+      await page.click("#spin");
+    }
     if (interruption === "os-motion") await page.emulateMedia({ reducedMotion: "reduce" });
     if (interruption === "setting-motion") {
       await motion(true);
@@ -234,7 +233,8 @@ try {
         document.dispatchEvent(new Event("visibilitychange"));
       });
     await page.waitForFunction(() => !document.querySelector("#back").disabled);
-    if ((await page.locator("#spin").innerText()) === "SKIP") await page.click("#spin");
+    if (interruption !== "skip" && (await page.locator("#spin").getAttribute("data-state")) === "settled")
+      await page.keyboard.press("Escape");
     await ready();
     assert.equal((await saved()).nextSpinId, before.nextSpinId + 1);
     assert.equal((await saved()).balance, before.balance + 10);
@@ -268,7 +268,7 @@ try {
   // Navigate directly during the win, with counters in flight; then exercise repeated teardown.
   await force([0, 0, 0, 0, 0]);
   await page.click("#spin");
-  await page.waitForFunction(() => document.querySelector("#spin").textContent === "SKIP");
+  await page.waitForFunction(() => document.querySelector("#spin").dataset.state === "settled");
   const won = await saved();
   await page.click("#back");
   await page.locator("#enter-slot").waitFor();

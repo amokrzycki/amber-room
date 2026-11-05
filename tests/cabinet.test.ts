@@ -1,5 +1,6 @@
 import { expect, it, vi } from "vitest";
-import { drawCabinet } from "../src/view/cabinet";
+import { cabinetCrops, drawCabinet } from "../src/view/cabinet";
+import { reelWindow, tuning } from "../src/view/tuning";
 
 it("bakes the cabinet once across scene visits and places it without moving the reel coordinate system", () => {
   const context: any = {};
@@ -42,8 +43,30 @@ it("bakes the cabinet once across scene visits and places it without moving the 
   expect(image).toHaveBeenLastCalledWith(35, 105, "orchard-cabinet");
   expect(setCrop.mock.calls.slice(0, 4)).toEqual([
     [0, 0, 1530, 104],
-    [0, 536, 1530, 244],
-    [0, 104, 256, 432],
-    [1276, 104, 254, 432],
+    [0, 572, 1530, 208],
+    [0, 104, 122, 468],
+    [1408, 104, 122, 468],
   ]);
+});
+
+it("keeps the reel aperture, columns and clip bounds on one geometry, 85% of the cabinet face", () => {
+  const w = reelWindow;
+  expect(w.w).toBe(1286);
+  expect(w.w / 1508).toBeGreaterThanOrEqual(0.85);
+  expect(w.x + w.w / 2).toBe(800);
+  expect(w.h).toBe(3 * tuning.rowGap);
+  expect(tuning.reelGap).toBe(w.colW + w.colGap);
+  expect(tuning.reelX + 4 * tuning.reelGap + w.colW / 2).toBe(w.x + w.w);
+  expect(tuning.reelY - tuning.rowGap / 2).toBe(w.y);
+  // The textured quads leave exactly the aperture bare, with no gap or overlap.
+  const [top, bottom, left, right] = cabinetCrops;
+  expect(105 + top[3]).toBe(w.y);
+  expect(105 + bottom[1]).toBe(w.y + w.h);
+  expect(35 + left[2]).toBe(w.x);
+  expect(35 + right[0]).toBe(w.x + w.w);
+  expect(w.clipTop).toBeLessThan(w.y);
+  expect(w.clipBottom).toBeGreaterThan(w.y + w.h);
+  // Symbols stay square and fit a row with a visible gap (sprite art fills ~81% of its frame).
+  expect(tuning.symbol * 0.82).toBeLessThan(tuning.rowGap);
+  expect(tuning.symbol).toBeLessThanOrEqual(w.colW);
 });

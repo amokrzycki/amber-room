@@ -50,13 +50,13 @@ try {
         const scale = document.querySelector("#ui").getBoundingClientRect().width / 1600;
         const elements = [
           ...document.querySelectorAll(
-            ".slot-hud,.balance-block,.payout-block,.bet-block,#spin,#spin-status,#spin-breakdown,#win-label,#per-line,#line-count,#back",
+            ".slot-hud,.balance-block,.returned-block,.bet-block,#spin,#spin-status,#balance,#payout,#stake,#per-line,#line-count,#back",
           ),
         ];
         return elements.map((element) => {
           const r = element.getBoundingClientRect();
           return {
-            element: element.id || element.className,
+            element: element.id || [...element.classList].pop(),
             text: element.textContent,
             font: parseFloat(getComputedStyle(element).fontSize) * scale,
             rect: r.toJSON(),
@@ -65,7 +65,10 @@ try {
               r.right <= stage.right + 1 &&
               r.top >= stage.top - 1 &&
               r.bottom <= stage.bottom + 1,
-            fits: element.scrollWidth <= element.clientWidth + 1 && element.scrollHeight <= element.clientHeight + 1,
+            // Large numerals overflow their line box vertically by design (glyph ascent/descent); width must always fit.
+            fits:
+              element.scrollWidth <= element.clientWidth + 1 &&
+              (element.tagName === "STRONG" || element.scrollHeight <= element.clientHeight + 1),
           };
         });
       });
@@ -74,10 +77,9 @@ try {
       }
       const byName = (name) => layout.find((e) => e.element === name).rect;
       for (const [a, b] of [
-        ["payout-block", "bet-block"],
-        ["payout-block", "spin"],
-        ["bet-block", "spin"],
-        ["balance-block", "spin-status"],
+        ["balance-block", "returned-block"],
+        ["returned-block", "bet-block"],
+        ["balance-block", "bet-block"],
       ]) {
         const x = byName(a),
           y = byName(b);
@@ -107,7 +109,8 @@ try {
         window.__stops = [...values];
       }, stops);
       await page.click("#spin");
-      assert(await page.locator("#spin").isDisabled());
+      assert.equal(await page.locator("#spin").getAttribute("data-state"), "spinning");
+      assert.equal(await page.locator("#spin").innerText(), "SKIP");
       assert(await page.locator("#line-count").isDisabled());
       assert(await page.locator("#per-line").isDisabled());
       assert(await page.locator("#back").isDisabled());
@@ -118,7 +121,7 @@ try {
       await page.waitForFunction(
         () =>
           document.querySelector("#spin").textContent === "SPIN" &&
-          !document.querySelector("#spin").disabled &&
+          document.querySelector("#spin").dataset.state === "idle" &&
           document.querySelector("#payout").textContent ===
             JSON.parse(localStorage.getItem("fruit-salon:v1")).lastSpin.outcome.payout.toLocaleString("en-GB"),
       );

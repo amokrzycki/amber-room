@@ -35,11 +35,11 @@ await page.addInitScript(() => {
         window.__frames.push(interval);
         const button = document.querySelector("#spin");
         const phase =
-          button?.textContent === "SPINNING"
+          button?.dataset.state === "spinning"
             ? performance.now() - window.__spinStarted < 850
               ? "spinning"
               : "stopping"
-            : button?.textContent === "SKIP"
+            : button?.dataset.state === "settled"
               ? "win"
               : "idle";
         window.__phases[phase].push(interval);

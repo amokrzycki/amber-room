@@ -1,6 +1,16 @@
 import type Phaser from "phaser";
+import { reelWindow as win } from "./tuning";
 
 const textureKey = "orchard-cabinet";
+const TEXTURE_X = 35;
+const TEXTURE_Y = 105;
+/** Texture-space quads around the reel aperture; the aperture itself is flat-shaded geometry, not texture. */
+export const cabinetCrops = [
+  [0, 0, 1530, win.y - TEXTURE_Y],
+  [0, win.y + win.h - TEXTURE_Y, 1530, 780 - (win.y + win.h - TEXTURE_Y)],
+  [0, win.y - TEXTURE_Y, win.x - TEXTURE_X, win.h],
+  [win.x + win.w - TEXTURE_X, win.y - TEXTURE_Y, 1530 - (win.x + win.w - TEXTURE_X), win.h],
+];
 
 /** Static joinery, baked once; the reels, feedback and accessible controls stay live. */
 export function drawCabinet(scene: Phaser.Scene) {
@@ -110,53 +120,53 @@ export function drawCabinet(scene: Phaser.Scene) {
     screw(993, 147);
 
     // One brass bezel and a dark gasket establish the recessed reel aperture.
-    brass(258, 185, 1084, 475, 20, 9);
-    round(269, 196, 1062, 456, 11, "#09090d");
+    brass(win.x - 33, 185, win.w + 66, win.y - 185 + win.h + 19, 20, 9);
+    round(win.x - 22, 196, win.w + 42, win.y - 196 + win.h + 11, 11, "#09090d");
+    const bezelBottom = win.y + win.h + 19;
+    const lip = bezelBottom + 16;
+    const deck = lip + 11;
     // A sloped lip catches the light; the instrument deck remains dark under every label.
-    round(79, 676, 1442, 19, 5, gradient(79, 676, 0, 19, ["#8b3d3f", "#48151e", "#210e13"]));
+    round(79, lip, 1442, 19, 5, gradient(79, lip, 0, 19, ["#8b3d3f", "#48151e", "#210e13"]));
     line(
       [
-        [85, 677],
-        [1514, 677],
+        [85, lip + 1],
+        [1514, lip + 1],
       ],
       "#c2966555",
     );
-    round(89, 687, 1422, 180, 10, gradient(89, 687, 0, 180, ["#25171b", "#1d1217"]));
+    round(89, deck, 1422, 867 - deck, 10, gradient(89, deck, 0, 867 - deck, ["#25171b", "#1d1217"]));
     line(
       [
-        [94, 688],
-        [1506, 688],
+        [94, deck + 1],
+        [1506, deck + 1],
       ],
       "#08070a",
       2,
     );
     round(61, 871, 1478, 9, 4, gradient(61, 871, 0, 9, ["#69313a", "#230e14"]));
-    for (const x of [104, 1496]) for (const y of [169, 669, 819]) screw(x, y);
+    for (const x of [104, 1496]) for (const y of [169, lip - 7, 819]) screw(x, y);
 
     texture.refresh();
   }
   // Leave the reel field out of the textured quads: its flat shading needs no texture sampling.
-  for (const [x, y, width, height] of [
-    [0, 0, 1530, 104],
-    [0, 536, 1530, 244],
-    [0, 104, 256, 432],
-    [1276, 104, 254, 432],
-  ])
+  for (const [x, y, width, height] of cabinetCrops)
     scene.add.image(35, 105, textureKey).setOrigin(0).setCrop(x, y, width, height);
   const field = scene.add.graphics();
-  field.fillStyle(0x100d12).fillRect(291, 209, 1020, 432);
+  const right = win.x + win.w;
+  const bottom = win.y + win.h;
+  field.fillStyle(0x100d12).fillRect(win.x, win.y, win.w, win.h);
   const tones = [0x100e13, 0x201920, 0x19131a, 0x100d12];
   for (let column = 0; column < 5; column++) {
-    const x = 291 + column * 205;
+    const x = win.x + column * (win.colW + win.colGap);
     for (let band = 0; band < 3; band++)
       field
         .fillGradientStyle(tones[band], tones[band], tones[band + 1], tones[band + 1])
-        .fillRect(x, 209 + band * 144, 198, 144);
+        .fillRect(x, win.y + band * win.rowGap, win.colW, win.rowGap);
     if (column < 4) {
-      field.lineStyle(4, 0x09070b).lineBetween(x + 200, 210, x + 200, 640);
-      field.lineStyle(1, 0x9d7b46, 0.24).lineBetween(x + 201, 211, x + 201, 640);
+      field.lineStyle(4, 0x09070b).lineBetween(x + win.colW + 2, win.y + 1, x + win.colW + 2, bottom - 1);
+      field.lineStyle(1, 0x9d7b46, 0.24).lineBetween(x + win.colW + 3, win.y + 2, x + win.colW + 3, bottom - 1);
     }
   }
-  field.lineStyle(5, 0x000000, 0.6).lineBetween(291, 210, 1311, 210);
-  field.lineStyle(2, 0xab814b, 0.2).lineBetween(291, 639, 1311, 639);
+  field.lineStyle(5, 0x000000, 0.6).lineBetween(win.x, win.y + 1, right, win.y + 1);
+  field.lineStyle(2, 0xab814b, 0.2).lineBetween(win.x, bottom - 2, right, bottom - 2);
 }

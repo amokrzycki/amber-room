@@ -97,6 +97,7 @@ canvas {
 .screen select,
 .screen input,
 .screen label,
+.screen summary,
 .screen dialog {
   pointer-events: auto;
 }
@@ -200,8 +201,7 @@ h2 {
   background: linear-gradient(90deg, #171214ed, #171214b3);
   border-radius: 8px;
 }
-.salon-wallet span,
-.slot-hud span {
+.salon-wallet span {
   font-size: var(--label-size);
   letter-spacing: 0.7px;
   color: #d8af55;
@@ -307,120 +307,236 @@ h2 {
     0 -1px 0 #4b32185c;
   text-align: center;
 }
+/* The HUD sits on the instrument deck (y 723-867 in the 1600x900 scene). Its box, its three columns and
+   every row inside them are fixed by tracks, never by content, so results cannot move anything. */
 .slot-hud {
   position: absolute;
-  left: 100px;
-  right: 100px;
-  top: 690px;
+  left: 125px;
+  right: 125px;
+  top: 723px;
+  height: 144px;
   display: grid;
-  grid-template-columns: 300px 1fr 410px;
-  gap: 24px;
+  grid-template-columns: 270px minmax(0, 1fr) 640px;
   align-items: center;
 }
-.balance-block,
-.payout-block {
+.hud-group {
+  display: grid;
+  grid-template-rows: 24px 60px 26px;
+  row-gap: 4px;
+  min-width: 0;
+  padding: 0 28px;
+}
+.hud-group:first-child {
+  padding-left: 0;
+}
+.hud-group + .hud-group {
+  border-left: 1px solid #d8af5530;
+}
+.hud-label {
+  font-size: var(--label-size);
+  letter-spacing: 1.2px;
+  color: #d8af55;
+  align-self: center;
+}
+.hud-head {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
 }
-.balance-block strong {
+.hud-figure {
+  container-type: inline-size;
+  display: flex;
+  align-items: flex-end;
+  min-width: 0;
+}
+.hud-figure strong {
+  /* 0.6em is a safe tabular-digit advance; --len is the character count set with the text. */
   font:
-    400 46px "Source Sans 3",
+    400 min(52px, calc(100cqi / (var(--len, 1) * 0.6))) / 1 "Source Sans 3",
     sans-serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+  flex: 1;
 }
-.balance-block small {
-  font-size: var(--detail-size);
-  color: #d7bba0;
-}
-.payout-block {
-  text-align: center;
-}
-.payout-block strong {
-  font:
-    400 56px "Source Sans 3",
-    sans-serif;
-  line-height: 1;
+.hud-figure.payout strong {
   color: #ffe0a0;
 }
-.slot-hud strong {
-  font-variant-numeric: lining-nums tabular-nums;
-}
-.payout-block small {
+.hud-note {
+  margin: 0;
   font-size: var(--detail-size);
+  line-height: 1.4;
   color: #d7bba0;
-  line-height: 1.25;
-}
-#spin-breakdown {
   white-space: nowrap;
-  color: #fff2cc;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-variant-numeric: lining-nums tabular-nums;
 }
-.bet-selects {
-  display: flex;
-  gap: 20px;
-  align-items: center;
+.hud-note strong {
+  font-weight: 600;
+  color: #fff2cc;
 }
-.bet-selects label {
+#net-wrap[data-sign="gain"] strong {
+  color: #ffe0a0;
+}
+#net-wrap[data-sign="loss"] strong {
+  color: #d7bba0;
+}
+.win-details {
+  position: static;
+  font-size: var(--detail-size);
+  min-width: 0;
+}
+.win-details[data-empty] {
+  visibility: hidden;
+}
+.win-details summary {
+  cursor: pointer;
+  color: #35e6d1;
+  white-space: nowrap;
+  line-height: 1.4;
+  border-radius: 4px;
+}
+.win-details summary:focus-visible {
+  outline: 3px solid #35e6d1;
+  outline-offset: 3px;
+}
+.win-panel {
+  /* Anchored to the HUD and out of flow: opening it cannot move the HUD. Bounded, then scrolls. */
+  position: absolute;
+  left: 308px;
+  bottom: calc(100% + 14px);
+  width: 520px;
+  max-width: calc(100% - 320px);
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 14px 16px;
+  background: #1b1116;
+  border: 1px solid #b88d4c;
+  border-radius: 10px;
+  box-shadow: 0 12px 40px #000c;
+  scrollbar-color: #73503d #1b1116;
+  pointer-events: auto;
+  z-index: 2;
+}
+.win-title {
+  margin: 0 0 8px;
+  color: #d7bba0;
+  font-size: var(--detail-size);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.win-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 10px;
+}
+.win-list button {
+  display: grid;
+  grid-template-columns: 4.6em minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: baseline;
+  padding: 6px 10px;
+  font-size: var(--detail-size);
+  text-align: left;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.win-list button b {
+  color: #d8af55;
+  font-weight: 600;
+}
+.win-list button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.win-list button em {
+  font-style: normal;
+  color: #ffe0a0;
+}
+.bet-row {
+  grid-row: 2 / 4;
+  display: grid;
+  grid-template-columns: 88px 14px 88px 14px 76px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 10px;
+}
+.bet-row label,
+.bet-row .total {
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  font-size: var(--detail-size);
+  gap: 8px;
+  font-size: var(--label-size);
+  letter-spacing: 0.7px;
   color: #d7bba0;
 }
-.bet-selects select {
+.bet-row label span,
+.bet-row .total span {
+  /* Captions occupy a fixed 24px slot, so the controls below never depend on the text-size clamp. */
+  height: 24px;
+  line-height: 24px;
+}
+.bet-row .total span {
+  color: #d8af55;
+}
+.bet-row .op {
+  /* Sit on the 50px control row: caption line + 8px gap, then centre in the control height. */
+  margin-top: 32px;
+  line-height: 50px;
+  text-align: center;
+  color: #9b8076;
+  font-size: 22px;
+}
+.bet-row select {
   background: #1b1116;
   border: 1px solid #896442;
   color: #fff2cc;
   border-radius: 6px;
   font-size: max(22px, calc(18px / var(--ui-scale, 1)));
-  padding: 7px;
-  width: 95px;
+  padding: 0 7px;
+  height: 50px;
+  width: 100%;
   box-shadow:
     inset 0 2px 3px #0009,
     0 1px 0 #d8af5526;
 }
-.bet-selects select:disabled {
+.bet-row select:disabled {
   color: #d7bba0;
   border-color: #69503c;
   opacity: 1;
   cursor: default;
 }
-.bet-selects > div {
-  display: flex;
-  flex-direction: column;
-  gap: 13px;
+.bet-row .total strong {
+  font:
+    400 34px / 1.35 "Source Sans 3",
+    sans-serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: #fff2cc;
 }
-.bet-selects > div span {
-  font-size: var(--label-size);
-  letter-spacing: 1px;
-}
-.bet-selects strong {
-  font-size: 30px;
-}
-.slot-controls {
-  position: absolute;
-  left: 100px;
-  right: 100px;
-  bottom: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.slot-controls p {
-  font-size: var(--detail-size);
-  color: #d7bba0;
-  max-width: 950px;
-}
-.slot-controls #spin {
-  width: 240px;
+#spin {
+  align-self: start;
+  margin-top: 25px; /* centred on the 50px control row beside it */
+  justify-self: end;
+  position: relative;
+  width: 220px;
   height: 64px;
+  padding: 0;
   font-size: 25px;
   font-weight: 600;
   letter-spacing: 1px;
-  padding: 0 20px;
+  color: #fff0d5;
+  background: none;
+  border: 0;
+  border-radius: 16px;
+  transition: none;
+}
+/* The cap is a pseudo-element so pressing it depresses the look without moving the button's own box. */
+#spin::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   border: 2px solid #c2a06a;
   border-radius: 16px;
-  color: #fff0d5;
   background: linear-gradient(#943847, #65202d);
   box-shadow:
     inset 0 2px 1px #edb8a63d,
@@ -431,12 +547,18 @@ h2 {
     box-shadow 80ms,
     transform 80ms;
 }
-.slot-controls #spin:hover:enabled {
+#spin .face {
+  position: relative;
+  display: block;
+  line-height: 64px;
+  transition: transform 80ms;
+}
+#spin:hover::before {
   background: linear-gradient(#a54352, #712735);
   border-color: #e0bf86;
 }
-.slot-controls #spin:active:enabled,
-.slot-controls #spin.is-pressed {
+#spin:active::before,
+#spin.is-pressed::before {
   transform: translateY(3px);
   background: linear-gradient(#782735, #65202d);
   box-shadow:
@@ -444,33 +566,16 @@ h2 {
     0 2px 1px #30121a,
     0 4px 6px #0008;
 }
-.slot-controls #spin.is-pressed {
+#spin:active .face,
+#spin.is-pressed .face {
+  transform: translateY(3px);
+}
+#spin.is-pressed::before,
+#spin.is-pressed .face {
   transition: none;
 }
-#skip-motion {
-  margin-left: auto;
-  margin-right: 16px;
-}
-.slot-controls #spin:disabled {
-  color: #d8bdad;
-  background: linear-gradient(#4a2730, #392029);
-  border-color: #8d7050;
-  opacity: 1;
-  cursor: default;
-  box-shadow:
-    inset 0 1px 2px #0006,
-    0 2px 1px #241018;
-}
-.slot-controls #spin[data-state="celebrating"] {
+#spin[data-state="spinning"]::before {
   background: linear-gradient(#69404a, #492832);
-}
-#returned,
-#net {
-  display: inline-block;
-  text-align: left;
-  color: inherit;
-  font-size: inherit;
-  letter-spacing: inherit;
 }
 .save-warning {
   position: absolute;
@@ -618,7 +723,8 @@ hr {
 }
 @media (prefers-reduced-motion: reduce) {
   button,
-  .slot-controls #spin {
+  #spin::before,
+  #spin .face {
     transition: none;
   }
 }
