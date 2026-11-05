@@ -165,7 +165,6 @@ Jedna referencja do bieżącej sesji jest przekazywana między scenami. Nie twor
 - [x] **Step 5:** Zmierzyć najcięższy przypadek wypłaty i powtórne wejścia do scen; cel 60 FPS, bez narastających listenerów i pętli audio. Profilować zbudowaną grę. Zapisać urządzenie, przeglądarkę, rozdzielczość i ograniczenia pomiaru; nie zastępować odsłuchu czy oceny użytkownika testem jednostkowym.
 - [x] **Step 6:** Niezależne końcowe review **G4** całej wersji. Naprawić istotne błędy, powtórzyć dotknięte sprawdzenia i zapisać pozostałe ograniczenia. README opisuje otwarcie, lokalny zapis, kopię i autorstwo zasobów. Commit `build: package the offline fruit salon`, jeśli dostępny.
 
-
 ## Samokontrola planu
 
 Pokrycie: zmienne linie → 1; portfel i zapis → 2; fullscreen oraz osobny salon → 3; juicy oprawa i audio → 4; skończone biznesy → 5; skala pieniędzy → 6; offline oraz odbiór → 7. Wszystkie klasy Review Focus mają wskazane sprawdzenia. Stare założenie salonu w tle i stałych pięciu aktywnych linii zostało zastąpione aktualnymi decyzjami użytkownika.

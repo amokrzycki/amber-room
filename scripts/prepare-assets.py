@@ -26,4 +26,6 @@ sheet=Image.new('RGB',(6*180,360),'#171214')
 for i,name in enumerate(['cherry','lemon','plum','melon','seven','wild']):
     im=Image.open(root/'symbols'/f'{name}.png');im.thumbnail((156,156))
     sheet.paste(im,(i*180+12,12),im);ImageDraw.Draw(sheet).rectangle((i*180,180,i*180+180,360),fill='#fff2cc');sheet.paste(im,(i*180+12,192),im)
-sheet.save('docs/asset-contact.png')
+evidence=Path('docs/evidence')
+evidence.mkdir(parents=True,exist_ok=True)
+sheet.save(evidence/'asset-contact.png')

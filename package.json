@@ -1,1 +1,31 @@
-{"name":"bursztynowy-salon","version":"1.0.0","private":true,"type":"module","scripts":{"dev":"vite --host 0.0.0.0","test":"vitest run","typecheck":"tsc --noEmit","build":"vite build","check:offline":"node scripts/check-offline.mjs"},"dependencies":{"phaser":"4.2.1"},"devDependencies":{"@playwright/test":"1.56.1","@types/node":"22.19.1","typescript":"5.9.3","vite":"7.3.7","vite-plugin-singlefile":"2.3.0","vitest":"5.1.0"}}
+{
+  "name": "bursztynowy-salon",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "build": "vite build",
+    "check:offline": "node scripts/check-offline.mjs",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint --error-on-warnings .",
+    "check": "biome check --error-on-warnings .",
+    "check:fix": "biome check --write .",
+    "prebuild": "npm run check"
+  },
+  "dependencies": {
+    "phaser": "4.2.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.5",
+    "@playwright/test": "1.56.1",
+    "@types/node": "22.19.1",
+    "typescript": "5.9.3",
+    "vite": "7.3.7",
+    "vite-plugin-singlefile": "2.3.0",
+    "vitest": "5.1.0"
+  }
+}

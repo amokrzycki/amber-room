@@ -1,6 +1,6 @@
 # Pochodzenie zasobów
 
-Grafiki generowano wbudowanym `image_gen` 2026-11-04/05, bez użycia cudzych symboli/logo. Rekordy narzędzia i prompty poniżej. Własne źródła zachowano w `src/assets/sources`; runtime w `symbols` i `art`. Normalizacja: `scripts/prepare-assets.py` (deterministyczna, alpha bez usuwania tła, do 512×512 z marginesem symboli). Podgląd w skali: `docs/asset-contact.png`. W grze zaobserwowano owoce i salon przez lokalne Chromium; nie jest to subiektywna akceptacja użytkownika.
+Grafiki generowano wbudowanym `image_gen` 2026-11-04/05, bez użycia cudzych symboli/logo. Rekordy narzędzia i prompty poniżej. Własne źródła zachowano w `src/assets/sources`; runtime w `symbols` i `art`. Normalizacja: `scripts/prepare-assets.py` (deterministyczna, alpha bez usuwania tła, do 512×512 z marginesem symboli). Podgląd w skali: `docs/evidence/asset-contact.png`. W grze zaobserwowano owoce i salon przez lokalne Chromium; nie jest to subiektywna akceptacja użytkownika.
 
 - Wiśnie, `exec-73242381-4bba-4e55-a684-1ea4482001f3.png`: Production 2D slot-machine symbol, pair of ripe red cherries, glossy green leaf, front facing rounded volume, bold dark outline, upper-left light, saturated red, restrained highlights, transparent alpha, 12% padding, no letters/logo/cabinet/checkerboard.
 - Cytryna, `exec-c3abcc76-c3c0-482b-b097-a57158532eec.png`: reference cherries as style, change to ONE yellow lemon, same outline, volume, upper-left light, padding and genuine alpha.

@@ -1,4 +1,48 @@
-import assert from 'node:assert/strict';
-import {chromium} from 'playwright';import {resolve} from 'node:path';
-const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox','--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader']});
-try{const context=await browser.newContext({viewport:{width:1600,height:900},offline:true,recordVideo:{dir:'test-results/checkpoint',size:{width:1600,height:900}}});const page=await context.newPage();const video=page.video();await page.addInitScript(()=>{const rng=crypto.getRandomValues.bind(crypto);window.__demoStops=[];crypto.getRandomValues=a=>{if(window.__demoStops.length&&a instanceof Uint32Array){a[0]=window.__demoStops.shift();return a;}return rng(a);};});await page.goto('file://'+resolve('dist/index.html'));await page.locator('#enter-slot').waitFor();await page.click('#enter-slot');await page.locator('#spin').waitFor();await page.waitForTimeout(400);await page.evaluate(()=>window.__demoStops=[0,0,0,0,0]);await page.click('#spin');await page.waitForFunction(()=>document.querySelector('#spin').textContent.includes('SKIP'));assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('fruit-salon:v1')).lastSpin.outcome.payout),70);await page.waitForTimeout(1100);await page.screenshot({path:'docs/slot-v2.png'});await page.waitForTimeout(1600);await context.close();await video.saveAs('docs/first-spin-v2.webm');console.log('Recorded revised checkpoint, forced gross70, no audio track, headless video.');}finally{await browser.close();}
+import assert from "node:assert/strict";
+import { chromium } from "playwright";
+import { resolve } from "node:path";
+const browser = await chromium.launch({
+  executablePath: "/usr/bin/chromium",
+  headless: true,
+  args: ["--no-sandbox", "--enable-unsafe-swiftshader", "--use-gl=angle", "--use-angle=swiftshader"],
+});
+try {
+  const context = await browser.newContext({
+    viewport: { width: 1600, height: 900 },
+    offline: true,
+    recordVideo: { dir: "docs/evidence/checkpoint", size: { width: 1600, height: 900 } },
+  });
+  const page = await context.newPage();
+  const video = page.video();
+  await page.addInitScript(() => {
+    const rng = crypto.getRandomValues.bind(crypto);
+    window.__demoStops = [];
+    crypto.getRandomValues = (a) => {
+      if (window.__demoStops.length && a instanceof Uint32Array) {
+        a[0] = window.__demoStops.shift();
+        return a;
+      }
+      return rng(a);
+    };
+  });
+  await page.goto(`file://${resolve("dist/index.html")}`);
+  await page.locator("#enter-slot").waitFor();
+  await page.click("#enter-slot");
+  await page.locator("#spin").waitFor();
+  await page.waitForTimeout(400);
+  await page.evaluate(() => (window.__demoStops = [0, 0, 0, 0, 0]));
+  await page.click("#spin");
+  await page.waitForFunction(() => document.querySelector("#spin").textContent.includes("SKIP"));
+  assert.equal(
+    await page.evaluate(() => JSON.parse(localStorage.getItem("fruit-salon:v1")).lastSpin.outcome.payout),
+    70,
+  );
+  await page.waitForTimeout(1100);
+  await page.screenshot({ path: "docs/evidence/slot-v2.png" });
+  await page.waitForTimeout(1600);
+  await context.close();
+  await video.saveAs("docs/evidence/first-spin-v2.webm");
+  console.log("Recorded revised checkpoint, forced gross70, no audio track, headless video.");
+} finally {
+  await browser.close();
+}

@@ -1,38 +1,43 @@
 # The Amber Room · Orchard No. 7
 
-Prywatna gra offline: jeden automat5×3 i osobny salon z barem, trzema maszynami biznesowymi oraz wyposażeniem. Interfejs angielski zgodnie z korektą użytkownika. Jedna fikcyjna waluta, bez backendu, kont i prawdziwych pieniędzy.
+A private offline game with a 5×3 slot machine and a separate lounge with a bar, three business machines, and furnishings. The interface is in English. The game uses one fictional currency, with no backend, accounts, or real money.
 
-## Uruchomienie
+## Play the game
 
-Otwórz **[dist/index.html](dist/index.html)** dwuklikiem w aktualnej przeglądarce z WebGL (sprawdzono Chromium156). Nie potrzeba serwera ani sieci. Plik ma około6.6MB i zawiera wszystkie22 obrazy/dźwięki oraz kod i style. Pierwszy klik odblokowuje audio.
+Double-click [dist/index.html](dist/index.html) to open it in a current browser with WebGL support (tested in Chromium 156). You do not need a server or an internet connection. The file is about 6.6 MB and includes all 22 image and audio assets, code, and styles. Your first click enables audio.
 
-- `Play Orchard No. 7` otwiera automat. `START` lub spacja rozpoczynają jeden obrót; przytrzymanie nie daje auto-spin.
-- `Bet / line` × `Lines` = `TOTAL BET`. Aktywne są pierwsze1/5/10/20/40 linii. `Lines & payouts` pokazuje dokładne ścieżki i tabelę.
-- `SKIP` lub spacja skracają wygraną, bez kolejnego zakładu. `← Lounge` wraca do salonu po zatrzymaniu bębnów.
-- `Settings & save`: wyciszenie, ograniczony ruch, intensywność efektów i kopia postępu. Tab/Shift+Tab i Enter/Space obsługują zwykłe przyciski; fokus jest widoczny.
-- Salon zarabia automatycznie w obu widokach oraz po powrocie, do8h jednej nieobecności. Zakupy mają po3 skończone poziomy. `Buy the room a round` kosztuje50, daje tylko krótką reakcję.
+- `Play Orchard No. 7` opens the slot machine. Press `START` or Space to spin once. Holding the button or key does not trigger automatic spins.
+- `Bet / line` × `Lines` = `TOTAL BET`. Choose the first 1, 5, 10, 20, or 40 paylines. `Lines & payouts` shows their exact paths and the payout table.
+- Press `SKIP` or Space to shorten a win celebration without placing another bet. `← Lounge` returns to the lounge once the reels stop.
+- `Settings & save` lets you mute audio, reduce motion, adjust effect intensity, and back up your progress. Use Tab/Shift+Tab to move between standard buttons and Enter/Space to activate them. Keyboard focus is visible.
+- The lounge earns income automatically in both views and credits up to 8 hours of income when you return from an absence. Each purchase has three upgrade levels. `Buy the room a round` costs 50 and triggers a brief reaction with no other benefit.
 
-## Kopia i przenoszenie zapisu
+## Back up and transfer saves
 
-`Settings & save` → `Export JSON` pobiera plik. W innym katalogu/urządzeniu otwórz grę i użyj `Import JSON`. Import najpierw waliduje cały plik; nieprawidłowy nie zastępuje postępu. Import zastępuje bieżący postęp poprawną kopią.
+Open `Settings & save` and choose `Export JSON` to download your save. To move it to another folder or device, open the game there and choose `Import JSON`. The game validates the entire file before importing it. A valid import replaces your current progress; an invalid file leaves it untouched.
 
-localStorage używa klucza `fruit-salon:v1`. Dostęp do niego dla plików `file://` zależy od przeglądarki i lokalizacji HTML; eksport jest przenośną kopią. Przy uszkodzonym zapisie oryginał jest chroniony, można go pobrać przez `Download damaged original`. Przy odmowie storage gra działa w pamięci z ostrzeżeniem — eksportuj przed zamknięciem. Wynik i saldo zapisują się razem przed animacją; restart nie wypłaca drugi raz.
+The game saves to localStorage under `fruit-salon:v1`. For `file://` pages, storage access depends on the browser and the HTML file's location. Use JSON exports as portable backups.
 
-## Źródła i sprawdzenia
+If a save is damaged, the game protects the original and lets you retrieve it with `Download damaged original`. If the browser blocks storage, the game runs in memory and displays a warning. Export your save before closing it. Spin results and the balance are saved together before the animation starts, so restarting does not pay out the same win twice.
 
-Wymagany Node24 lub26 (sprawdzono26.12.1). Pierwsze `npm ci` pobiera zależności; zbudowana gra ich nie pobiera.
+## Development and checks
+
+Use Node 24 or 26 (tested with 26.12.1). The initial `npm ci` downloads dependencies; the built game does not download them.
 
 ```sh
 npm ci
+npm run check
 npm test
 npm run typecheck
 npm run build
 npm run check:offline
 ```
 
-`npm run dev` uruchamia Vite do pracy nad źródłami. Tylko development ma oznaczone przyciski wymuszonych scenariuszy; nie ma ich w `dist/index.html`. Phaser jest przypięty do4.2.1, zależności zapisane w lockfile. `build` generuje jeden samodzielny plik, bez katalogu `public` i zewnętrznych fontów.
+`npm run dev` starts Vite for development. Labeled buttons for forcing test scenarios appear only in development, not in `dist/index.html`. Phaser is pinned to 4.2.1, and the lockfile records dependencies. `build` produces a single standalone file without a `public` directory or external fonts.
 
-Powtarzalny odbiór pliku offline w lokalnym Chromium:
+Use `npm run format` to format supported files across the repository with Biome. `npm run check` checks formatting and lint rules; `npm run check:fix` applies formatting and safe fixes. You can also run `npm run lint` and `npm run format:check` separately. The build and GitHub Actions require `check` to pass. For formatting on save in VS Code or Cursor, install the recommended Biome extension. Biome does not handle Python scripts or binary files.
+
+Run the offline browser acceptance checks in local Chromium:
 
 ```sh
 node scripts/browser-acceptance.mjs
@@ -42,12 +47,18 @@ node scripts/browser-idle.mjs
 node scripts/browser-performance.mjs
 ```
 
-Te skrypty używają zainstalowanego `/usr/bin/chromium`; na innym systemie dostosuj `executablePath`. Nie instalują przeglądarki i nie uruchamiają serwera. Test przycinania porównuje piksele klatek przez Python/Pillow. Testy wymuszają wyniki przez podmianę RNG **w swoim środowisku przeglądarkowym**, bez produkcyjnego panelu ani dopisywania salda w grze. Raport wydajności jest z headless SwiftShader, nie z docelowego GPU użytkownika.
+These scripts use an existing `/usr/bin/chromium` installation. Adjust `executablePath` on other systems. They do not install a browser or start a server. The reel-clipping test compares frame pixels using Python/Pillow.
 
-## Zasoby i raport
+The tests force outcomes by replacing the RNG within their browser environment. They do not use a production control panel or add to the in-game balance. Performance measurements come from headless SwiftShader, not the player's GPU.
 
-Własna rodzina bitmap powstała w `image_gen`, liczby7/WILD i dokładna obudowa kodowo, audio to13 oryginalnych syntetycznych WAV. Nie wykorzystano sampli Kenney/Freesound — pobranie archiwum Kenney dało HTTP403. Szczegóły, źródła i modyfikacje: [runtime manifest](src/assets/manifest.json), [pochodzenie i prompty](docs/asset-generation.md), [noty Phaser MIT](docs/THIRD_PARTY_NOTICES.md). Bezstratne źródła i generatory są w repozytorium.
+## Assets and reports
 
-[Wykonane testy i ograniczenia](docs/playtest.md), [decyzje](docs/decisions.md), [dokładna matematyka](docs/math-report.json), [pomiar techniczny](docs/performance-report.json), niezależne review w `docs/reviews/`.
+Screenshots, recordings, and the asset preview sheet go in `docs/evidence/`. This local directory is ignored by Git and created automatically by the scripts.
 
-Odbiór poprawionej oprawy przez użytkownika, odsłuch na słuchawkach/głośnikach oraz60FPS na jego komputerze pozostają osobnymi, niesprawdzonymi pozycjami. Kod i pomiar headless tego nie zastępują.
+The custom bitmap set was created with `image_gen`. The 7/WILD symbols and the precise cabinet geometry were drawn in code. Audio consists of 13 original synthesized WAV files. The game uses no Kenney or Freesound samples; the Kenney archive download returned HTTP 403. Lossless sources and generators are included in the repository.
+
+For asset details, sources, and modifications, see the [runtime manifest](src/assets/manifest.json), [asset origins and prompts](docs/asset-generation.md), and [Phaser MIT notices](docs/THIRD_PARTY_NOTICES.md).
+
+Further documentation covers [tests and limitations](docs/playtest.md), [design decisions](docs/decisions.md), [exact game math](docs/math-report.json), and [performance measurements](docs/performance-report.json). Independent reviews are in `docs/reviews/`.
+
+User approval of the revised visuals, listening checks on headphones and speakers, and confirmation of 60 FPS on the player's computer remain unverified. Code checks and headless measurements do not establish those results.
