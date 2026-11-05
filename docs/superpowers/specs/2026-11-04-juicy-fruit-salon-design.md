@@ -1,6 +1,6 @@
 # Owocowy salon offline — projekt gry
 
-Data aktualizacji: 2026-11-04. Status: uzgodniony kierunek produktu, robocze parametry balansu, bez implementacji.
+Data aktualizacji: 2026-11-04. Status: MVP wdrożone technicznie; aktualizacja wykonawcza 2026-11-05, odbiór poprawionego feelingu i odsłuch użytkownika oczekują.
 
 Pakiet wykonawczy MVP: [prompt startowy](../../../START-MVP.md), [brief zasobów](../assets/2026-11-04-mvp-asset-brief.md) i [lista planowanych zasobów](../assets/2026-11-04-mvp-assets.plan.json). Zlecenie implementacji następuje po użyciu promptu w docelowym repozytorium; dokumenty w tej sesji przygotowują przekazanie.
 
@@ -74,7 +74,7 @@ Początkowy pasek dla każdego bębna: `cherry, lemon, plum, cherry, melon, lemo
 
 Wygrywają ciągi minimum trzech symboli od lewej. Wild zastępuje symbol zwykły i może płacić jako własny symbol. Dla każdej aktywnej linii sprawdzić wszystkie dopasowania i wypłacić wyłącznie najwyższe. Sumować wypłaty aktywnych linii. Kwota stawki na linię mnoży wynik tabeli; nie dzielić łącznej stawki przez stałą pięć.
 
-Robocze mnożniki stawki na linię za 3 / 4 / 5 symboli: cherry `2/5/15`, lemon `3/8/20`, plum `4/12/35`, melon `6/20/60`, seven `12/40/120`, wild `20/80/200`. Zmiana linii przed nowym obrotem nie zmienia wyniku ani kosztu poprzedniego. Rekord obrotu przechowuje zastosowany zakład.
+Robocze mnożniki stawki na linię za 3 / 4 / 5 symboli: cherry `2/5/15`, lemon `3/8/20`, plum `4/12/35`, melon `6/20/60`, seven `12/40/120`, wild `20/80/2000`. Zmiana linii przed nowym obrotem nie zmienia wyniku ani kosztu poprzedniego. Rekord obrotu przechowuje zastosowany zakład.
 
 Darmowe obroty, dodatkowe grywalne maszyny i bonusowe minigry pozostają poza pierwszą wersją.
 
@@ -100,7 +100,7 @@ Nie wybrano jeszcze konkretnych plików audio, nie wykonano odsłuchu i nie wyge
 
 ## Ruch, dźwięk i reakcja salonu
 
-Profil roboczy: rozruch `180 ms`, wspólny ruch `650 ms`, hamowanie `220 ms`, odstęp startu hamowania kolejnych bębnów `140 ms`; całość około `1610 ms`. Bębny przewijają się w jednym kierunku, z lekkim rozmyciem, kontrolowanym wyhamowaniem i osadzeniem symboli. Wynik jest ustalony przed animacją. Ruch zależy od czasu, nie liczby klatek.
+Profil roboczy: rozruch `220 ms`, wspólny ruch `560 ms`, hamowanie `380 ms`, odstęp startu hamowania kolejnych bębnów `110 ms`; całość `1600 ms`. Bębny przewijają się w jednym kierunku, z lekkim rozmyciem, kontrolowanym wyhamowaniem i osadzeniem symboli. Wynik jest ustalony przed animacją. Ruch zależy od czasu, nie liczby klatek.
 
 Po zatrzymaniu wskazać zwycięskie symbole i turkusowe ścieżki; licznik wypłaty pokazuje kwotę brutto. Poziom celebracji zależy od zysku `payout - totalStake`:
 
@@ -117,20 +117,20 @@ Pierwszy gest odblokowuje dźwięk. Wyciszenie obejmuje wszystkie aktywne źród
 
 ## Salon i ekonomia o umiarkowanej skali
 
-Jeden portfel żetonów. Dochód biznesu jest stałym **dochodem netto**; nie dodawać drugiego systemu ręcznego rozliczania czynszu/pracowników. Saldo początkowe `1000`, bazowy dochód `120/h`, maksymalnie `8 h` rozliczenia jednej przerwy. Dochód trafia automatycznie do portfela; bez obowiązku klikania „odbierz”.
+Jeden portfel żetonów. Dochód biznesu jest stałym **dochodem netto**; nie dodawać drugiego systemu ręcznego rozliczania czynszu/pracowników. Saldo początkowe `1000`, bazowy dochód `64/h`, maksymalnie `8 h` rozliczenia jednej przerwy. Dochód trafia automatycznie do portfela; bez obowiązku klikania „odbierz”.
 
 Poniższe skończone tabele są propozycją wykonawczą do symulacji:
 
-- **Bar, poziomy 0–3:** kolejne zakupy `500,1000,2000`; dodatkowy dochód dla poziomów `0,40,80,120/h`.
-- **Dodatkowe automaty, liczba 0–3:** ceny kolejnych sztuk `750,1500,3000`; każda dodaje `60/h`. Przyrost dochodu jest liniowy.
+- **Bar, poziomy 0–3:** kolejne zakupy `500,1000,2000`; dodatkowy dochód dla poziomów `0,12,24,36/h`.
+- **Dodatkowe automaty, liczba 0–3:** ceny kolejnych sztuk `750,1500,3000`; każda dodaje `20/h`. Przyrost dochodu jest liniowy.
 - **Wyposażenie salonu, poziomy 0–3:** kolejne zakupy `300,900,1800`; widoczna zmiana wyglądu, bez mnożnika dochodu i bez zmiany szans automatu.
 - **Opcjonalne „Postaw kolejkę”, koszt `50`:** krótka reakcja w widoku salonu, bez nagrody i statystycznego bonusu. To proponowany niewielki wydatek dla klimatu właściciela, nie obowiązek ani nowa mechanika alkoholu/postaci.
 
-Najwyższy dochód z powyższej tabeli wynosi `420/h`, czyli maksymalnie `3360` za ośmiogodzinną przerwę. Żaden zakup nie odblokowuje nieograniczonego automatycznego mnożenia. Bar, automaty i wyposażenie mają trwałą reprezentację w salonie, a nie wyłącznie większy numer w menu.
+Najwyższy dochód z powyższej tabeli wynosi `160/h`, czyli maksymalnie `1280` za ośmiogodzinną przerwę. Żaden zakup nie odblokowuje nieograniczonego automatycznego mnożenia. Bar, automaty i wyposażenie mają trwałą reprezentację w salonie, a nie wyłącznie większy numer w menu.
 
 Dochód z biznesów nie odzyskuje bezpośrednio żetonów przegranych przez właściciela w ręcznych obrotach. Nie dopisywać straty drugi raz jako „zarobku własnego kasyna”. Ulepszenia nie zmieniają RNG, stawek ani tabeli wypłat.
 
-Pieniądze pokazywać zwykłymi liczbami z separatorem tysięcy, bez K/M/B. Cel balansu: codzienne operacje w dziesiątkach, setkach i tysiącach; duże jednorazowe wygrane mogą wejść w dziesiątki tysięcy. Przy obecnej tabeli bezpieczna górna granica sumy wypłat to `40_000` przy zakładzie `40 × 5` (40 linii razy stawka 5 razy najwyższy mnożnik 200). Faktyczny osiągalny maksymalny wynik zależy od pasków i katalogu ścieżek; policzyć go przy enumeracji. Nie jest to limit odcinający wynik.
+Pieniądze pokazywać zwykłymi liczbami z separatorem tysięcy, bez K/M/B. Cel balansu: codzienne operacje w dziesiątkach, setkach i tysiącach; duże jednorazowe wygrane mogą wejść w dziesiątki tysięcy. Przy obecnej tabeli bezpieczna górna granica sumy wypłat to `400_000` przy zakładzie `40 × 5` (40 linii razy stawka 5 razy najwyższy mnożnik 2000). Enumeracja 12^5 stopów: osiągalne maksimum przy 40 × 5 wynosi 13 055; domyślnie przy 5 × 1 wynosi 2080. RTP 76,289223% dla wszystkich ustawień linii. Nie jest to limit odcinający wynik.
 
 Nie wprowadzać ukrytego twardego limitu portfela ani konfiskaty nadwyżki. Skończone ulepszenia i stawki ograniczają wzrost, ale sam liniowy dochód nie daje matematycznej gwarancji małego salda przez dowolnie długi czas. Symulacja długich sesji ma wykrywać nadmierną akumulację; korygować jawne ceny, dochód i wydatki, nie odzyskiwać już zdobytych żetonów. Twardy limit bogactwa wymagałby osobnej decyzji użytkownika.
 
@@ -159,3 +159,9 @@ Kryteria odbioru: spójne sceny bez salonu za bębnami; poprawna cena i wypłata
 ## Nadal do sprawdzenia w wykonaniu
 
 Rzeczywiste odczucie dźwięku i animacji, ostateczne tempo zakupów oraz akumulacja waluty w długim okresie. Nazwę roboczą, kształty pozostałych linii i drobne detale wyposażenia wybiera wykonawca w zaakceptowanym stylu. Liczby ekonomii są punktami startowymi, a nie już zweryfikowanym balansem.
+
+## Aktualizacja wykonawcza 2026-11-05
+
+Użytkownik po pierwszym obrocie zlecił spokojniejsze efekty, dużo płynniejszy ruch, mniej generyczną oprawę oraz potwierdził język angielski interfejsu. Nazwa: The Amber Room / Orchard No. 7. Wyróżniamy jedną najlepszą linię, wypłacamy pełną sumę wszystkich aktywnych wygranych. Brak skalowania owoców, wolniejsza poświata, intensity domyślnie 0.4. Syntetyczne oryginalne WAV zastępują niedostępne archiwum Kenney (HTTP403); pochodzenie i ograniczenia w docs/asset-generation.md.
+
+Tuning ekonomii uzasadniony raportem docs/math-report.json: 64/h baza, 12/h/poziom baru i 20/h/maszynę, max160/h. Pięć wildów 2000×, pozostałe wypłaty i paski bez zmian. Doba przerwy rozlicza8h =512 żetonów bazy, powrót do najtańszego zakładu po56.25s. Brak limitu portfela; po180d saldo nadal może wynosić setki tysięcy, wzrost liniowy nie jest matematycznie ograniczony. Starsze sekcje o nieprzygotowanych zasobach opisują stan planowania; rzeczywisty stan pochodzi z runtime manifestu i docs/playtest.md.

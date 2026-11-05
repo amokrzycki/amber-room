@@ -1,0 +1,64 @@
+{
+  "date": "2026-11-04T23:33:59.586Z",
+  "browser": "156.0.8078.73",
+  "os": "linux 7.3.0-4-cachyos",
+  "cpu": "AMD Ryzen 7 5800X3D 8-Core Processor",
+  "cpus": 16,
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "softwareRendering": true,
+  "recordVideo": false,
+  "case": "40 lines × 5, exact maximum payout 13055, stops9/10/10/10/9; 12 scene round trips",
+  "rafIntervalMs": {
+    "samples": 204,
+    "mean": 25.816176470588236,
+    "p50": 33.29999999999927,
+    "p95": 33.400000000000546,
+    "max": 50
+  },
+  "mainCallbackMs": {
+    "samples": 204,
+    "mean": 1.1799019607943575,
+    "p50": 0.8999999994412065,
+    "p95": 1.5,
+    "max": 27.300000000745058
+  },
+  "estimatedRafFps": 38.73540301908288,
+  "domBefore": {
+    "documents": 1,
+    "nodes": 419,
+    "jsEventListeners": 99
+  },
+  "domAfter": {
+    "documents": 1,
+    "nodes": 419,
+    "jsEventListeners": 99
+  },
+  "performanceMetrics": [
+    {
+      "name": "JSEventListeners",
+      "value": 144
+    },
+    {
+      "name": "Nodes",
+      "value": 545
+    },
+    {
+      "name": "ScriptDuration",
+      "value": 0.919473
+    },
+    {
+      "name": "TaskDuration",
+      "value": 1.573464
+    },
+    {
+      "name": "JSHeapUsedSize",
+      "value": 8114392
+    }
+  ],
+  "errors": [],
+  "limits": "Headless Chromium + SwiftShader. No user hardware, GPU timing or acoustic listening. RAF is not a guarantee of perceived 60FPS."
+}

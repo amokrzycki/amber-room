@@ -1,0 +1,14 @@
+name: Code checks
+
+on: [ push, pull_request ]
+
+permissions:
+  contents: read
+
+jobs:
+  biome:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v4
+      - uses: biomejs/setup-biome@v2
+      - run: biome check --error-on-warnings .
