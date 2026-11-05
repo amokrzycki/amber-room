@@ -1,0 +1,511 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-05T10:36:27.336326+00:00",
+  "title": "Design System: The Amber Room · Orchard No. 7",
+  "extensions": {
+    "colorMeta": {
+      "antique-gold": {
+        "role": "primary",
+        "displayName": "Antique Gold",
+        "tonalRamp": [
+          "oklch(15.00% 0.11823 84.82)",
+          "oklch(26.43% 0.11823 84.82)",
+          "oklch(37.86% 0.11823 84.82)",
+          "oklch(49.29% 0.11823 84.82)",
+          "oklch(60.71% 0.11823 84.82)",
+          "oklch(72.14% 0.11823 84.82)",
+          "oklch(83.57% 0.11823 84.82)",
+          "oklch(95.00% 0.11823 84.82)"
+        ]
+      },
+      "wine-velvet": {
+        "role": "secondary",
+        "displayName": "Wine Velvet",
+        "tonalRamp": [
+          "oklch(15.00% 0.07343 2.62)",
+          "oklch(26.43% 0.07343 2.62)",
+          "oklch(37.86% 0.07343 2.62)",
+          "oklch(49.29% 0.07343 2.62)",
+          "oklch(60.71% 0.07343 2.62)",
+          "oklch(72.14% 0.07343 2.62)",
+          "oklch(83.57% 0.07343 2.62)",
+          "oklch(95.00% 0.07343 2.62)"
+        ]
+      },
+      "wine-shadow": {
+        "role": "secondary",
+        "displayName": "Wine Shadow",
+        "tonalRamp": [
+          "oklch(15.00% 0.03389 349.28)",
+          "oklch(26.43% 0.03389 349.28)",
+          "oklch(37.86% 0.03389 349.28)",
+          "oklch(49.29% 0.03389 349.28)",
+          "oklch(60.71% 0.03389 349.28)",
+          "oklch(72.14% 0.03389 349.28)",
+          "oklch(83.57% 0.03389 349.28)",
+          "oklch(95.00% 0.03389 349.28)"
+        ]
+      },
+      "candlelit-cream": {
+        "role": "neutral",
+        "displayName": "Candlelit Cream",
+        "tonalRamp": [
+          "oklch(15.00% 0.05124 91.37)",
+          "oklch(26.43% 0.05124 91.37)",
+          "oklch(37.86% 0.05124 91.37)",
+          "oklch(49.29% 0.05124 91.37)",
+          "oklch(60.71% 0.05124 91.37)",
+          "oklch(72.14% 0.05124 91.37)",
+          "oklch(83.57% 0.05124 91.37)",
+          "oklch(95.00% 0.05124 91.37)"
+        ]
+      },
+      "mint-light": {
+        "role": "tertiary",
+        "displayName": "Mint Light",
+        "tonalRamp": [
+          "oklch(15.00% 0.13931 182.76)",
+          "oklch(26.43% 0.13931 182.76)",
+          "oklch(37.86% 0.13931 182.76)",
+          "oklch(49.29% 0.13931 182.76)",
+          "oklch(60.71% 0.13931 182.76)",
+          "oklch(72.14% 0.13931 182.76)",
+          "oklch(83.57% 0.13931 182.76)",
+          "oklch(95.00% 0.13931 182.76)"
+        ]
+      },
+      "night": {
+        "role": "neutral",
+        "displayName": "Night",
+        "tonalRamp": [
+          "oklch(15.00% 0.01058 326.05)",
+          "oklch(26.43% 0.01058 326.05)",
+          "oklch(37.86% 0.01058 326.05)",
+          "oklch(49.29% 0.01058 326.05)",
+          "oklch(60.71% 0.01058 326.05)",
+          "oklch(72.14% 0.01058 326.05)",
+          "oklch(83.57% 0.01058 326.05)",
+          "oklch(95.00% 0.01058 326.05)"
+        ]
+      },
+      "room-dark": {
+        "role": "neutral",
+        "displayName": "Room Dark",
+        "tonalRamp": [
+          "oklch(15.00% 0.00907 351.94)",
+          "oklch(26.43% 0.00907 351.94)",
+          "oklch(37.86% 0.00907 351.94)",
+          "oklch(49.29% 0.00907 351.94)",
+          "oklch(60.71% 0.00907 351.94)",
+          "oklch(72.14% 0.00907 351.94)",
+          "oklch(83.57% 0.00907 351.94)",
+          "oklch(95.00% 0.00907 351.94)"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Panel",
+        "tonalRamp": [
+          "oklch(15.00% 0.02180 340.61)",
+          "oklch(26.43% 0.02180 340.61)",
+          "oklch(37.86% 0.02180 340.61)",
+          "oklch(49.29% 0.02180 340.61)",
+          "oklch(60.71% 0.02180 340.61)",
+          "oklch(72.14% 0.02180 340.61)",
+          "oklch(83.57% 0.02180 340.61)",
+          "oklch(95.00% 0.02180 340.61)"
+        ]
+      },
+      "control": {
+        "role": "neutral",
+        "displayName": "Control",
+        "tonalRamp": [
+          "oklch(15.00% 0.02806 342.60)",
+          "oklch(26.43% 0.02806 342.60)",
+          "oklch(37.86% 0.02806 342.60)",
+          "oklch(49.29% 0.02806 342.60)",
+          "oklch(60.71% 0.02806 342.60)",
+          "oklch(72.14% 0.02806 342.60)",
+          "oklch(83.57% 0.02806 342.60)",
+          "oklch(95.00% 0.02806 342.60)"
+        ]
+      },
+      "control-hover": {
+        "role": "neutral",
+        "displayName": "Control Hover",
+        "tonalRamp": [
+          "oklch(15.00% 0.05041 353.74)",
+          "oklch(26.43% 0.05041 353.74)",
+          "oklch(37.86% 0.05041 353.74)",
+          "oklch(49.29% 0.05041 353.74)",
+          "oklch(60.71% 0.05041 353.74)",
+          "oklch(72.14% 0.05041 353.74)",
+          "oklch(83.57% 0.05041 353.74)",
+          "oklch(95.00% 0.05041 353.74)"
+        ]
+      },
+      "brass-border": {
+        "role": "neutral",
+        "displayName": "Brass Border",
+        "tonalRamp": [
+          "oklch(15.00% 0.05573 49.41)",
+          "oklch(26.43% 0.05573 49.41)",
+          "oklch(37.86% 0.05573 49.41)",
+          "oklch(49.29% 0.05573 49.41)",
+          "oklch(60.71% 0.05573 49.41)",
+          "oklch(72.14% 0.05573 49.41)",
+          "oklch(83.57% 0.05573 49.41)",
+          "oklch(95.00% 0.05573 49.41)"
+        ]
+      },
+      "muted-copy": {
+        "role": "neutral",
+        "displayName": "Muted Copy",
+        "tonalRamp": [
+          "oklch(15.00% 0.04089 65.86)",
+          "oklch(26.43% 0.04089 65.86)",
+          "oklch(37.86% 0.04089 65.86)",
+          "oklch(49.29% 0.04089 65.86)",
+          "oklch(60.71% 0.04089 65.86)",
+          "oklch(72.14% 0.04089 65.86)",
+          "oklch(83.57% 0.04089 65.86)",
+          "oklch(95.00% 0.04089 65.86)"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Field",
+        "tonalRamp": [
+          "oklch(15.00% 0.02574 342.09)",
+          "oklch(26.43% 0.02574 342.09)",
+          "oklch(37.86% 0.02574 342.09)",
+          "oklch(49.29% 0.02574 342.09)",
+          "oklch(60.71% 0.02574 342.09)",
+          "oklch(72.14% 0.02574 342.09)",
+          "oklch(83.57% 0.02574 342.09)",
+          "oklch(95.00% 0.02574 342.09)"
+        ]
+      },
+      "gold-top": {
+        "role": "primary",
+        "displayName": "Gold Top",
+        "tonalRamp": [
+          "oklch(15.00% 0.11256 85.98)",
+          "oklch(26.43% 0.11256 85.98)",
+          "oklch(37.86% 0.11256 85.98)",
+          "oklch(49.29% 0.11256 85.98)",
+          "oklch(60.71% 0.11256 85.98)",
+          "oklch(72.14% 0.11256 85.98)",
+          "oklch(83.57% 0.11256 85.98)",
+          "oklch(95.00% 0.11256 85.98)"
+        ]
+      },
+      "gold-bottom": {
+        "role": "primary",
+        "displayName": "Gold Bottom",
+        "tonalRamp": [
+          "oklch(15.00% 0.11793 73.30)",
+          "oklch(26.43% 0.11793 73.30)",
+          "oklch(37.86% 0.11793 73.30)",
+          "oklch(49.29% 0.11793 73.30)",
+          "oklch(60.71% 0.11793 73.30)",
+          "oklch(72.14% 0.11793 73.30)",
+          "oklch(83.57% 0.11793 73.30)",
+          "oklch(95.00% 0.11793 73.30)"
+        ]
+      },
+      "gold-hover-top": {
+        "role": "primary",
+        "displayName": "Gold Hover Top",
+        "tonalRamp": [
+          "oklch(15.00% 0.08992 87.85)",
+          "oklch(26.43% 0.08992 87.85)",
+          "oklch(37.86% 0.08992 87.85)",
+          "oklch(49.29% 0.08992 87.85)",
+          "oklch(60.71% 0.08992 87.85)",
+          "oklch(72.14% 0.08992 87.85)",
+          "oklch(83.57% 0.08992 87.85)",
+          "oklch(95.00% 0.08992 87.85)"
+        ]
+      },
+      "gold-rim": {
+        "role": "primary",
+        "displayName": "Gold Rim",
+        "tonalRamp": [
+          "oklch(15.00% 0.08117 97.85)",
+          "oklch(26.43% 0.08117 97.85)",
+          "oklch(37.86% 0.08117 97.85)",
+          "oklch(49.29% 0.08117 97.85)",
+          "oklch(60.71% 0.08117 97.85)",
+          "oklch(72.14% 0.08117 97.85)",
+          "oklch(83.57% 0.08117 97.85)",
+          "oklch(95.00% 0.08117 97.85)"
+        ]
+      },
+      "primary-ink": {
+        "role": "primary",
+        "displayName": "Primary Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.04108 359.64)",
+          "oklch(26.43% 0.04108 359.64)",
+          "oklch(37.86% 0.04108 359.64)",
+          "oklch(49.29% 0.04108 359.64)",
+          "oklch(60.71% 0.04108 359.64)",
+          "oklch(72.14% 0.04108 359.64)",
+          "oklch(83.57% 0.04108 359.64)",
+          "oklch(95.00% 0.04108 359.64)"
+        ]
+      },
+      "payout-glow": {
+        "role": "neutral",
+        "displayName": "Payout Glow",
+        "tonalRamp": [
+          "oklch(15.00% 0.08792 84.90)",
+          "oklch(26.43% 0.08792 84.90)",
+          "oklch(37.86% 0.08792 84.90)",
+          "oklch(49.29% 0.08792 84.90)",
+          "oklch(60.71% 0.08792 84.90)",
+          "oklch(72.14% 0.08792 84.90)",
+          "oklch(83.57% 0.08792 84.90)",
+          "oklch(95.00% 0.08792 84.90)"
+        ]
+      },
+      "warning": {
+        "role": "neutral",
+        "displayName": "Warning",
+        "tonalRamp": [
+          "oklch(15.00% 0.11491 68.95)",
+          "oklch(26.43% 0.11491 68.95)",
+          "oklch(37.86% 0.11491 68.95)",
+          "oklch(49.29% 0.11491 68.95)",
+          "oklch(60.71% 0.11491 68.95)",
+          "oklch(72.14% 0.11491 68.95)",
+          "oklch(83.57% 0.11491 68.95)",
+          "oklch(95.00% 0.11491 68.95)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Lounge title."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Base secondary headings; contextual overrides are documented."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Purchase headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Lounge introductory paragraph."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Tracked uppercase eyebrows."
+      },
+      "navigation": {
+        "displayName": "Navigation",
+        "purpose": "Header menu buttons."
+      },
+      "brand": {
+        "displayName": "Brand",
+        "purpose": "Shared masthead."
+      },
+      "balance": {
+        "displayName": "Balance",
+        "purpose": "Machine balance; lounge uses 46px."
+      },
+      "payout": {
+        "displayName": "Payout",
+        "purpose": "Central gross payout."
+      },
+      "select": {
+        "displayName": "Select",
+        "purpose": "Native bet selectors."
+      },
+      "spin": {
+        "displayName": "Spin",
+        "purpose": "START/SKIP control."
+      }
+    },
+    "shadows": [
+      {
+        "name": "raised-action",
+        "value": "0 5px 0 #72401f, 0 8px 28px #0006",
+        "purpose": "Solid lower edge and soft surrounding shadow on primary actions."
+      },
+      {
+        "name": "dialog-separation",
+        "value": "0 20px 90px #000b",
+        "purpose": "Separate modal content from the game."
+      },
+      {
+        "name": "text-over-artwork",
+        "value": "0 2px 20px #000",
+        "purpose": "Protect lounge introductory copy over artwork."
+      }
+    ],
+    "motion": [
+      {
+        "name": "button-transition",
+        "value": "background 0.15s, border-color 0.15s",
+        "purpose": "Standard button feedback; removed by CSS prefers-reduced-motion."
+      },
+      {
+        "name": "reel-acceleration",
+        "value": "220ms",
+        "purpose": "Initial acceleration; custom continuous velocity easing in ReelView."
+      },
+      {
+        "name": "reel-cruise",
+        "value": "560ms",
+        "purpose": "Base cruise duration, extended by each reel stagger."
+      },
+      {
+        "name": "reel-braking",
+        "value": "380ms",
+        "purpose": "Smooth final braking; reels still move with reduced motion enabled."
+      },
+      {
+        "name": "reel-stagger",
+        "value": "110ms",
+        "purpose": "Per-column duration increment; total durations 1160–1600ms."
+      },
+      {
+        "name": "cabinet-glow",
+        "value": "1100ms Sine.easeInOut",
+        "purpose": "Yoyo glow for big wins and jackpots, suppressed by reduced motion."
+      },
+      {
+        "name": "symbol-pulse",
+        "value": "500ms Sine.easeInOut",
+        "purpose": "Subtle alpha pulse; suppressed by reduced motion or zero effect intensity."
+      },
+      {
+        "name": "celebration-small",
+        "value": "700ms",
+        "purpose": "Maximum small-win celebration; skippable."
+      },
+      {
+        "name": "celebration-big",
+        "value": "2200ms",
+        "purpose": "Maximum big-win celebration; skippable."
+      },
+      {
+        "name": "celebration-jackpot",
+        "value": "4000ms",
+        "purpose": "Maximum jackpot celebration; skippable."
+      }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary Spin Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Raised gold START/SKIP action, shown in its ready state.",
+      "html": "<button class=\"ds-spin\" type=\"button\">START <span>↻</span></button>",
+      "css": ".ds-spin { font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #fff2cc; background: #2c1d26; border: 1px solid #73503d; border-radius: 8px; padding: 13px 20px; cursor: pointer; transition: background 0.15s, border-color 0.15s; } .ds-spin:hover { background: #452633; border-color: #d8af55; } .ds-spin:focus-visible { outline: 3px solid #35e6d1; outline-offset: 4px; } .ds-spin:disabled { opacity: 0.5; cursor: default; } .ds-spin { width: 270px; padding: 15px; font-size: 23px; letter-spacing: 3px; font-weight: 700; background: linear-gradient(#f4ce79, #c58d3c); color: #2b131b; border: 1px solid #fff2b3; box-shadow: 0 5px 0 #72401f, 0 8px 28px #0006; } .ds-spin:hover { background: linear-gradient(#ffe3a0, #d8af55); } .ds-spin span { float: right; font-size: 28px; } @media (prefers-reduced-motion: reduce) { .ds-spin { transition: none; } }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Standard dark action, using the existing export label.",
+      "html": "<button class=\"ds-secondary\" type=\"button\">Export JSON</button>",
+      "css": ".ds-secondary { font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #fff2cc; background: #2c1d26; border: 1px solid #73503d; border-radius: 8px; padding: 13px 20px; cursor: pointer; transition: background 0.15s, border-color 0.15s; } .ds-secondary:hover { background: #452633; border-color: #d8af55; } .ds-secondary:focus-visible { outline: 3px solid #35e6d1; outline-offset: 4px; } .ds-secondary:disabled { opacity: 0.5; cursor: default; }  @media (prefers-reduced-motion: reduce) { .ds-secondary { transition: none; } }"
+    },
+    {
+      "name": "Header Navigation",
+      "kind": "nav",
+      "refersTo": "button-navigation",
+      "description": "The two shared transparent header actions.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Game menus\"><button class=\"ds-nav-button\" type=\"button\">Lines &amp; payouts</button><button class=\"ds-nav-button\" type=\"button\">Settings &amp; save</button></nav>",
+      "css": ".ds-nav-button { font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #fff2cc; background: #2c1d26; border: 1px solid #73503d; border-radius: 8px; padding: 13px 20px; cursor: pointer; transition: background 0.15s, border-color 0.15s; } .ds-nav-button:hover { background: #452633; border-color: #d8af55; } .ds-nav-button:focus-visible { outline: 3px solid #35e6d1; outline-offset: 4px; } .ds-nav-button:disabled { opacity: 0.5; cursor: default; } .ds-nav { display: flex; gap: 12px; } .ds-nav .ds-nav-button { background: transparent; border-color: #73503d80; padding: 11px 17px; font-size: 16px; } @media (prefers-reduced-motion: reduce) { .ds-nav-button { transition: none; } }"
+    },
+    {
+      "name": "Bet Selector",
+      "kind": "input",
+      "refersTo": "bet-select",
+      "description": "Native bet-per-line selector with its contextual label.",
+      "html": "<label class=\"ds-bet\">Bet / line<select class=\"ds-bet-select\"><option>1</option><option>2</option><option>5</option></select></label>",
+      "css": ".ds-bet { display: flex; flex-direction: column; gap: 9px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #d7bba0; } .ds-bet-select { font-family: Arial, Helvetica, sans-serif; background: #20131b; border: 1px solid #896442; color: #fff2cc; border-radius: 6px; font-size: 22px; padding: 7px; width: 95px; cursor: pointer; } .ds-bet-select:focus-visible { outline: 3px solid #35e6d1; outline-offset: 4px; } .ds-bet-select, .ds-checkbox, .ds-range { color-scheme: dark; }"
+    },
+    {
+      "name": "Motion Setting",
+      "kind": "input",
+      "description": "Native checkbox with the implemented motion-setting label.",
+      "html": "<label class=\"ds-setting\"><input class=\"ds-checkbox\" type=\"checkbox\">Reduce motion &amp; lights</label>",
+      "css": ".ds-setting { display: flex; gap: 15px; align-items: center; margin: 27px 0; font-family: Arial, Helvetica, sans-serif; font-size: 19px; color: #fff2cc; } .ds-checkbox { width: 22px; height: 22px; accent-color: #d8af55; font: inherit; } .ds-checkbox:focus-visible { outline: 3px solid #35e6d1; outline-offset: 4px; } .ds-bet-select, .ds-checkbox, .ds-range { color-scheme: dark; }"
+    },
+    {
+      "name": "Effect Intensity",
+      "kind": "input",
+      "description": "Native range with the existing 0–1 scale and default value.",
+      "html": "<label class=\"ds-intensity\">Effect intensity<input class=\"ds-range\" type=\"range\" min=\"0\" max=\"1\" step=\"0.05\" value=\"0.4\"></label>",
+      "css": ".ds-intensity { display: flex; gap: 15px; align-items: center; margin: 27px 0; font-family: Arial, Helvetica, sans-serif; font-size: 19px; color: #fff2cc; } .ds-range { width: 240px; accent-color: #d8af55; font: inherit; } .ds-range:focus-visible { outline: 3px solid #35e6d1; outline-offset: 4px; } .ds-bet-select, .ds-checkbox, .ds-range { color-scheme: dark; }"
+    },
+    {
+      "name": "Purchase Row",
+      "kind": "card",
+      "refersTo": "purchase-row",
+      "description": "Flat upgrade row, with the existing bar entry at its initial level.",
+      "html": "<article class=\"ds-purchase\"><div class=\"ds-purchase-head\"><h3>Bar</h3><small>0 / 3</small></div><p>+12 tokens / hour net · odds stay the same</p><button class=\"ds-purchase-button\" type=\"button\">Add bar <strong>500 tokens</strong></button></article>",
+      "css": ".ds-purchase-button { font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #fff2cc; background: #2c1d26; border: 1px solid #73503d; border-radius: 8px; padding: 13px 20px; cursor: pointer; transition: background 0.15s, border-color 0.15s; } .ds-purchase-button:hover { background: #452633; border-color: #d8af55; } .ds-purchase-button:focus-visible { outline: 3px solid #35e6d1; outline-offset: 4px; } .ds-purchase-button:disabled { opacity: 0.5; cursor: default; } .ds-purchase { width: 435px; padding: 17px 0; border-bottom: 1px solid #d8af552b; font-family: Arial, Helvetica, sans-serif; color: #fff2cc; } .ds-purchase-head { display: flex; align-items: baseline; justify-content: space-between; } .ds-purchase h3 { margin: 0; font-size: 22px; } .ds-purchase small { color: #bca58f; font-size: 13px; } .ds-purchase p { color: #d8c5ae; margin: 12px 0; font-size: 15px; } .ds-purchase-button { width: 100%; font-size: 17px; text-align: left; padding: 12px 16px; } .ds-purchase-button strong { float: right; color: #d8af55; } @media (prefers-reduced-motion: reduce) { .ds-purchase-button { transition: none; } }"
+    },
+    {
+      "name": "Dialog Panel",
+      "kind": "custom",
+      "refersTo": "dialog-panel",
+      "description": "Static sample of the shared modal shell; the game uses a native dialog and backdrop.",
+      "html": "<section class=\"ds-dialog\" role=\"dialog\" aria-label=\"Make yourself at home\"><button class=\"ds-close\" type=\"button\" aria-label=\"Close\">×</button><h2>Make yourself at home</h2><p>Your progress stays on this device. Export a backup before moving this HTML file.</p></section>",
+      "css": ".ds-close { font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #fff2cc; background: #2c1d26; border: 1px solid #73503d; border-radius: 8px; padding: 13px 20px; cursor: pointer; transition: background 0.15s, border-color 0.15s; } .ds-close:hover { background: #452633; border-color: #d8af55; } .ds-close:focus-visible { outline: 3px solid #35e6d1; outline-offset: 4px; } .ds-close:disabled { opacity: 0.5; cursor: default; } .ds-dialog { position: relative; width: 1020px; max-width: calc(100vw - 40px); max-height: min(800px, calc(100vh - 40px)); overflow-y: auto; background: #21161d; color: #fff2cc; border: 1px solid #b88d4c; border-radius: 20px; padding: 38px; box-shadow: 0 20px 90px #000b; font-family: Arial, Helvetica, sans-serif; } .ds-dialog h2 { font-family: Georgia, serif; font-weight: 400; font-size: 33px; line-height: 1.2; margin: 12px 0 20px; } .ds-dialog p { font-size: 17px; line-height: 1.5; color: #d1bba2; } .ds-dialog .ds-close { position: absolute; right: 17px; top: 12px; border: 0; background: transparent; font-size: 27px; padding: 7px 12px; } @media (prefers-reduced-motion: reduce) { .ds-close { transition: none; } }"
+    },
+    {
+      "name": "Payline Tile",
+      "kind": "custom",
+      "refersTo": "payline-tile",
+      "description": "Active payline with the existing number-and-SVG pattern; remove the active class for its inactive appearance.",
+      "html": "<div class=\"ds-line ds-line-active\"><span>1</span><svg viewBox=\"0 0 100 54\" aria-label=\"Line 1: 1,1,1,1,1\"><polyline points=\"8,27 29,27 50,27 71,27 92,27\"/></svg></div>",
+      "css": ".ds-line { background: #100c10; color: #fff2cc; padding: 8px; border: 1px solid #4a3338; border-radius: 6px; opacity: 0.45; font-family: Arial, Helvetica, sans-serif; } .ds-line span { font-size: 13px; } .ds-line-active { border-color: #35e6d1; opacity: 1; } .ds-line svg { width: 100%; height: 45px; } .ds-line polyline { fill: none; stroke: #35e6d1; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Lamplit Private Arcade",
+    "overview": "An understated, comfortable, traditional arcade: a warm lounge, a brass cabinet, and a personal retreat. Illustrated room artwork supplies the atmosphere; familiar controls keep the room and gameplay in the foreground.\n\nWine-colored cabinet surfaces, Antique Gold trim, and Candlelit Cream type connect the game art to the interface. Mint Light marks focus, active paylines, and feedback. Depth comes from layered artwork and dark panels, with structural shadows on primary buttons and dialogs. Controls are comfortable and traditional: familiar controls within the arcade cabinet.",
+    "keyCharacteristics": [
+      "Illustrated lounge artwork and glossy fruit symbols.",
+      "Wine-colored surfaces, brass edges, warm text, and selective mint signals.",
+      "Georgia display and numeric type paired with Arial controls.",
+      "A fixed landscape stage with calm, skippable win effects."
+    ],
+    "rules": [
+      {
+        "name": "The Signal Rule",
+        "body": "Preserve Mint Light for the implemented focus, payline, and feedback roles; use Antique Gold for trim, labels, prices, and primary-action gradients.",
+        "section": "colors"
+      },
+      {
+        "name": "The Structural Shadow Rule",
+        "body": "Preserve the raised primary-button edge and dialog separation; purchase rows remain flat and divided by fine rules.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep the supplied illustrated lounge, glossy fruit assets, and code-drawn cabinet visually connected.",
+      "Do retain the cream-on-dark controls, brass emphasis, and visible mint focus outlines.",
+      "Do preserve fixed-stage alignment, clipped reel symbols, and separate lounge and machine views.",
+      "Do keep effects calm, proportional, adjustable, and skippable."
+    ],
+    "donts": [
+      "Don't present the extracted role names as existing CSS variables; the implementation uses literal values.",
+      "Don't claim that scaling is mobile reflow or that reduced motion removes reel movement.",
+      "Don't replace fonts, artwork, palette, or control behavior as part of documenting this system.",
+      "Don't add card shadows, pressed animations, type-scale ratios, or breakpoints that the code does not define."
+    ]
+  }
+}
