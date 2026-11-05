@@ -22,3 +22,9 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Asset provenance: asset-generation.md and src/assets/manifest.json. No Kenney/Freesound files are distributed.
+
+## Embedded typefaces (Phase 2.1)
+
+Libre Caslon Text (The Libre Caslon Text Project Authors) and Source Sans 3 (Adobe) are distributed under SIL Open Font License 1.1. Original variable TTFs and full licenses are in `src/assets/fonts/`; license text is also bundled in the standalone HTML and available under Settings & save → Typeface credits & licenses. No remote font service is required.
+
+Sources: https://github.com/google/fonts/tree/main/ofl/librecaslontext and https://github.com/google/fonts/tree/main/ofl/sourcesans3 .

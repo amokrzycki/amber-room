@@ -117,7 +117,10 @@ try {
       if (state === "jackpot") await capture("celebrating");
       await page.waitForFunction(
         () =>
-          document.querySelector("#spin").textContent.includes("START") && !document.querySelector("#spin").disabled,
+          document.querySelector("#spin").textContent === "SPIN" &&
+          !document.querySelector("#spin").disabled &&
+          document.querySelector("#payout").textContent ===
+            JSON.parse(localStorage.getItem("fruit-salon:v1")).lastSpin.outcome.payout.toLocaleString("en-GB"),
       );
       assert.equal(await page.locator("#payout").innerText(), payout.toLocaleString("en-GB"));
       assert.equal(await page.locator("#spin").isDisabled(), false);

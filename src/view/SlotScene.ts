@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { owner, number, accrue } from "../runtime";
 import { tuning } from "./tuning";
 import { machine } from "../game/machine";
-import { secureRng, spin } from "../game/engine";
+import { secureRng } from "../game/engine";
 import { requestSpin, selectBet, reelsStopped, finishSpin } from "../game/session";
 import { classifyWin } from "../game/feedback";
 import type { Bet, SpinRecord } from "../game/model";
@@ -12,13 +12,18 @@ import { createAudio, type GameAudio } from "./audio";
 import { mountUI } from "./ui";
 import { playWin } from "./feedback";
 import { describeSpinResult } from "./spinResult";
+import { NumberDisplay } from "./NumberDisplay";
+import { idleGrid } from "./idleGrid";
 export class SlotScene extends Phaser.Scene {
   private reels: ReelView[] = [];
   private audio!: GameAudio;
   private ui!: ReturnType<typeof mountUI>;
   private win: ReturnType<typeof playWin> | undefined;
   private run = 0;
-  private countTween: Phaser.Tweens.Tween | undefined;
+  private balanceDisplay!: NumberDisplay;
+  private payoutDisplay!: NumberDisplay;
+  private netDisplay!: NumberDisplay;
+  private leaving = false;
   private returnedLine: ReturnType<typeof playWin> | undefined;
   private announcedSpinId = 0;
   constructor() {
@@ -26,6 +31,7 @@ export class SlotScene extends Phaser.Scene {
   }
   init() {
     this.reels = [];
+    this.leaving = false;
     this.win = undefined;
     this.returnedLine = undefined;
     this.run++;
@@ -37,17 +43,7 @@ export class SlotScene extends Phaser.Scene {
     this.registry.set("paylines", machine.paylines);
     this.add.rectangle(800, 450, 1600, 900, 0x171214);
     drawCabinet(this);
-    this.add
-      .text(800, 142, "ORCHARD No. 7", {
-        fontFamily: "Georgia",
-        fontSize: "34px",
-        fontStyle: "italic",
-        color: "#fff2cc",
-        letterSpacing: 5,
-      })
-      .setOrigin(0.5);
-    const initial =
-      owner.state.save.lastSpin?.outcome.grid ?? spin(machine, { lineCount: 5, perLine: 1 }, () => 0).grid;
+    const initial = owner.state.save.lastSpin?.outcome.grid ?? idleGrid;
     for (let c = 0; c < 5; c++) this.reels.push(new ReelView(this, c, initial[c]));
     const bet = owner.state.save.selectedBet;
     const lastSpin = owner.state.save.lastSpin;
@@ -55,13 +51,22 @@ export class SlotScene extends Phaser.Scene {
     this.ui = mountUI(
       this,
       this.audio,
-      `<button class="back" id="back">← Lounge</button><div class="slot-hud"><div class="balance-block"><span>BALANCE</span><strong id="balance">${number(owner.state.save.balance)}</strong><small>tokens</small></div><div class="payout-block"><span>GROSS PAYOUT</span><strong id="payout">${lastSpin ? number(lastSpin.outcome.payout) : "—"}</strong><small id="win-label">${lastSpin ? "Last completed spin" : "Ready to play"}</small><small id="spin-breakdown">${lastSpin ? describeSpinResult(lastSpin).breakdown : "Choose your bet, then press START."}</small></div><div class="bet-block"><div class="bet-selects"><label>Bet / line<select id="per-line">${[1, 2, 5].map((n) => `<option ${n === bet.perLine ? "selected" : ""}>${n}</option>`).join("")}</select></label><label>Lines<select id="line-count">${[1, 5, 10, 20, 40].map((n) => `<option ${n === bet.lineCount ? "selected" : ""}>${n}</option>`).join("")}</select></label><div><span>TOTAL BET</span><strong id="stake">${bet.lineCount * bet.perLine}</strong></div></div></div></div><div class="slot-controls"><p id="spin-status" role="status">SPACE to spin · take it at your own pace</p><button id="spin" class="primary">START <span>↻</span></button></div><p class="sr-only" id="result-announcement" role="status" aria-live="polite" aria-atomic="true"></p>`,
+      `<h1 class="machine-name">THE ORCHARD</h1><button class="back" id="back" aria-describedby="cashout-note">CASH OUT <span>· Lounge</span></button><p id="cashout-note">Payouts go straight to your balance. Leave whenever the reels stop.</p><div class="slot-hud"><div class="balance-block"><span>BALANCE</span><strong id="balance" aria-hidden="true">${number(owner.state.save.balance)}</strong><small>tokens</small><span class="sr-only" id="balance-final">${number(owner.state.save.balance)} tokens</span></div><div class="payout-block"><span>GROSS PAYOUT</span><strong id="payout" aria-hidden="true">${lastSpin ? number(lastSpin.outcome.payout) : "—"}</strong><small id="win-label">${lastSpin ? "Last completed spin" : "Ready to play"}</small><small id="spin-breakdown" aria-hidden="true">${lastSpin ? describeSpinResult(lastSpin).breakdown : "Choose your bet, then press SPIN."}</small></div><div class="bet-block"><div class="bet-selects"><label>Bet / line<select id="per-line">${[1, 2, 5].map((n) => `<option ${n === bet.perLine ? "selected" : ""}>${n}</option>`).join("")}</select></label><label>Lines<select id="line-count">${[1, 5, 10, 20, 40].map((n) => `<option ${n === bet.lineCount ? "selected" : ""}>${n}</option>`).join("")}</select></label><div><span>TOTAL BET</span><strong id="stake">${bet.lineCount * bet.perLine}</strong></div></div></div></div><div class="slot-controls"><p id="spin-status" role="status">SPACE to spin · take it at your own pace</p><button id="spin" class="primary" data-state="idle">SPIN</button></div><p class="sr-only" id="result-summary">${lastSpin ? describeSpinResult(lastSpin).announcement : ""}</p><p class="sr-only" id="result-announcement" role="status" aria-live="polite" aria-atomic="true"></p>`,
     );
     const root = this.ui.root;
-    root.querySelector("#back")!.addEventListener("click", () => {
-      if (owner.state.phase === "spinning") return;
-      this.skip();
-      this.scene.start("salon");
+    this.balanceDisplay = new NumberDisplay(owner.state.save.balance, (value) => {
+      root.querySelector("#balance")!.textContent = number(value);
+    });
+    this.payoutDisplay = new NumberDisplay(lastSpin?.outcome.payout ?? 0, (value) => {
+      root.querySelector("#payout")!.textContent = number(value);
+    });
+    this.netDisplay = new NumberDisplay(0, (value) => {
+      const net = root.querySelector("#net");
+      if (net) net.textContent = `${value > 0 ? "+" : ""}${number(value)}`;
+    });
+    root.querySelector("#back")!.addEventListener("click", () => this.cashOut());
+    root.querySelector<HTMLButtonElement>("#back")!.addEventListener("keydown", (event) => {
+      if ((event.key === "Enter" || event.code === "Space") && event.repeat) event.preventDefault();
     });
     root.querySelector("#spin")!.addEventListener("click", () => this.start());
     const change = () => {
@@ -88,9 +93,19 @@ export class SlotScene extends Phaser.Scene {
       e.preventDefault();
       if (e.repeat) return;
       this.ui.unlock();
+      root.querySelector("#spin")!.classList.add("is-pressed");
       this.start();
     };
+    const release = () => root.querySelector("#spin")!.classList.remove("is-pressed");
     window.addEventListener("keydown", key);
+    window.addEventListener("keyup", release);
+    window.addEventListener("blur", release);
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const finishNumbers = () => {
+      if (this.reducedMotion()) this.finishNumbers();
+    };
+    motion.addEventListener("change", finishNumbers);
+    root.addEventListener("input", finishNumbers);
     this.input.on("pointerdown", () => {
       void this.audio.unlock();
       if (owner.state.phase === "celebrating") this.skip();
@@ -99,6 +114,7 @@ export class SlotScene extends Phaser.Scene {
       if (document.hidden) {
         this.audio.silence();
         this.skip();
+        this.finishNumbers();
       } else this.audio.resume();
     };
     document.addEventListener("visibilitychange", visibility);
@@ -111,7 +127,12 @@ export class SlotScene extends Phaser.Scene {
       this.reels.forEach((r) => {
         r.dispose();
       });
-      this.countTween?.stop();
+      this.balanceDisplay.dispose();
+      this.payoutDisplay.dispose();
+      this.netDisplay.dispose();
+      motion.removeEventListener("change", finishNumbers);
+      window.removeEventListener("keyup", release);
+      window.removeEventListener("blur", release);
       window.removeEventListener("keydown", key);
       window.removeEventListener("salon-state", income);
       document.removeEventListener("visibilitychange", visibility);
@@ -125,23 +146,33 @@ export class SlotScene extends Phaser.Scene {
   private refresh() {
     const root = this.ui.root;
     const s = owner.state;
-    root.querySelector("#balance")!.textContent = number(s.save.balance);
+    if (s.phase !== "spinning") {
+      this.balanceDisplay.to(s.save.balance, this.reducedMotion() || document.hidden);
+      root.querySelector("#balance-final")!.textContent = `${number(s.save.balance)} tokens`;
+    }
     root.querySelector("#stake")!.textContent = number(s.save.selectedBet.lineCount * s.save.selectedBet.perLine);
     root.querySelectorAll<HTMLSelectElement>("select").forEach((el) => {
       el.disabled = s.phase !== "ready";
     });
     (root.querySelector("#back") as HTMLButtonElement).disabled = s.phase === "spinning";
     (root.querySelector("#spin") as HTMLButtonElement).disabled = s.phase === "spinning";
-    root.querySelector("#spin")!.innerHTML = s.phase === "celebrating" ? "SKIP <span>→</span>" : "START <span>↻</span>";
+    const spin = root.querySelector<HTMLButtonElement>("#spin")!;
+    spin.textContent = s.phase === "spinning" ? "SPINNING" : s.phase === "celebrating" ? "SKIP" : "SPIN";
+    spin.dataset.state = s.phase === "ready" ? "idle" : s.phase;
+    root.querySelector("#cashout-note")!.textContent =
+      s.phase === "spinning"
+        ? "Result saved. Cash out when the reels stop."
+        : "Payouts are in your balance · cash out to return to the lounge.";
     this.ui.warning();
   }
   private async start(forced?: number[]) {
-    if (this.ui.dialog.open) return;
+    if (this.leaving || this.ui.dialog.open) return;
     if (owner.state.phase === "celebrating") {
       this.skip();
       return;
     }
     if (owner.state.phase !== "ready") return;
+    this.finishNumbers();
     this.returnedLine?.dispose();
     this.returnedLine = undefined;
     accrue();
@@ -163,7 +194,9 @@ export class SlotScene extends Phaser.Scene {
       void this.audio.unlock().then(() => {
         if (run === this.run && owner.state.phase === "spinning") this.audio.startReels();
       });
-      this.ui.root.querySelector("#payout")!.textContent = "0";
+      this.payoutDisplay.to(0, true);
+      this.netDisplay.to(0, true);
+      this.ui.root.querySelector("#result-summary")!.textContent = "";
       this.ui.root.querySelector("#win-label")!.textContent = "Finding the rhythm…";
       this.ui.root.querySelector("#spin-breakdown")!.textContent = "";
       this.ui.root.querySelector("#spin-status")!.textContent = "";
@@ -185,7 +218,7 @@ export class SlotScene extends Phaser.Scene {
   }
   private celebrate(spin: SpinRecord) {
     const tier = classifyWin(spin.totalStake, spin.outcome.payout);
-    const settings = owner.state.save.settings;
+    const settings = { ...owner.state.save.settings, reducedMotion: this.reducedMotion() };
     const labels = {
       neutral:
         spin.outcome.payout === spin.totalStake
@@ -198,10 +231,11 @@ export class SlotScene extends Phaser.Scene {
       jackpot: "JACKPOT · This one is on the house!",
     };
     this.ui.root.querySelector("#win-label")!.textContent = labels[tier];
+    this.payoutDisplay.to(spin.outcome.payout, this.reducedMotion() || document.hidden);
+    this.completeResult(spin);
     if (document.hidden || tier === "neutral") {
       if (!document.hidden && spin.outcome.payout > 0) this.returnedLine = playWin(this, spin, settings);
-      this.ui.root.querySelector("#payout")!.textContent = number(spin.outcome.payout);
-      this.completeResult(spin);
+
       owner.state = finishSpin(owner.state, spin.id);
       this.refresh();
       return;
@@ -218,22 +252,6 @@ export class SlotScene extends Phaser.Scene {
       );
     this.win = playWin(this, spin, settings);
     const win = this.win;
-    const counter = { value: 0 };
-    let tick = -1;
-    this.countTween = this.tweens.add({
-      targets: counter,
-      value: spin.outcome.payout,
-      duration: tier === "small" ? 450 : tier === "big" ? 1100 : 1800,
-      ease: "Sine.easeOut",
-      onUpdate: () => {
-        this.ui.root.querySelector("#payout")!.textContent = number(Math.floor(counter.value));
-        const next = Math.floor(this.time.now / 130);
-        if (next !== tick) {
-          tick = next;
-          this.audio.play("payout-tick");
-        }
-      },
-    });
     this.refresh();
     void win.done.then(() => {
       if (this.win === win) this.endWin();
@@ -241,15 +259,10 @@ export class SlotScene extends Phaser.Scene {
   }
   private endWin() {
     this.win = undefined;
-    this.countTween?.stop();
+    this.finishNumbers();
     this.reels.forEach((r) => {
       r.clearHighlight();
     });
-    const spin = owner.state.save.lastSpin;
-    if (spin) {
-      this.ui.root.querySelector("#payout")!.textContent = number(spin.outcome.payout);
-      this.completeResult(spin);
-    }
     this.audio.stopWin();
     if (!document.hidden) this.audio.play("payout-end");
     this.audio.duck(false);
@@ -257,12 +270,39 @@ export class SlotScene extends Phaser.Scene {
     this.refresh();
   }
   private completeResult(spin: SpinRecord) {
-    const result = describeSpinResult(spin);
-    this.ui.root.querySelector("#spin-breakdown")!.textContent = result.breakdown;
+    const breakdown = this.ui.root.querySelector("#spin-breakdown")!;
+    if (!breakdown.querySelector("#net")) {
+      const prefix = `Stake ${number(spin.totalStake)} · Returned ${number(spin.outcome.payout)} · Net `;
+      breakdown.replaceChildren(document.createTextNode(prefix));
+      const net = document.createElement("span");
+      net.id = "net";
+      net.style.width = `${Math.max(4, number(spin.outcome.payout - spin.totalStake).length + (spin.outcome.payout > spin.totalStake ? 1 : 0))}ch`;
+      net.textContent = "0";
+      breakdown.append(net);
+      this.netDisplay.to(spin.outcome.payout - spin.totalStake, this.reducedMotion() || document.hidden);
+    }
     if (spin.id !== this.announcedSpinId) {
-      this.ui.root.querySelector("#result-announcement")!.textContent = result.announcement;
+      this.ui.root.querySelector("#result-announcement")!.textContent = this.resultAnnouncement(spin);
       this.announcedSpinId = spin.id;
     }
+  }
+  private reducedMotion() {
+    return owner.state.save.settings.reducedMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+  private finishNumbers() {
+    this.balanceDisplay.finish();
+    this.payoutDisplay.finish();
+    this.netDisplay.finish();
+  }
+  private resultAnnouncement(spin: SpinRecord) {
+    return `${describeSpinResult(spin).announcement} Balance ${number(owner.state.save.balance)} tokens. Payout already credited.`;
+  }
+  private cashOut() {
+    if (this.leaving || owner.state.phase === "spinning") return;
+    this.leaving = true;
+    this.skip();
+    this.finishNumbers();
+    this.scene.start("salon");
   }
   private skip() {
     if (this.win) {

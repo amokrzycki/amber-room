@@ -41,3 +41,28 @@ it("1000 minus default stake plus gross 20 persists as exactly 1015", () => {
   expect(r.spin.outcome.payout).toBe(20);
   expect(r.state.save.balance).toBe(1015);
 });
+it.each([
+  [[1, 0, 0, 0, 0], 0],
+  [[2, 1, 0, 0, 0], 4],
+  [[5, 1, 1, 0, 0], 5],
+  [[3, 0, 0, 0, 0], 15],
+] as const)("preserves balance through repeated completion and reload for stops %j", (stops, payout) => {
+  let i = 0;
+  const result = requestSpin(createSession(createSave(0)), () => stops[i++]);
+  if (!result.ok) throw Error("Expected a spin");
+  expect(result.spin.outcome.payout).toBe(payout);
+  const expected = 1000 - 5 + payout;
+  let state = reelsStopped(result.state, result.spin.id);
+  for (let input = 0; input < 20; input++) state = finishSpin(state, result.spin.id);
+  expect(state.save.balance).toBe(expected);
+  expect(state.save.nextSpinId).toBe(2);
+  for (const saved of [result.state.save, state.save]) {
+    const loaded = createSession(saved);
+    expect(loaded.phase).toBe("ready");
+    expect(loaded.save.balance).toBe(expected);
+    const next = requestSpin(loaded, () => 0);
+    if (!next.ok) throw Error("Expected the next spin");
+    expect(next.state.save.balance).toBe(expected - 5 + next.spin.outcome.payout);
+    expect(finishSpin(next.state, result.spin.id)).toBe(next.state);
+  }
+});

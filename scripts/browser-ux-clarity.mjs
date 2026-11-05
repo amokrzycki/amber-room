@@ -32,9 +32,19 @@ await page.addInitScript(() => {
 });
 const save = () => page.evaluate(() => JSON.parse(localStorage.getItem("fruit-salon:v1")));
 const ready = () =>
-  page.waitForFunction(
-    () => document.querySelector("#spin")?.textContent.includes("START") && !document.querySelector("#spin").disabled,
-  );
+  page.waitForFunction(() => {
+    const spin = document.querySelector("#spin");
+    const saved = JSON.parse(localStorage.getItem("fruit-salon:v1"));
+    const net = document.querySelector("#net");
+    return (
+      spin?.textContent === "SPIN" &&
+      !spin.disabled &&
+      (!saved?.lastSpin ||
+        (document.querySelector("#payout").textContent === saved.lastSpin.outcome.payout.toLocaleString("en-GB") &&
+          (!net ||
+            Number(net.textContent.replaceAll(",", "")) === saved.lastSpin.outcome.payout - saved.lastSpin.totalStake)))
+    );
+  });
 const number = (value) => value.toLocaleString("en-GB");
 const checkLayout = async (screen) => {
   const result = await page.evaluate(() => {
@@ -108,8 +118,8 @@ const spinOnce = async (stops, skip = false) => {
     await page.waitForFunction(() => Number(document.querySelector("#payout").textContent.replaceAll(",", "")) > 0);
     assert.equal(
       await page.evaluate(() => window.__resultUpdates.length),
-      completed,
-      "Counting frames must stay silent",
+      completed + 1,
+      "Counting frames must announce the final authoritative outcome once",
     );
     await page.focus("#spin");
     await page.keyboard.down("Space");
@@ -130,7 +140,7 @@ const spinOnce = async (stops, skip = false) => {
   const announcement = await page.locator("#result-announcement").textContent();
   assert.equal(
     announcement,
-    `Spin ${id} complete. Stake ${number(totalStake)} tokens. Returned ${number(outcome.payout)} tokens. ${net === 0 ? "Break-even." : `Net ${net > 0 ? "gain" : "loss"} ${number(Math.abs(net))} tokens.`}`,
+    `Spin ${id} complete. Stake ${number(totalStake)} tokens. Returned ${number(outcome.payout)} tokens. ${net === 0 ? "Break-even." : `Net ${net > 0 ? "gain" : "loss"} ${number(Math.abs(net))} tokens.`} Balance ${number(settled.balance)} tokens. Payout already credited.`,
   );
   assert.equal((await save()).nextSpinId, settled.nextSpinId, "Skip/held Space must not place another bet");
   return settled;

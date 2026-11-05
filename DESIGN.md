@@ -1,5 +1,5 @@
 ---
-name: The Amber Room · Orchard No. 7
+name: The Amber Room · The Orchard
 description: An understated private arcade with illustrated rooms, wine-colored cabinets, and brass controls.
 colors:
   antique-gold: '#d8af55'
@@ -24,54 +24,54 @@ colors:
   warning: '#ffc078'
 typography:
   display:
-    fontFamily: Georgia, serif
+    fontFamily: Libre Caslon Text, Georgia, serif
     fontSize: 57px
     fontWeight: 400
     lineHeight: 1.03
   headline:
-    fontFamily: Georgia, serif
+    fontFamily: Libre Caslon Text, Georgia, serif
     fontSize: 35px
     fontWeight: 400
     lineHeight: 1.2
   title:
-    fontFamily: Arial, Helvetica, sans-serif
+    fontFamily: Source Sans 3, Arial, sans-serif
     fontSize: 22px
-    fontWeight: 700
+    fontWeight: 600
   body:
-    fontFamily: Arial, Helvetica, sans-serif
+    fontFamily: Source Sans 3, Arial, sans-serif
     fontSize: 18px
     fontWeight: 400
     lineHeight: 1.65
   label:
-    fontFamily: Arial, Helvetica, sans-serif
+    fontFamily: Source Sans 3, Arial, sans-serif
     fontSize: 13px
-    fontWeight: 700
-    letterSpacing: 3px
+    fontWeight: 600
+    letterSpacing: 0.7px
   navigation:
-    fontFamily: Arial, Helvetica, sans-serif
+    fontFamily: Source Sans 3, Arial, sans-serif
     fontSize: 16px
   brand:
-    fontFamily: Arial, Helvetica, sans-serif
+    fontFamily: Source Sans 3, Arial, sans-serif
     fontSize: 24px
-    fontWeight: 700
-    letterSpacing: 5px
+    fontWeight: 600
+    letterSpacing: 2px
   balance:
-    fontFamily: Georgia, serif
-    fontSize: 45px
+    fontFamily: Source Sans 3, Arial, sans-serif
+    fontSize: 46px
     fontWeight: 400
   payout:
-    fontFamily: Georgia, serif
+    fontFamily: Source Sans 3, Arial, sans-serif
     fontSize: 56px
     fontWeight: 400
     lineHeight: 1
   select:
-    fontFamily: Arial, Helvetica, sans-serif
+    fontFamily: Source Sans 3, Arial, sans-serif
     fontSize: 22px
   spin:
-    fontFamily: Arial, Helvetica, sans-serif
-    fontSize: 23px
-    fontWeight: 700
-    letterSpacing: 3px
+    fontFamily: Source Sans 3, Arial, sans-serif
+    fontSize: 25px
+    fontWeight: 600
+    letterSpacing: 1px
 rounded:
   field: 6px
   button: 8px
@@ -96,7 +96,7 @@ components:
     typography: '{typography.spin}'
     rounded: '{rounded.button}'
     padding: 15px
-    width: 270px
+    width: 240px
   button-navigation:
     backgroundColor: transparent
     textColor: '{colors.candlelit-cream}'
@@ -125,7 +125,7 @@ components:
     padding: '{spacing.tile-padding}'
 ---
 
-# Design System: The Amber Room · Orchard No. 7
+# Design System: The Amber Room · The Orchard
 
 ## Overview
 
@@ -139,7 +139,7 @@ Wine-colored cabinet surfaces, Antique Gold trim, and Candlelit Cream type conne
 
 - Illustrated lounge artwork and glossy fruit symbols.
 - Wine-colored surfaces, brass edges, warm text, and selective mint signals.
-- Georgia display and numeric type paired with Arial controls.
+- Libre Caslon Text display paired with Source Sans 3 controls and tabular lining numerals.
 - A fixed landscape stage with calm, skippable win effects.
 
 This records the incumbent implementation, using the user's confirmed descriptive language. Source authority: `src/style.css`, `src/view/SlotScene.ts`, `src/view/SalonScene.ts`, `src/view/ReelView.ts`, `src/view/feedback.ts`, and `src/view/tuning.ts`. Existing `docs/evidence/salon.png` and `docs/evidence/slot.png` were inspected for visual context; current code resolves any differences. No fresh browser capture was made for this documentation pass.
@@ -174,14 +174,14 @@ The sidecar's eight-step tonal ramps are generated swatch previews, not addition
 
 ## Typography
 
-**Display and numeric font:** Georgia, serif. **Body and control font:** Arial, Helvetica, sans-serif. All are system stacks; the game embeds no external fonts. The pairing is traditional and familiar. Values are logical stage pixels before scaling, with no uniform mathematical type ratio.
+**Display font:** Libre Caslon Text, with Georgia fallback. **UI and numeric font:** Source Sans 3, with Arial fallback. Both primary families are embedded, with real variable weights and tabular lining data figures. Values are logical stage pixels before scaling; functional UI sizes retain the existing laptop compensation.
 
 - **Display / headline:** `display` is the lounge title; `headline` is the base secondary heading. The shop overrides its heading to (32px), and dialogs to (33px).
 - **Title / body:** `title` describes purchase headings; `body` describes the lounge paragraph. Shop introductory copy uses (16px, line-height 1.6), and purchase descriptions (15px).
 - **Label / brand / navigation:** `label` is the bold tracked eyebrow; wallet and machine labels use (13px, tracking 2px). `brand` is the uppercase masthead, with a subtitle at (10px, tracking 3px). Navigation uses `navigation`.
 - **Balance / payout:** `balance` is the machine balance; the lounge wallet uses (46px). `payout` is the larger central result. Machine HUD numbers request tabular numerals.
-- **Select / spin:** `select` describes native bet controls; `spin` describes START/SKIP. The lounge entry action uses (20px) instead.
-- **Cabinet title:** canvas-rendered Georgia at (34px), italic, with tracking (5px). Font style lives in source and sidecar snippets where needed; it is not an unsupported frontmatter typography property.
+- **Select / spin:** `select` describes native bet controls; `spin` describes SPIN/SPINNING/SKIP. The lounge entry action uses (20px) instead.
+- **Cabinet title:** DOM-rendered Libre Caslon Text 400 at (27px), with (2px) tracking and a subtle offset engraving highlight.
 
 ## Layout
 
@@ -214,7 +214,7 @@ Control borders are generally (1px). Keyboard focus is a Mint Light outline (3px
 
 **Character:** Comfortable and traditional — familiar controls within the arcade cabinet. The sidecar includes nine self-contained HTML/CSS samples of implemented patterns. Samples show appearance and native controls; they do not implement purchases, game transitions, or save operations.
 
-- **Primary action:** a raised gold gradient with dark bold text. START/SKIP uses `button-primary`; the lounge entry shares its material but is wider (350px) with padding (21px). Hover changes the gradient. There is no custom pressed transform.
+- **Primary action:** the lounge entry retains its raised gold material, (350px) width and (21px) padding. The cabinet SPIN uses a burgundy switch surface, muted brass rim, fixed (240×64px) footprint and (3px) pressed depression.
 - **Secondary button:** dark plum fill, cream text, fine brass border, and rounded corners from `button-secondary`. Hover uses `button-secondary-hover` and a brighter brass border. Disabled buttons use opacity (0.5) and the default cursor.
 - **Navigation:** two transparent outlined header buttons in a horizontal group with `navigation-gap`. The later header rule preserves their transparent fill and muted border on hover; keyboard focus remains visible. The lounge back action is borderless and transparent at rest.
 - **Selectors and settings:** native selects use `bet-select` with a contextual field border. Checkboxes are (22×22px), ranges (240px) wide, and both use Antique Gold accents. Preserve native keyboard behavior and the shared focus outline.
@@ -224,15 +224,21 @@ Control borders are generally (1px). Keyboard focus is a Mint Light outline (3px
 - **Game feedback:** show the single highest-paying winning line while reporting the full payout. Reels use acceleration (220ms), cruise (560ms), braking (380ms), and per-reel stagger (110ms), giving approximately (1160–1600ms) across the five reels. Small, big, and jackpot celebrations last up to (700ms / 2200ms / 4000ms); skip clears them immediately. Positive returns without profit get a brief static line without fanfare.
 - **Motion preferences:** CSS removes button transitions for `prefers-reduced-motion`. The in-game reduced-motion setting suppresses symbol pulses, animated cabinet glow, and the lounge toast glow, while reels and payout counting still move. Default effect intensity is (0.4); zero intensity suppresses line and frame decoration. There is no claim of a fully motion-free mode.
 
-## Phase 2 cabinet materials
+## Phase 2.1 corrective direction
 
-The playable cabinet now uses `src/view/cabinet.ts`: one cached, static Phaser CanvasTexture drawn in four sections around a native Graphics reel backing. Its brass bezel, burgundy enamel collar, lacquered side returns, fluted fittings, fan ornaments and stepped base draw directly from the lounge miniature. Highlights are narrow and warm from above left, with dark lower/right returns and contact shadows. The reel aperture, fruit scale, feedback geometry and timing are unchanged.
+The machine display name is **THE ORCHARD**. Its flush brass nameplate has two fasteners, dark Libre Caslon Text 400 lettering, 27px type and 2px tracking. Georgia was compared in the same rendered cabinet; Caslon's wider, quieter capitals were selected. The lounge uses the same display family without changing its composition or artwork.
 
-The painter owns these illustration tones rather than treating them as interface colors: wood `#623823` to `#21130f`; enamel `#7b2935` to `#2b1118`; brass highlights `#f0d398`, midtones `#c39a56` / `#aa7738`, returns `#725025` / `#5b3b20`; dark deck `#25171b` to `#1d1217`. This is material shading, not a new semantic palette.
+Source Sans 3 supplies UI type and numeric counters. Use real 400 and 600 variable-font weights, no synthetic bold/italic, tabular lining figures for balance, payout, stake and net. Base line height is 1.25; balance 46px/1.1, gross payout 56px/1. Font files and SIL OFL 1.1 licenses are embedded in the standalone build. The existing scale compensation keeps functional detail at least 14 physical pixels on the requested laptop sizes.
 
-Native slot selects gain a recessed surface (`#1b1116`) and inset shadow. The slot START/SKIP button uses a quieter brass ramp (`#e8c986` to `#bd8b42`) with a physical lower edge. Disabled slot controls retain opaque, readable text (`#d7bba0`) on dark surfaces instead of fading the entire control. Their existing sizing, placement, focus ring, labels and input behavior remain intact. The lounge's controls retain their existing treatment.
+The static cabinet painter retains burgundy enamel, warm wood returns, a narrow structural brass perimeter, one recessed reel bezel, dark instrument deck and fastening screws. Fan/shell motifs, fluted rails, arbitrary vertical strokes, extra enamel collar and duplicated plinth highlights have been removed. No replacement ornaments were added.
 
-Phase 1 scale-compensated type, gross payout hierarchy and recorded-stake outcome breakdown remain authoritative. Decoration must stay outside functional text and must never require moving the fruit or redefining paylines. The cabinet remains a landscape adaptation of the portrait reference, not a replica of its physical dimensions.
+SPIN is a fixed 240×64px burgundy physical control, 25px/600 lettering, 1px tracking, 16px corners and a muted brass rim. Idle, hover, pressed (3px depression), spinning/disabled, celebration/skip and mint keyboard-focus states preserve its footprint. No bounce or glow. Native bet selectors retain the dark recessed treatment and keyboard behavior.
+
+CASH OUT · Lounge ends a session after the reels stop, including during a celebration. Adjacent copy states that payouts are already in the balance. It never credits money. Spinning disables this control until the saved result has been presented.
+
+Display-only counters use 320ms cubic ease-out for balance, payout and net. New targets interrupt from the visible integer; skip, navigation and hiding finish or dispose the relevant work. Both the OS reduced-motion preference and game setting bypass counter motion. Screen readers get a single final outcome including the authoritative balance, with no animated frames or reload announcement. The last completed result remains statically readable after reload. Reel timing, RNG, paylines and settlement are unchanged.
+
+The `.impeccable/design.json` sidecar predates these changes and has not been regenerated as an unrelated maintenance task.
 
 ## Do's and Don'ts
 

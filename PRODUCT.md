@@ -1,4 +1,4 @@
-# The Amber Room · Orchard No. 7
+# The Amber Room · The Orchard
 
 <!-- impeccable:product-schema 1 -->
 
@@ -40,7 +40,7 @@ The same fictional currency funds both spins and permanent lounge improvements. 
 
 ## Brand Commitments
 
-- Product name: The Amber Room; playable machine: Orchard No. 7. The interface is in English.
+- Product name: The Amber Room; playable machine: The Orchard. The interface is in English.
 - Preserve the user's preference for calmer, smoother effects and a less generic presentation. Larger wins should feel satisfying without excessive spectacle; the lounge reacts through sound and cabinet lights while the player remains in the machine view.
 - The supplied machine photograph at `docs/superpowers/references/salon-fruit-machine.png` is an existing reference commitment, not a final production asset. Visual-system documentation belongs outside this product record.
 

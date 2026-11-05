@@ -1,4 +1,4 @@
-# The Amber Room · Orchard No. 7
+# The Amber Room · The Orchard
 
 A private offline game with a 5×3 slot machine and a separate lounge with a bar, three business machines, and furnishings. The interface is in English. The game uses one fictional currency, with no backend, accounts, or real money.
 
@@ -6,7 +6,7 @@ A private offline game with a 5×3 slot machine and a separate lounge with a bar
 
 Double-click [dist/index.html](dist/index.html) to open it in a current browser with WebGL support (tested in Chromium 156). You do not need a server or an internet connection. The file is about 6.6 MB and includes all 22 image and audio assets, code, and styles. Your first click enables audio.
 
-- `Play Orchard No. 7` opens the slot machine. Press `START` or Space to spin once. Holding the button or key does not trigger automatic spins.
+- `Play The Orchard` opens the slot machine. Press `SPIN` or Space to spin once. Holding the button or key does not trigger automatic spins.
 - `Bet / line` × `Lines` = `TOTAL BET`. Choose the first 1, 5, 10, 20, or 40 paylines. `Lines & payouts` shows their exact paths and the payout table.
 - Press `SKIP` or Space to shorten a win celebration without placing another bet. `← Lounge` returns to the lounge once the reels stop.
 - `Settings & save` lets you mute audio, reduce motion, adjust effect intensity, and back up your progress. Use Tab/Shift+Tab to move between standard buttons and Enter/Space to activate them. Keyboard focus is visible.
@@ -62,3 +62,5 @@ For asset details, sources, and modifications, see the [runtime manifest](src/as
 Further documentation covers [tests and limitations](docs/playtest.md), [design decisions](docs/decisions.md), [exact game math](docs/math-report.json), and [performance measurements](docs/performance-report.json). Independent reviews are in `docs/reviews/`.
 
 User approval of the revised visuals, listening checks on headphones and speakers, and confirmation of 60 FPS on the player's computer remain unverified. Code checks and headless measurements do not establish those results.
+
+Phase 2.1: **CASH OUT · Lounge** returns to the lounge without another spin. Each payout is already saved in the token balance before reel playback; cash out never credits it again. Balance, payout and net use display-only 320ms counters, disabled by either reduced-motion preference. Font files and licenses are embedded for offline use.

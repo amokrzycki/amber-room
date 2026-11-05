@@ -59,11 +59,19 @@ const force = (stops) =>
     window.__stops = [...s];
   }, stops);
 const ready = () =>
-  page.waitForFunction(
-    () =>
-      document.querySelector("#spin")?.textContent.trim().startsWith("START") &&
-      !document.querySelector("#spin").disabled,
-  );
+  page.waitForFunction(() => {
+    const spin = document.querySelector("#spin");
+    const saved = JSON.parse(localStorage.getItem("fruit-salon:v1"));
+    const net = document.querySelector("#net");
+    return (
+      spin?.textContent === "SPIN" &&
+      !spin.disabled &&
+      (!saved?.lastSpin ||
+        (document.querySelector("#payout").textContent === saved.lastSpin.outcome.payout.toLocaleString("en-GB") &&
+          (!net ||
+            Number(net.textContent.replaceAll(",", "")) === saved.lastSpin.outcome.payout - saved.lastSpin.totalStake)))
+    );
+  });
 try {
   await page.goto(`file://${resolve("dist/index.html")}`);
   await page.locator("#enter-slot").waitFor();

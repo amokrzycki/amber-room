@@ -23,6 +23,10 @@ try {
   await page.locator("#enter-slot").waitFor();
   await page.click("#enter-slot");
   await page.locator("#spin").waitFor();
+  // Exclude changing DOM guidance from this pixel-boundary test; the full UI is captured in phase21.
+  await page.locator("#cashout-note").evaluate((element) => {
+    element.style.visibility = "hidden";
+  });
   await page.screenshot({ path: `${directory}/idle.png` });
   await page.click("#spin");
   for (let frame = 0; frame < 4; frame++) {
