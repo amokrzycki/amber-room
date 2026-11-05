@@ -10,6 +10,7 @@ import { ReelView } from "./ReelView";
 import { createAudio, type GameAudio } from "./audio";
 import { mountUI } from "./ui";
 import { playWin } from "./feedback";
+import { describeSpinResult } from "./spinResult";
 export class SlotScene extends Phaser.Scene {
   private reels: ReelView[] = [];
   private audio!: GameAudio;
@@ -18,6 +19,7 @@ export class SlotScene extends Phaser.Scene {
   private run = 0;
   private countTween: Phaser.Tweens.Tween | undefined;
   private returnedLine: ReturnType<typeof playWin> | undefined;
+  private announcedSpinId = 0;
   constructor() {
     super("slot");
   }
@@ -68,10 +70,12 @@ export class SlotScene extends Phaser.Scene {
       owner.state.save.lastSpin?.outcome.grid ?? spin(machine, { lineCount: 5, perLine: 1 }, () => 0).grid;
     for (let c = 0; c < 5; c++) this.reels.push(new ReelView(this, c, initial[c]));
     const bet = owner.state.save.selectedBet;
+    const lastSpin = owner.state.save.lastSpin;
+    this.announcedSpinId = lastSpin?.id ?? 0;
     this.ui = mountUI(
       this,
       this.audio,
-      `<button class="back" id="back">← Lounge</button><div class="slot-hud"><div class="balance-block"><span>BALANCE</span><strong id="balance">${number(owner.state.save.balance)}</strong><small>tokens</small></div><div class="payout-block"><span>GROSS PAYOUT</span><strong id="payout">${number(owner.state.save.lastSpin?.outcome.payout ?? 0)}</strong><small id="win-label">A little luck. A little afterglow.</small></div><div class="bet-block"><div class="bet-selects"><label>Bet / line<select id="per-line">${[1, 2, 5].map((n) => `<option ${n === bet.perLine ? "selected" : ""}>${n}</option>`).join("")}</select></label><label>Lines<select id="line-count">${[1, 5, 10, 20, 40].map((n) => `<option ${n === bet.lineCount ? "selected" : ""}>${n}</option>`).join("")}</select></label><div><span>TOTAL BET</span><strong id="stake">${bet.lineCount * bet.perLine}</strong></div></div></div></div><div class="slot-controls"><p id="spin-status" role="status">SPACE to spin · take it at your own pace</p><button id="spin" class="primary">START <span>↻</span></button></div>`,
+      `<button class="back" id="back">← Lounge</button><div class="slot-hud"><div class="balance-block"><span>BALANCE</span><strong id="balance">${number(owner.state.save.balance)}</strong><small>tokens</small></div><div class="payout-block"><span>GROSS PAYOUT</span><strong id="payout">${lastSpin ? number(lastSpin.outcome.payout) : "—"}</strong><small id="win-label">${lastSpin ? "Last completed spin" : "Ready to play"}</small><small id="spin-breakdown">${lastSpin ? describeSpinResult(lastSpin).breakdown : "Choose your bet, then press START."}</small></div><div class="bet-block"><div class="bet-selects"><label>Bet / line<select id="per-line">${[1, 2, 5].map((n) => `<option ${n === bet.perLine ? "selected" : ""}>${n}</option>`).join("")}</select></label><label>Lines<select id="line-count">${[1, 5, 10, 20, 40].map((n) => `<option ${n === bet.lineCount ? "selected" : ""}>${n}</option>`).join("")}</select></label><div><span>TOTAL BET</span><strong id="stake">${bet.lineCount * bet.perLine}</strong></div></div></div></div><div class="slot-controls"><p id="spin-status" role="status">SPACE to spin · take it at your own pace</p><button id="spin" class="primary">START <span>↻</span></button></div><p class="sr-only" id="result-announcement" role="status" aria-live="polite" aria-atomic="true"></p>`,
     );
     const root = this.ui.root;
     root.querySelector("#back")!.addEventListener("click", () => {
@@ -181,6 +185,7 @@ export class SlotScene extends Phaser.Scene {
       });
       this.ui.root.querySelector("#payout")!.textContent = "0";
       this.ui.root.querySelector("#win-label")!.textContent = "Finding the rhythm…";
+      this.ui.root.querySelector("#spin-breakdown")!.textContent = "";
       this.ui.root.querySelector("#spin-status")!.textContent = "";
       await Promise.all(
         this.reels.map((reel, c) =>
@@ -202,7 +207,12 @@ export class SlotScene extends Phaser.Scene {
     const tier = classifyWin(spin.totalStake, spin.outcome.payout);
     const settings = owner.state.save.settings;
     const labels = {
-      neutral: spin.outcome.payout ? "Tokens returned" : "Another turn. Another chance.",
+      neutral:
+        spin.outcome.payout === spin.totalStake
+          ? "Break-even"
+          : spin.outcome.payout
+            ? "Tokens returned"
+            : "No return this time",
       small: "A little afterglow",
       big: "A lovely win",
       jackpot: "JACKPOT · This one is on the house!",
@@ -211,6 +221,7 @@ export class SlotScene extends Phaser.Scene {
     if (document.hidden || tier === "neutral") {
       if (!document.hidden && spin.outcome.payout > 0) this.returnedLine = playWin(this, spin, settings);
       this.ui.root.querySelector("#payout")!.textContent = number(spin.outcome.payout);
+      this.completeResult(spin);
       owner.state = finishSpin(owner.state, spin.id);
       this.refresh();
       return;
@@ -255,12 +266,23 @@ export class SlotScene extends Phaser.Scene {
       r.clearHighlight();
     });
     const spin = owner.state.save.lastSpin;
-    if (spin) this.ui.root.querySelector("#payout")!.textContent = number(spin.outcome.payout);
+    if (spin) {
+      this.ui.root.querySelector("#payout")!.textContent = number(spin.outcome.payout);
+      this.completeResult(spin);
+    }
     this.audio.stopWin();
     if (!document.hidden) this.audio.play("payout-end");
     this.audio.duck(false);
     if (owner.state.activeSpinId !== null) owner.state = finishSpin(owner.state, owner.state.activeSpinId);
     this.refresh();
+  }
+  private completeResult(spin: SpinRecord) {
+    const result = describeSpinResult(spin);
+    this.ui.root.querySelector("#spin-breakdown")!.textContent = result.breakdown;
+    if (spin.id !== this.announcedSpinId) {
+      this.ui.root.querySelector("#result-announcement")!.textContent = result.announcement;
+      this.announcedSpinId = spin.id;
+    }
   }
   private skip() {
     if (this.win) {

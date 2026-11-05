@@ -18,7 +18,9 @@ new Phaser.Game({
 const stage = document.querySelector("#stage") as HTMLElement;
 const ui = document.querySelector("#ui") as HTMLElement;
 new ResizeObserver(() => {
-  ui.style.transform = `scale(${stage.clientWidth / 1600})`;
+  const scale = stage.clientWidth / 1600;
+  ui.style.transform = `scale(${scale})`;
+  ui.style.setProperty("--ui-scale", String(scale));
 }).observe(stage);
 setInterval(() => {
   if (!document.hidden) accrue();
