@@ -16,12 +16,12 @@ test("moving reels stay inside the cabinet", async ({ browser }) => {
     if (m.type() === "warning") warnings.push(m.text());
   });
   page.on("pageerror", (e) => errors.push(e.message));
+  await page.clock.install();
   await page.goto(`file://${resolve("dist/index.html")}`);
   await page.locator("#enter-slot").waitFor();
   await page.click("#enter-slot");
   await page.locator("#spin").waitFor();
   await page.screenshot({ path: `${directory}/idle.png` });
-  await page.clock.install();
   await page.clock.pauseAt(new Date(Date.now() + 100));
   await page.click("#spin");
   for (let frame = 0; frame < 4; frame++) {

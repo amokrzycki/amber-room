@@ -3,10 +3,11 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 180_000,
-  workers: process.env.CI ? 2 : "50%",
+  globalTimeout: process.env.CI ? 12 * 60_000 : undefined,
+  workers: process.env.CI ? 1 : "50%",
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  reporter: "list",
+  reporter: [[process.env.CI ? "line" : "list"], ["json", { outputFile: "test-results/results.json" }]],
   use: {
     actionTimeout: 15_000,
     browserName: "chromium",
