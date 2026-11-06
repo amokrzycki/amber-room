@@ -32,7 +32,7 @@ try {
   await page.waitForTimeout(400);
   await page.evaluate(() => (window.__demoStops = [0, 0, 0, 0, 0]));
   await page.click("#spin");
-  await page.waitForFunction(() => document.querySelector("#spin").textContent.includes("SKIP"));
+  await page.waitForFunction(() => document.querySelector("#spin").dataset.state === "settled");
   assert.equal(
     await page.evaluate(() => JSON.parse(localStorage.getItem("fruit-salon:v1")).lastSpin.outcome.payout),
     70,

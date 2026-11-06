@@ -28,7 +28,7 @@ export class SalonScene extends Phaser.Scene {
     this.ui = mountUI(
       this,
       this.audio,
-      `<div class="salon-copy"><p class="eyebrow">YOUR LITTLE CORNER OF THE NIGHT</p><h1>The Amber<br>Room</h1><p>A warm light. A familiar rhythm.<br>Your lounge keeps its own hours.</p></div><button class="enter-button primary" id="enter-slot">Play Orchard No. 7 <span>→</span></button><div class="salon-wallet"><span>YOUR TOKENS</span><strong id="salon-balance"></strong><small id="income"></small></div><aside class="shop"><p class="eyebrow">MAKE IT YOURS</p><h2>A good room.<br>A better evening.</h2><p class="shop-intro">Small upgrades, steady returns.<br>Nothing grows forever. Make yourself at home.</p><div id="purchases">${(Object.entries(catalog) as [Item, (typeof catalog)[Item]][]).map(([item, entry]) => `<article class="purchase"><div class="purchase-head"><h3>${entry.name}</h3><small id="level-${item}"></small></div><p id="benefit-${item}"></p><button id="buy-${item}" data-item="${item}"></button></article>`).join("")}<button class="toast-button" id="round">Buy the room a round <strong>50</strong></button></div><p id="salon-message" role="status"></p></aside>`,
+      `<div class="salon-copy"><p class="eyebrow">YOUR LITTLE CORNER OF THE NIGHT</p><h1>The Amber<br>Room</h1><p>A warm light. A familiar rhythm.<br>Your lounge keeps its own hours.</p></div><button class="enter-button primary" id="enter-slot">Play The Orchard <span>→</span></button><div class="salon-wallet"><span>YOUR TOKENS</span><strong id="salon-balance"></strong><small id="income"></small></div><aside class="shop"><p class="eyebrow">MAKE IT YOURS</p><h2>A good room.<br>A better evening.</h2><p class="shop-intro">Small upgrades. Make yourself at home.</p><div id="purchases">${(Object.entries(catalog) as [Item, (typeof catalog)[Item]][]).map(([item, entry]) => `<article class="purchase"><div class="purchase-head"><h3>${entry.name}</h3><small id="level-${item}"></small></div><p id="benefit-${item}"></p><button id="buy-${item}" data-item="${item}" aria-describedby="benefit-${item}"></button></article>`).join("")}<button class="toast-button" id="round" aria-describedby="round-purpose">Buy the room a round <strong>50 tokens</strong></button><p id="round-purpose">Celebration only · no bonus or income.</p></div><p id="salon-message" role="status"></p></aside>`,
     );
     const root = this.ui.root;
     root.querySelector("#enter-slot")!.addEventListener("click", () => {
@@ -116,10 +116,10 @@ export class SalonScene extends Phaser.Scene {
       root.querySelector(`#benefit-${item}`)!.textContent =
         item === "decor"
           ? [
-              "A woven rug for the long evenings.",
-              "A little greenery, a softer corner.",
-              "Your name in warm brass light.",
-              "Every detail in its place.",
+              "A woven rug. Cosmetic only; no income.",
+              "Greenery. Cosmetic only; no income.",
+              "Your name in brass. Cosmetic only; no income.",
+              "Every detail in place. Cosmetic only.",
             ][level]
           : complete
             ? "The room is working at its best."

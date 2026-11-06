@@ -1,0 +1,15 @@
+{
+  "buildPath": "comp",
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "createdAt": "2026-11-05T11:13:33.888Z",
+        "reason": "Agent: DESIGN.md explicitly establishes Arial/Helvetica as the body and control stack; Phase 1 requires preserving the existing typography and art direction."
+      }
+    ]
+  }
+}

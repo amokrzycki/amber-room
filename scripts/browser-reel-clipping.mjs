@@ -27,7 +27,11 @@ try {
   await page.click("#spin");
   for (let frame = 0; frame < 4; frame++) {
     await page.waitForTimeout(80);
-    assert(await page.locator("#spin").isDisabled(), "Capture must sample moving reels");
+    assert.equal(
+      await page.locator("#spin").getAttribute("data-state"),
+      "spinning",
+      "Capture must sample moving reels",
+    );
     await page.screenshot({ path: `${directory}/moving-${frame}.png` });
   }
   execFileSync(
@@ -42,10 +46,10 @@ idle=Image.open(root/'idle.png').convert('RGB')
 changed_inside=False
 for path in sorted(root.glob('moving-*.png')):
  frame=Image.open(path).convert('RGB')
- for region in [(285,100,1320,207),(285,642,1320,690)]:
+ for region in [(240,100,1480,207),(120,678,1480,712)]:
   diff=ImageChops.difference(idle.crop(region),frame.crop(region))
   assert diff.getbbox() is None, f'{path.name}: symbols leak outside reel window {region}'
- changed_inside |= ImageChops.difference(idle.crop((291,209,1310,640)),frame.crop((291,209,1310,640))).getbbox() is not None
+ changed_inside |= ImageChops.difference(idle.crop((158,209,1443,677)),frame.crop((158,209,1443,677))).getbbox() is not None
 assert changed_inside, 'Reels must actually move; a frozen screen cannot prove clipping'
 `,
     ],

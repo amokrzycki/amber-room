@@ -52,3 +52,11 @@ Poprawiony checkpoint: `docs/evidence/first-spin-v2.webm`, krótki obrót z wymu
 
 Przed poprawką test `browser-reel-clipping` na zbudowanym file:// odtworzył widoczną zmianę pikseli nad oknem (285,100–1320,207), a test jednostkowy położeń wykazał widoczny symbol ody196 zamiast207. To faktyczny RED, nie wniosek z samego przeglądu kodu. Wcześniejsze PASS ruchu nie dowodziło poprawności przycinania.
 Po poprawce: RED→GREEN testu klatek (`browser-reel-clipping`), cztery rzeczywiste klatki ruchu z niezmienionymi pikselami obudowy nad/pod oknem i zmiennymi pikselami wewnątrz; brak ostrzeżenia niewspieranej maski. Obejrzano klatkę ruchu z poprawnym przycięciem obu krawędzi. Test jednostkowy obejmuje początek, pośrednie przesunięcia i końcową kolumnę. Pełna suite36/36PASS (~20.89s), typecheck/build/check:offline PASS. Browser-acceptance ponownie PASS (trzy rozdzielczości, linie, wygrane, skip i powroty scen), pageerror0/HTTP0,1AudioContext i0źródeł po wyjściu. Użytkownik potwierdził płynność jako „spoko”; nie oznacza to akceptacji fontu ani odsłuchu.
+
+## Phase 3.3 result and input regressions
+
+- With fruit, WILD substitution, overlapping lines and a long 40-line result, check the compact count and open Win details. Its independent 5×3 diagram must retain the recorded symbols; selecting another line must not change the machine behind it.
+- Check line number, paying count and payout against the recorded outcome. Arrow keys and Home/End change selection; Tab/Shift+Tab stay in the dialog; Escape and Close restore trigger focus. Space within the dialog must not wager.
+- During a jackpot celebration, activate SPIN once: the celebration ends, the saved balance and next spin ID remain unchanged. Rapid extra clicks and held Space/Enter must not wager. After the re-arm delay, a distinct activation can place one wager.
+- Check the unchanged SPIN rectangle and typography, warm brass line thread, WILD's single existing border, and absence of the lower two cabinet screws.
+- Browser automation is technical evidence only. Owner aesthetic acceptance, screen-reader listening, hardware audio and hardware FPS remain separate checks.

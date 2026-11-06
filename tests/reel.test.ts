@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import { ReelView } from "../src/view/ReelView";
+import { reelWindow, tuning } from "../src/view/tuning";
 
 function renderer() {
   const active = new Set<any>(),
@@ -108,7 +109,7 @@ it("clears all symbol effects and restores rest state immediately", () => {
   reel.clearHighlight();
   expect(active.size).toBe(0);
   expect(images[0].alpha).toBe(1);
-  expect(images[0].scaleX).toBe(168 / 512);
+  expect(images[0].scaleX).toBe(tuning.symbol / 512);
 });
 
 it("clips visible pixels to the reel window throughout motion and restores the final column", async () => {
@@ -125,12 +126,41 @@ it("clips visible pixels to the reel window throughout motion and restores the f
     for (const image of visible) {
       const crop = image.crop ?? [0, 0, image.width, image.height];
       const top = image.y + offset - image.displayHeight / 2 + crop[1] * image.scaleY;
-      expect(top).toBeGreaterThanOrEqual(207);
-      expect(top + crop[3] * image.scaleY).toBeLessThanOrEqual(642);
+      expect(top).toBeGreaterThanOrEqual(reelWindow.clipTop);
+      expect(top + crop[3] * image.scaleY).toBeLessThanOrEqual(reelWindow.clipBottom);
     }
   }
   tween.onComplete();
+  const settle = tweens[1];
+  expect(settle.y).toBe(tween.y + 2);
+  settle.targets.y = settle.y;
+  settle.onComplete();
   await done;
   expect(containers[0].list.map((image: any) => image.texture.key)).toEqual(["wild", "seven", "melon"]);
   reel.dispose();
+});
+
+it("finishes or cancels mid-spin once, with exact symbols and no delayed stop effect", async () => {
+  for (const finish of [true, false]) {
+    const { scene, containers } = renderer();
+    const reel = new ReelView(scene, 0, ["cherry", "lemon", "plum"]);
+    let stops = 0;
+    const done = reel.play(["wild", "seven", "melon"], 0, 0, false, () => stops++);
+    if (finish) reel.finish();
+    else reel.cancel();
+    await done;
+    expect(stops).toBe(0);
+    const column = containers[0].list.filter((image: any) => image.texture).map((image: any) => image.texture.key);
+    expect(column).toEqual(finish ? ["wild", "seven", "melon"] : ["cherry", "lemon", "plum"]);
+    reel.dispose();
+  }
+});
+
+it("reduced motion creates no moving container or tween and shows the saved outcome", async () => {
+  const { scene, tweens, containers } = renderer();
+  const reel = new ReelView(scene, 0, ["cherry", "lemon", "plum"]);
+  await reel.play(["wild", "seven", "melon"], 0, 0, true);
+  expect(tweens).toHaveLength(0);
+  expect(containers).toHaveLength(1);
+  expect(containers[0].list.map((image: any) => image.texture.key)).toEqual(["wild", "seven", "melon"]);
 });

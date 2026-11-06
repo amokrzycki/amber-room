@@ -20,6 +20,12 @@ it("shows a returned winning line briefly without a profit celebration and dispo
       },
     },
     tweens: { killTweensOf() {}, add() {} },
+    time: {
+      delayedCall(ms: number, callback: () => void) {
+        const timer = setTimeout(callback, ms);
+        return { remove: () => clearTimeout(timer) };
+      },
+    },
   };
   let i = 0;
   const outcome = spin(machine, { lineCount: 5, perLine: 1 }, () => [2, 1, 0, 0, 0][i++]);

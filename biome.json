@@ -100,6 +100,12 @@
   },
   "overrides": [
     {
+      "includes": ["DESIGN.md"],
+      "formatter": {
+        "enabled": false
+      }
+    },
+    {
       "includes": ["*.config.{ts,js,mjs}", "*.config.*.{ts,js,mjs}"],
       "linter": {
         "rules": {

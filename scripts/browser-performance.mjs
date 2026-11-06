@@ -2,6 +2,7 @@ import { chromium } from "playwright";
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import os from "node:os";
+const [artifact = "dist/index.html", reportPath = "docs/performance-report.json"] = process.argv.slice(2);
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
@@ -12,13 +13,37 @@ const page = await context.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 await page.addInitScript(() => {
+  window.__cabinetUploads = [];
+  for (const renderer of [WebGLRenderingContext, WebGL2RenderingContext]) {
+    const upload = renderer.prototype.texImage2D;
+    renderer.prototype.texImage2D = function (...args) {
+      const source = args.at(-1);
+      if (source instanceof HTMLCanvasElement && source.width === 1530 && source.height === 780)
+        window.__cabinetUploads.push(performance.now());
+      return upload.apply(this, args);
+    };
+  }
   const raf = requestAnimationFrame.bind(window);
   window.__frames = [];
   window.__callbacks = [];
+  window.__phases = { idle: [], spinning: [], stopping: [], win: [] };
   let previous = 0;
   window.requestAnimationFrame = (cb) =>
     raf((t) => {
-      if (previous) window.__frames.push(t - previous);
+      if (previous && t !== previous) {
+        const interval = t - previous;
+        window.__frames.push(interval);
+        const button = document.querySelector("#spin");
+        const phase =
+          button?.dataset.state === "spinning"
+            ? performance.now() - window.__spinStarted < 850
+              ? "spinning"
+              : "stopping"
+            : button?.dataset.state === "settled"
+              ? "win"
+              : "idle";
+        window.__phases[phase].push(interval);
+      }
       previous = t;
       const start = performance.now();
       cb(t);
@@ -44,11 +69,14 @@ const stats = (values) => {
     mean: values.reduce((a, b) => a + b, 0) / values.length,
     p50: sorted[Math.floor(sorted.length * 0.5)],
     p95: sorted[Math.floor(sorted.length * 0.95)],
+    p99: sorted[Math.floor(sorted.length * 0.99)],
     max: sorted.at(-1),
+    over25ms: values.filter((v) => v > 25).length,
+    estimatedMissed60Hz: values.reduce((n, v) => n + Math.max(0, Math.round(v / (1000 / 60)) - 1), 0),
   };
 };
 try {
-  await page.goto(`file://${resolve("dist/index.html")}`);
+  await page.goto(`file://${resolve(artifact)}`);
   await page.locator("#enter-slot").waitFor();
   await page.click("#enter-slot");
   await page.locator("#spin").waitFor();
@@ -84,13 +112,20 @@ try {
   await page.evaluate(() => {
     window.__frames = [];
     window.__callbacks = [];
+    window.__phases = { idle: [], spinning: [], stopping: [], win: [] };
     window.__stops = [9, 10, 10, 10, 9];
+  });
+  await page.waitForTimeout(1500);
+  await page.evaluate(() => {
+    window.__spinStarted = performance.now();
   });
   await page.click("#spin");
   await page.waitForTimeout(5200);
   const values = await page.evaluate(() => ({
     frames: window.__frames,
     callbacks: window.__callbacks,
+    phases: window.__phases,
+    cabinetUploads: window.__cabinetUploads,
     renderer: (() => {
       const gl =
         document.querySelector("canvas").getContext("webgl2") || document.querySelector("canvas").getContext("webgl");
@@ -106,11 +141,14 @@ try {
     cpu: os.cpus()[0].model,
     cpus: os.cpus().length,
     viewport: { width: 1600, height: 900 },
+    artifact,
+    cabinetUploads: values.cabinetUploads,
     renderer: values.renderer,
     softwareRendering: true,
     recordVideo: false,
     case: "40 lines × 5, exact maximum payout 13055, stops9/10/10/10/9; 12 scene round trips",
     rafIntervalMs: stats(values.frames),
+    phases: Object.fromEntries(Object.entries(values.phases).map(([phase, samples]) => [phase, stats(samples)])),
     mainCallbackMs: stats(values.callbacks),
     estimatedRafFps: 1000 / stats(values.frames).mean,
     domBefore: before,
@@ -122,7 +160,7 @@ try {
     limits:
       "Headless Chromium + SwiftShader. No user hardware, GPU timing or acoustic listening. RAF is not a guarantee of perceived 60FPS.",
   };
-  writeFileSync("docs/performance-report.json", `${JSON.stringify(report, null, 2)}\n`);
+  writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
   console.log(JSON.stringify(report, null, 2));
   if (errors.length || after.jsEventListeners > before.jsEventListeners + 5) process.exitCode = 1;
 } finally {

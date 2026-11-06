@@ -59,11 +59,18 @@ const force = (stops) =>
     window.__stops = [...s];
   }, stops);
 const ready = () =>
-  page.waitForFunction(
-    () =>
-      document.querySelector("#spin")?.textContent.trim().startsWith("START") &&
-      !document.querySelector("#spin").disabled,
-  );
+  page.waitForFunction(() => {
+    const spin = document.querySelector("#spin");
+    const saved = JSON.parse(localStorage.getItem("fruit-salon:v1"));
+    const net = document.querySelector("#net");
+    return (
+      spin?.dataset.state === "idle" &&
+      (!saved?.lastSpin ||
+        (document.querySelector("#payout").textContent === saved.lastSpin.outcome.payout.toLocaleString("en-GB") &&
+          (!net ||
+            Number(net.textContent.replaceAll(",", "")) === saved.lastSpin.outcome.payout - saved.lastSpin.totalStake)))
+    );
+  });
 try {
   await page.goto(`file://${resolve("dist/index.html")}`);
   await page.locator("#enter-slot").waitFor();
@@ -140,15 +147,13 @@ try {
     assert.equal(await page.locator("#line-count").isDisabled(), true);
     await page.waitForFunction(() => !document.querySelector("#back").disabled); // reels have stopped
     if (tier !== "neutral" && tier !== "return") {
-      assert.match(await page.locator("#spin").innerText(), /SKIP/);
+      // Reels have settled: the one button reads SPIN again; the celebration ends without another wager.
+      assert.equal(await page.locator("#spin").innerText(), "SPIN");
       await page.screenshot({ path: `docs/evidence/win-${tier}.png` });
-      const key = { small: "Space", big: "Enter", jackpot: "NumpadEnter" }[tier];
-      await page.focus("#spin");
-      await page.keyboard.down(key);
-      await page.keyboard.down(key);
-      await page.keyboard.up(key);
-      assert.equal((await readSave()).nextSpinId, settled.nextSpinId, `Held ${key} must not place another bet`);
+      await page.keyboard.press("Escape");
+      assert.equal((await readSave()).nextSpinId, settled.nextSpinId, "Escape must not place another bet");
       await ready();
+      await page.waitForTimeout(400); // A distinct activation must follow the celebration-dismiss re-arm window.
       await page.waitForFunction(() => window.__audio.active === 0, undefined, { timeout: 2000 });
       assert.equal((await readSave()).nextSpinId, settled.nextSpinId);
       assert.equal((await readSave()).balance, settled.balance);
@@ -163,7 +168,7 @@ try {
   }
   await force([9, 9, 9, 9, 0]);
   await page.click("#spin");
-  await page.waitForFunction(() => document.querySelector("#spin")?.textContent.includes("SKIP"));
+  await page.waitForFunction(() => document.querySelector("#spin")?.dataset.state === "settled");
   await page.click("#back");
   await page.locator("#enter-slot").waitFor();
   await page.waitForTimeout(100);

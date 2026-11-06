@@ -22,3 +22,9 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Asset provenance: asset-generation.md and src/assets/manifest.json. No Kenney/Freesound files are distributed.
+
+## Embedded typefaces (Phase 3.2)
+
+Marcellus (Brian J. Bonislawsky DBA Astigmatic, Reserved Font Name "Marcellus") and Source Sans 3 (Adobe) are distributed under SIL Open Font License 1.1. Marcellus is shipped unmodified (the Reserved Font Name forbids a renamed or subsetted derivative); Source Sans 3 is the original variable TTF. Full license texts are in `src/assets/fonts/`; they are also bundled in the standalone HTML and available under Settings & save → Typeface credits & licenses. No remote font service is required. Libre Caslon Text, used in Phases 2.1–3.1, is no longer distributed.
+
+Sources: https://github.com/google/fonts/tree/main/ofl/marcellus and https://github.com/google/fonts/tree/main/ofl/sourcesans3 .
