@@ -44,7 +44,7 @@ test("save recovery and business purchases", async ({ browser }) => {
     const accrued = await save();
     expect(accrued.balance).toBe(20512);
     expect(accrued.businesses.barLevel).toBe(0);
-    await page.screenshot({ path: "docs/evidence/salon-before.png" });
+    if (!process.env.CI) await page.screenshot({ path: "docs/evidence/salon-before.png" });
     for (const item of ["bar", "machine", "decor"] as const)
       for (let i = 1; i <= 3; i++) {
         await page.click(`#buy-${item}`);
@@ -62,7 +62,7 @@ test("save recovery and business purchases", async ({ browser }) => {
       expect(await page.locator(`#buy-${item}`).isDisabled()).toBe(true);
     await page.click("#round");
     expect((await save()).balance).toBe(maxed.balance - 50);
-    await page.screenshot({ path: "docs/evidence/salon-max.png" });
+    if (!process.env.CI) await page.screenshot({ path: "docs/evidence/salon-max.png" });
     await page.click("[data-action=settings]");
     const download = page.waitForEvent("download");
     await page.click("#export");

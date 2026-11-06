@@ -61,8 +61,14 @@ test("result dialog and input regressions", async ({ browser }) => {
     }, stops);
     await page.click("#spin");
   }
-  const phase = (p: Page, state: string) =>
-    p.waitForFunction((s) => document.querySelector<HTMLButtonElement>("#spin")!.dataset.state === s, state);
+  const phase = async (p: Page, state: string) => {
+    if (state === "idle") {
+      await p.waitForFunction(() => !document.querySelector<HTMLButtonElement>("#back")!.disabled);
+      await p.keyboard.press("Escape");
+      await p.waitForTimeout(400);
+    }
+    await p.waitForFunction((s) => document.querySelector<HTMLButtonElement>("#spin")!.dataset.state === s, state);
+  };
   const rect = (p: Page) => p.locator("#spin").boundingBox();
   try {
     const { page, context } = await open();
@@ -119,7 +125,7 @@ test("result dialog and input regressions", async ({ browser }) => {
           (await page.locator("dialog[open]").count()) === 0,
         );
         check(`${width} ${name}: HUD fixed`, JSON.stringify(await rect(page)) === JSON.stringify(initial));
-        if (width === 1600) await page.screenshot({ path: `${out}/after-${name}.png` });
+        if (width === 1600 && !process.env.CI) await page.screenshot({ path: `${out}/after-${name}.png` });
         await page.click(".win-details");
         const dialog = page.locator(".result-dialog");
         check(
@@ -185,7 +191,7 @@ test("result dialog and input regressions", async ({ browser }) => {
           return r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight;
         });
         check(`${width} ${name}: dialog fits viewport`, fits);
-        if (width === 1600) await page.screenshot({ path: `${out}/dialog-${name}.png` });
+        if (width === 1600 && !process.env.CI) await page.screenshot({ path: `${out}/dialog-${name}.png` });
         await page.keyboard.press("Escape");
         check(
           `${width} ${name}: Escape restores trigger focus`,

@@ -38,7 +38,7 @@ test("cabinet geometry and rendering", async ({ browser }) => {
     });
     await page.goto(`file://${resolve(artifact)}`);
     await page.locator("#enter-slot").waitFor();
-    await page.screenshot({ path: `${evidence}/${label}-lounge-${width}x${height}.png` });
+    if (!process.env.CI) await page.screenshot({ path: `${evidence}/${label}-lounge-${width}x${height}.png` });
     await page.click("#enter-slot");
     await page.locator("#spin").waitFor();
     const capture = async (state: string) => {
@@ -87,7 +87,7 @@ test("cabinet geometry and rendering", async ({ browser }) => {
         );
       }
       layouts.push({ state, width, height, layout });
-      await page.screenshot({ path: `${evidence}/${label}-${state}-${width}x${height}.png` });
+      if (!process.env.CI) await page.screenshot({ path: `${evidence}/${label}-${state}-${width}x${height}.png` });
     };
     await capture("idle");
     for (const [state, stops, payout] of [
@@ -115,6 +115,8 @@ test("cabinet geometry and rendering", async ({ browser }) => {
       if (state === "loss") await capture("spinning-disabled");
       await page.waitForFunction(() => !document.querySelector<HTMLButtonElement>("#back")!.disabled);
       if (state === "jackpot") await capture("celebrating");
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(400);
       await page.waitForFunction(
         () =>
           document.querySelector<HTMLButtonElement>("#spin")!.textContent! === "SPIN" &&

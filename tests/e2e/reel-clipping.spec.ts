@@ -21,9 +21,11 @@ test("moving reels stay inside the cabinet", async ({ browser }) => {
   await page.click("#enter-slot");
   await page.locator("#spin").waitFor();
   await page.screenshot({ path: `${directory}/idle.png` });
+  await page.clock.install();
+  await page.clock.pauseAt(new Date(Date.now() + 100));
   await page.click("#spin");
   for (let frame = 0; frame < 4; frame++) {
-    await page.waitForTimeout(80);
+    await page.clock.runFor(80);
     expect(await page.locator("#spin").getAttribute("data-state"), "Capture must sample moving reels").toBe("spinning");
     await page.screenshot({ path: `${directory}/moving-${frame}.png` });
   }

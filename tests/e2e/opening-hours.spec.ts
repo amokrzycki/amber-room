@@ -29,7 +29,7 @@ test("isolated opening hours prototype", async ({ browser }) => {
   expect(await page.evaluate(() => localStorage.getItem("fruit-salon:v1")!)).toBe(original);
   await page.click("#reset");
   expect(await page.evaluate(() => localStorage.getItem("fruit-salon:v1")!)).toBe(original);
-  await page.screenshot({ path: "docs/evidence/phase40/accounting-lab.png" });
+  if (!process.env.CI) await page.screenshot({ path: "docs/evidence/phase40/accounting-lab.png" });
   writeFileSync(
     "docs/evidence/phase40/prototype-browser.json",
     JSON.stringify({ ok: true, result, productionKeyUntouched: true }, null, 2),

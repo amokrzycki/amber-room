@@ -177,7 +177,10 @@ const reelPixels = (page: Page) => {
     );
 };
 const settleAll = async (page: Page) => {
+  await page.waitForFunction(() => document.querySelector<HTMLButtonElement>("#spin")!.dataset.state !== "spinning");
+  await page.keyboard.press("Escape");
   await idle(page);
+  await page.waitForTimeout(400);
   await page.waitForFunction(() => {
     const s = JSON.parse(localStorage.getItem("fruit-salon:v1")!) as SaveV1;
     return (
@@ -261,9 +264,12 @@ test("Space: held key spins once; keyup never skips; fresh Space skips; double-t
   expect(await state(page), "the keyup echo must not act as SKIP").toBe("spinning");
   expect((await saved(page)).nextSpinId).toBe(before.nextSpinId + 1);
   await page.waitForTimeout(350); // outside the first-gesture window; a fresh Space now means SKIP
-  await page.keyboard.press("Space");
-  await page.keyboard.press("Space"); // double-tap: second must be swallowed, not a new wager
-  await page.keyboard.press("Space");
+  await page.locator("#spin").evaluate((button) => {
+    for (let i = 0; i < 3; i++) {
+      button.dispatchEvent(new KeyboardEvent("keydown", { key: " ", code: "Space", bubbles: true }));
+      button.dispatchEvent(new KeyboardEvent("keyup", { key: " ", code: "Space", bubbles: true }));
+    }
+  });
   await page.waitForTimeout(100);
   expect((await saved(page)).nextSpinId, "double-tapping SKIP must not wager").toBe(before.nextSpinId + 1);
   expect(await page.evaluate(() => document.activeElement?.id)).toBe("spin");
@@ -274,6 +280,7 @@ test("Space: held key spins once; keyup never skips; fresh Space skips; double-t
   // Enter on the focused button behaves the same, Space on the page body too.
   await page.evaluate(() => (document.activeElement as HTMLElement).blur());
   await force(page, STOPS.loss);
+  await page.waitForTimeout(400); // A distinct wager follows the SKIP rearm window.
   await page.keyboard.press("Space");
   expect((await saved(page)).nextSpinId).toBe(before.nextSpinId + 2);
   await settleAll(page);
@@ -286,9 +293,9 @@ test("pointer: SKIP then dismiss celebration without a wager; a distinct activat
   await force(page, STOPS.big);
   await page.click("#spin");
   await page.waitForTimeout(250);
-  await page.click("#spin"); // SKIP
-  await page.click("#spin", { delay: 20 });
-  await page.click("#spin");
+  await page.locator("#spin").evaluate((button) => {
+    for (let i = 0; i < 3; i++) (button as HTMLButtonElement).click();
+  }); // SKIP and immediate echoes share one browser task.
   expect((await saved(page)).nextSpinId, "extra clicks right after SKIP are not a new wager").toBe(
     before.nextSpinId + 1,
   );

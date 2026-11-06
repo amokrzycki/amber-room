@@ -1,3 +1,4 @@
+import { createSave } from "../../src/game/save";
 import type { SaveV1 } from "../../src/game/model";
 import { expect } from "@playwright/test";
 import { test } from "./fixtures";
@@ -8,6 +9,12 @@ test("outcome copy and accessible announcements", async ({ browser }) => {
   const evidence = "docs/evidence/phase1";
   await mkdir(evidence, { recursive: true });
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, offline: true });
+  await context.addInitScript(
+    (save) => {
+      if (!localStorage.getItem("fruit-salon:v1")) localStorage.setItem("fruit-salon:v1", JSON.stringify(save));
+    },
+    createSave(Date.now() + 86400000),
+  );
   const page = await context.newPage();
   const errors: string[] = [],
     network: string[] = [],
@@ -173,11 +180,11 @@ test("outcome copy and accessible announcements", async ({ browser }) => {
           ) < 2,
       );
       await checkLayout("slot-initial");
-      await page.screenshot({ path: `${evidence}/after-slot-${width}x${height}.png` });
+      if (!process.env.CI) await page.screenshot({ path: `${evidence}/after-slot-${width}x${height}.png` });
       await page.click("#back");
       await page.locator("#enter-slot").waitFor();
       await checkLayout("lounge");
-      await page.screenshot({ path: `${evidence}/after-lounge-${width}x${height}.png` });
+      if (!process.env.CI) await page.screenshot({ path: `${evidence}/after-lounge-${width}x${height}.png` });
       await page.click("#enter-slot");
       await page.locator("#spin").waitFor();
     }
@@ -204,7 +211,7 @@ test("outcome copy and accessible announcements", async ({ browser }) => {
       const result = await spinOnce(stops, skip);
       expect(result.lastSpin!.outcome.payout).toBe(returned);
       await checkLayout(name);
-      await page.screenshot({ path: `${evidence}/after-${name}-1280x800.png` });
+      if (!process.env.CI) await page.screenshot({ path: `${evidence}/after-${name}-1280x800.png` });
     }
     for (const lineCount of [1, 5, 10, 20, 40] as const)
       for (const perLine of [1, 2, 5] as const) {

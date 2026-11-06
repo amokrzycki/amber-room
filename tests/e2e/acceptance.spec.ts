@@ -1,3 +1,4 @@
+import { createSave } from "../../src/game/save";
 import type { SaveV1 } from "../../src/game/model";
 import { expect } from "@playwright/test";
 import { test } from "./fixtures";
@@ -7,8 +8,14 @@ test("offline game acceptance", async ({ browser }) => {
   const context = await browser.newContext({
     viewport: { width: 1600, height: 900 },
     offline: true,
-    recordVideo: { dir: "docs/evidence/video", size: { width: 1600, height: 900 } },
+    ...(!process.env.CI ? { recordVideo: { dir: "docs/evidence/video", size: { width: 1600, height: 900 } } } : {}),
   });
+  await context.addInitScript(
+    (save) => {
+      if (!localStorage.getItem("fruit-salon:v1")) localStorage.setItem("fruit-salon:v1", JSON.stringify(save));
+    },
+    createSave(Date.now() + 86400000),
+  );
   const page = await context.newPage();
   const errors: string[] = [],
     network: string[] = [];
@@ -74,7 +81,7 @@ test("offline game acceptance", async ({ browser }) => {
   try {
     await page.goto(`file://${resolve("dist/index.html")}`);
     await page.locator("#enter-slot").waitFor();
-    await page.screenshot({ path: "docs/evidence/salon.png" });
+    if (!process.env.CI) await page.screenshot({ path: "docs/evidence/salon.png" });
     await page.mouse.click(745, 405);
     await page.locator("#spin").waitFor({ timeout: 2000 });
     for (const key of ["Space", "Enter"] as const) {
@@ -128,7 +135,7 @@ test("offline game acceptance", async ({ browser }) => {
     }
     await page.selectOption("#line-count", "5");
     await page.selectOption("#per-line", "1");
-    await page.screenshot({ path: "docs/evidence/slot.png" });
+    if (!process.env.CI) await page.screenshot({ path: "docs/evidence/slot.png" });
     const cases: [string, number[], number][] = [
       ["small", [3, 0, 0, 0, 0], 15],
       ["big", [0, 0, 0, 0, 0], 70],
@@ -153,7 +160,7 @@ test("offline game acceptance", async ({ browser }) => {
       if (tier !== "neutral" && tier !== "return") {
         // Reels have settled: the one button reads SPIN again; the celebration ends without another wager.
         expect(await page.locator("#spin").innerText()).toBe("SPIN");
-        await page.screenshot({ path: `docs/evidence/win-${tier}.png` });
+        if (!process.env.CI) await page.screenshot({ path: `docs/evidence/win-${tier}.png` });
         await page.keyboard.press("Escape");
         expect((await readSave()).nextSpinId, "Escape must not place another bet").toBe(settled.nextSpinId);
         await ready();

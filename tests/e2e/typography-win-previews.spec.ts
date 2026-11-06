@@ -60,6 +60,9 @@ test("fonts and win previews", async ({ browser }) => {
   const settle = async (page: Page, stops: readonly number[]) => {
     await page.evaluate((s) => (window.__stops = [...s]), stops);
     await page.click("#spin");
+    await page.waitForFunction(() => !document.querySelector<HTMLButtonElement>("#back")!.disabled);
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(400);
     await page.waitForFunction(
       () => document.querySelector<HTMLButtonElement>("#spin")!.dataset.state === "idle",
       null,
@@ -176,7 +179,7 @@ test("fonts and win previews", async ({ browser }) => {
         };
       });
       check("fallback nameplate fits", fb.fits, fb);
-      await page.screenshot({ path: `${evidence}/fallback-1280x800.png` });
+      if (!process.env.CI) await page.screenshot({ path: `${evidence}/fallback-1280x800.png` });
     }
     // Disabled while spinning; click returns to the lounge and keeps the wallet.
     const before = await save(page);
@@ -214,7 +217,7 @@ test("fonts and win previews", async ({ browser }) => {
   let brass = 0;
   for (let i = 0; i < gapPixels.length; i += 4) if (isBrass(gapPixels[i], gapPixels[i + 1], gapPixels[i + 2])) brass++;
   check("warm brass thread visible between WILD tiles", brass > 80, brass);
-  await page.screenshot({ path: `${evidence}/check-wild-five.png` });
+  if (!process.env.CI) await page.screenshot({ path: `${evidence}/check-wild-five.png` });
   const top = await page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.tagName, [cx(2), cy(1)]);
   check("overlay leaves the canvas hit-testable", top === "CANVAS", top);
   await settle(page, [9, 6, 0, 0, 0]); // two lines share one WILD cell

@@ -91,7 +91,7 @@ test("input, settlement and accessibility", async ({ browser }) => {
         }),
       );
       for (const element of layout) assert(element.fits && element.inside, `${width} ${state}: ${element.id} clipped`);
-      await page.screenshot({ path: `${evidence}/after-${state}-${width}x${height}.png` });
+      if (!process.env.CI) await page.screenshot({ path: `${evidence}/after-${state}-${width}x${height}.png` });
       results.push({ width, height, state, layout });
     };
     await capture("idle");
@@ -153,7 +153,7 @@ test("input, settlement and accessibility", async ({ browser }) => {
     expect((await save(page)).balance).toBe(settled.balance);
     expect((await save(page)).nextSpinId).toBe(settled.nextSpinId);
     expect(await page.locator("#salon-balance").innerText()).toBe("1,010");
-    await page.screenshot({ path: `${evidence}/after-cash-out-${width}x${height}.png` });
+    if (!process.env.CI) await page.screenshot({ path: `${evidence}/after-cash-out-${width}x${height}.png` });
     await page.reload();
     await page.click("#enter-slot");
     await ready(page);
@@ -264,7 +264,7 @@ test("input, settlement and accessibility", async ({ browser }) => {
     }
     expect(changes.announcement.filter(Boolean).length).toBe(1);
     results.push({ preference, changes });
-    await page.screenshot({ path: `${evidence}/after-reduced-${preference}-1366x768.png` });
+    if (!process.env.CI) await page.screenshot({ path: `${evidence}/after-reduced-${preference}-1366x768.png` });
     await context.close();
   }
   expect(errors).toEqual([]);

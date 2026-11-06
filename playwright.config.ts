@@ -3,11 +3,12 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 180_000,
-  workers: 1,
+  workers: process.env.CI ? 2 : "50%",
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   reporter: "list",
   use: {
+    actionTimeout: 15_000,
     browserName: "chromium",
     viewport: { width: 1600, height: 900 },
     launchOptions: {
