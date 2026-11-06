@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Amber Room progression comparison</title>
+    <style>
+    :root {
+      color-scheme: light dark;
+    }
+    body {
+      margin: 0;
+      color: var(--foreground);
+      font-family: var(--font-sans);
+    }
+    figure {
+      margin: 0;
+    }
+    figcaption {
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+    .comparison {
+      display: grid;
+      gap: 12px;
+    }
+    .row,
+    .axis {
+      display: grid;
+      grid-template-columns: 114px minmax(0, 1fr) 48px;
+      align-items: center;
+      gap: 8px;
+    }
+    .label {
+      color: var(--foreground);
+    }
+    .label small {
+      display: block;
+      color: var(--muted-foreground);
+    }
+    .track {
+      background: color-mix(in srgb, var(--foreground) 5%, transparent);
+      height: 16px;
+    }
+    .bar {
+      height: 16px;
+      background: var(--chart-1);
+    }
+    .candidate {
+      background: var(--chart-2);
+    }
+    .value {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .axis {
+      margin-top: 14px;
+      color: var(--muted-foreground);
+    }
+    .ticks {
+      display: flex;
+      justify-content: space-between;
+    }
+    .unit {
+      text-align: right;
+    }
+    p {
+      margin: 14px 0 0;
+      color: var(--muted-foreground);
+    }
+    </style>
+  </head>
+  <body>
+    <figure id="amber-completion" aria-describedby="comparison-method">
+      <figcaption>Full-room completion · no spins</figcaption>
+      <div
+        class="comparison"
+        role="img"
+        aria-label="Current versus experimental furnishing income: frequent 4.25 versus 4 days; daily 11 versus 10 days; occasional 22 versus 20 days. Same prices and eight-hour cap. ROI-target policy, not player observations."
+      >
+        <div class="row">
+          <div class="label">Frequent<small>Current</small></div>
+          <div class="track"><div class="bar" style="width:14.1667%"></div></div>
+          <span class="value">4.25</span>
+        </div>
+        <div class="row">
+          <div class="label">Frequent<small>Candidate</small></div>
+          <div class="track"><div class="bar candidate" style="width:13.3333%"></div></div>
+          <span class="value">4</span>
+        </div>
+        <div class="row">
+          <div class="label">Daily<small>Current</small></div>
+          <div class="track"><div class="bar" style="width:36.6667%"></div></div>
+          <span class="value">11</span>
+        </div>
+        <div class="row">
+          <div class="label">Daily<small>Candidate</small></div>
+          <div class="track"><div class="bar candidate" style="width:33.3333%"></div></div>
+          <span class="value">10</span>
+        </div>
+        <div class="row">
+          <div class="label">Every two days<small>Current</small></div>
+          <div class="track"><div class="bar" style="width:73.3333%"></div></div>
+          <span class="value">22</span>
+        </div>
+        <div class="row">
+          <div class="label">Every two days<small>Candidate</small></div>
+          <div class="track"><div class="bar candidate" style="width:66.6667%"></div></div>
+          <span class="value">20</span>
+        </div>
+      </div>
+      <div class="axis" aria-hidden="true">
+        <span></span>
+        <div class="ticks"><span>0</span><span>10</span><span>20</span><span>30</span></div>
+        <span class="unit">days</span>
+      </div>
+      <p id="comparison-method">
+        Modeled ROI-target purchases. Same nine prices and eight-hour gap cap. Candidate remains rejected for production
+        pending playtest evidence.
+      </p>
+    </figure>
+  </body>
+</html>
