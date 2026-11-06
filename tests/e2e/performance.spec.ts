@@ -4,7 +4,7 @@ import { test } from "./fixtures";
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import os from "node:os";
-test("browser resource usage", async ({ browser }, testInfo) => {
+test("browser resource usage", { tag: "@local" }, async ({ browser }, testInfo) => {
   const artifact = "dist/index.html";
   const reportPath = testInfo.outputPath("performance-report.json");
   const context = await browser.newContext({ viewport: { width: 1600, height: 900 }, offline: true });

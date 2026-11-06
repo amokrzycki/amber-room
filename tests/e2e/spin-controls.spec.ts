@@ -315,7 +315,9 @@ test("pointer: SKIP then dismiss celebration without a wager; a distinct activat
 });
 
 // 3 ──────────────────────────────────────────────────────────────────────────────────────────────
-test("skip during acceleration, cruise and deceleration: exact predetermined grid, balance and one announcement", async () => {
+test("skip during acceleration, cruise and deceleration: exact predetermined grid, balance and one announcement", {
+  tag: "@local",
+}, async () => {
   for (const [label, delay] of [
     ["acceleration", 90],
     ["cruise", 500],
@@ -348,7 +350,7 @@ test("skip during acceleration, cruise and deceleration: exact predetermined gri
   }
 });
 
-test("SKIP is immediate: reels settle within two frames of the activation", async () => {
+test("SKIP is immediate: reels settle within two frames of the activation", { tag: "@local" }, async () => {
   const { context, page } = await open();
   await force(page, STOPS.small);
   await page.click("#spin");
@@ -407,7 +409,9 @@ test("30 spins with random skip timing: every wager and credit appears exactly o
 });
 
 // 4 ──────────────────────────────────────────────────────────────────────────────────────────────
-test("HUD and canvas boxes never move or resize through loss / partial / even / win / jackpot spins (4 viewports, with and without SKIP)", async () => {
+test("HUD and canvas boxes never move or resize through loss / partial / even / win / jackpot spins (4 viewports, with and without SKIP)", {
+  tag: "@local",
+}, async () => {
   for (const [width, height] of [
     [1280, 800],
     [1366, 768],

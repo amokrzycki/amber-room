@@ -4,7 +4,7 @@ import { test } from "./fixtures";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-test("reel motion and counting", async ({ browser }) => {
+test("reel motion and counting", { tag: "@local" }, async ({ browser }) => {
   const evidence = "docs/evidence/phase3";
   await mkdir(evidence, { recursive: true });
   const context = await browser.newContext({ viewport: { width: 1600, height: 900 }, offline: true });

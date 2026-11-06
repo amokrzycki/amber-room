@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
-test("moving reels stay inside the cabinet", async ({ browser }) => {
+test("moving reels stay inside the cabinet", { tag: "@local" }, async ({ browser }) => {
   const directory = "docs/evidence/reel-clipping";
   mkdirSync(directory, { recursive: true });
 

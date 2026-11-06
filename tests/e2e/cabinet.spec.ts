@@ -4,7 +4,7 @@ import { test } from "./fixtures";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-test("cabinet geometry and rendering", async ({ browser }) => {
+test("cabinet geometry and rendering", { tag: "@local" }, async ({ browser }) => {
   const label = "after";
   const artifact = "dist/index.html";
   const evidence = "docs/evidence/phase2";

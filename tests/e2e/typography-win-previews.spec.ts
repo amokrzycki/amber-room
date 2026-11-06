@@ -4,7 +4,7 @@ import { test } from "./fixtures";
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-test("fonts and win previews", async ({ browser }) => {
+test("fonts and win previews", { tag: "@local" }, async ({ browser }) => {
   // Phase 3.2 browser checks on dist/index.html (offline file://): lounge link in shared nav, font loading and
   // fallback, win marks behind symbols (pixel checks), preview via pointer and keyboard, overlay hit testing.
 

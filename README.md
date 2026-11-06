@@ -44,6 +44,10 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
+GitHub Actions runs `npm run test:e2e:ci`, which excludes tests tagged `@local`. It checks offline startup, exact-once wagers and payouts, all bet settings, save recovery/import/export, purchases, idle income, keyboard input, accessible announcements, reduced motion, result dialogs and DOM layout bounds. These checks wait for application state rather than require a particular frame rate.
+
+`npm run test:e2e:local` runs the eight local audits: resource/FPS measurements, the full cabinet state/viewport sweep, moving-reel clipping, reel motion/audio sequencing and pixel alignment, font/win-preview pixels, skip at specific animation phases, the two-frame skip limit, and the full per-frame HUD stability sweep. `npm run test:e2e` still runs all 29 tests. Functional assertions bundled in these audits remain part of the full local suite; CI covers the corresponding game flows without FPS thresholds or the full visual audits.
+
 Use `npm run test:e2e:ui` for the interactive runner, or `npx playwright test tests/e2e/save-business.spec.ts` to run one suite after building. `npm test` runs the separate Vitest unit tests. `npm run typecheck` checks both unit and browser tests.
 
 The suite opens the production build via `file://` with networking disabled. Playwright starts and stops Vite automatically for the isolated opening-hours prototype. Chromium is managed by Playwright; to use an existing browser, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium`. The reel-clipping test also needs Python with Pillow (`python -m pip install Pillow`).
