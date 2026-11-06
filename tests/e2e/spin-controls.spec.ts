@@ -1,21 +1,21 @@
-// Phase 3.1 focused browser tests: unified SPIN/SKIP, stable HUD, compact win details, wider reels.
-// Runs against dist/index.html (offline file://). `node scripts/browser-phase31.mjs [video]`
+import type { SaveV1 } from "../../src/game/model";
+import { expect, type Browser, type Page } from "@playwright/test";
+import { test } from "./fixtures";
 import assert from "node:assert/strict";
-import { chromium } from "playwright";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
+let browser: Browser;
+test.beforeAll(async ({ browser: runnerBrowser }) => {
+  browser = runnerBrowser;
+});
+// Phase 3.1 focused browser tests: unified SPIN/SKIP, stable HUD, compact win details, wider reels.
+// Runs against the standalone offline build.
 
 const evidence = "docs/evidence/phase31";
 mkdirSync(evidence, { recursive: true });
 const file = `file://${resolve("dist/index.html")}`;
-const browser = await chromium.launch({
-  executablePath: "/usr/bin/chromium",
-  headless: true,
-  args: ["--no-sandbox", "--enable-unsafe-swiftshader", "--use-gl=angle", "--use-angle=swiftshader"],
-});
-const results = [];
-const errors = [];
-const network = [];
+const errors: string[] = [];
+const network: string[] = [];
 
 const STOPS = {
   loss: [1, 0, 0, 0, 0], // 0 returned
@@ -34,7 +34,7 @@ async function open({
   bet = { lineCount: 5, perLine: 1 },
   reducedMotion = false,
   os = false,
-  video,
+  video = false,
 } = {}) {
   const context = await browser.newContext({
     viewport: { width, height },
@@ -51,7 +51,7 @@ async function open({
       window.__stops = [];
       crypto.getRandomValues = (a) => {
         if (window.__stops.length && a instanceof Uint32Array) {
-          a[0] = window.__stops.shift();
+          a[0] = window.__stops.shift()!;
           return a;
         }
         return rng(a);
@@ -62,7 +62,7 @@ async function open({
         if (k === "fruit-salon:v1") window.__saves++;
         return set.call(this, k, v);
       };
-      if (!localStorage.getItem("fruit-salon:v1"))
+      if (!localStorage.getItem("fruit-salon:v1")!)
         localStorage.setItem(
           "fruit-salon:v1",
           JSON.stringify({
@@ -80,16 +80,17 @@ async function open({
       // Layout sampler: every non-inline box in the HUD, plus canvas/stage, on every frame and every 5ms.
       window.__layout = null;
       const boxes = () => {
-        const hud = document.querySelector(".slot-hud");
+        const hud = document.querySelector<HTMLElement>(".slot-hud")!;
         if (!hud) return null;
-        const out = {};
-        const add = (name, el) => {
+        const out: Record<string, number[]> = {};
+        const add = (name: string, el: Element) => {
           const r = el.getBoundingClientRect();
           out[name] = [r.x, r.y, r.width, r.height];
         };
-        for (const q of ["#stage", "#ui", "canvas", ".slot-hud", "#back"]) add(q, document.querySelector(q));
+        for (const q of ["#stage", "#ui", "canvas", ".slot-hud", "#back"] as const)
+          add(q, document.querySelector<HTMLElement>(q)!);
         let i = 0;
-        for (const el of hud.querySelectorAll("*")) {
+        for (const el of hud.querySelectorAll<HTMLElement>("*")) {
           // .face is the label of the pressed cap: it depresses 3px by transform while physically pressed.
           if (el.closest(".win-details") || el.classList.contains("face") || getComputedStyle(el).display === "inline")
             continue;
@@ -128,135 +129,126 @@ async function open({
   return { context, page };
 }
 
-const saved = (page) => page.evaluate(() => JSON.parse(localStorage.getItem("fruit-salon:v1")));
-const state = (page) => page.locator("#spin").getAttribute("data-state");
-const force = (page, stops) => page.evaluate((s) => (window.__stops = [...s]), stops);
-const idle = (page, timeout = 20000) =>
-  page.waitForFunction(() => document.querySelector("#spin").dataset.state === "idle", null, { timeout });
-const watchAnnouncements = (page) =>
+const saved = (page: Page) => page.evaluate(() => JSON.parse(localStorage.getItem("fruit-salon:v1")!) as SaveV1);
+const state = (page: Page) => page.locator("#spin").getAttribute("data-state");
+const force = (page: Page, stops: readonly number[]) => page.evaluate((s) => (window.__stops = [...s]), stops);
+const idle = (page: Page, timeout = 20000) =>
+  page.waitForFunction(() => document.querySelector<HTMLButtonElement>("#spin")!.dataset.state === "idle", null, {
+    timeout,
+  });
+const watchAnnouncements = (page: Page) =>
   page.evaluate(() => {
     window.__ann = [];
-    new MutationObserver(() => window.__ann.push(document.querySelector("#result-announcement").textContent)).observe(
-      document.querySelector("#result-announcement"),
-      { childList: true, subtree: true, characterData: true },
-    );
+    new MutationObserver(() =>
+      window.__ann.push(document.querySelector<HTMLElement>("#result-announcement")!.textContent!),
+    ).observe(document.querySelector<HTMLElement>("#result-announcement")!, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
   });
-const announcements = async (page) => (await page.evaluate(() => window.__ann)).filter(Boolean);
-const track = (page) => page.evaluate(() => (window.__layout = { n: 0, box: {} }));
-async function untrack(page) {
+const announcements = async (page: Page) => (await page.evaluate(() => window.__ann)).filter(Boolean);
+const track = (page: Page) => page.evaluate(() => (window.__layout = { n: 0, box: {} }));
+async function untrack(page: Page) {
   const l = await page.evaluate(() => {
     window.__sample();
-    const l = window.__layout;
+    const l = window.__layout!;
     window.__layout = null;
     return l;
   });
-  const spread = {};
+  const spread: Record<string, number[]> = {};
   for (const [k, { min, max }] of Object.entries(l.box))
     spread[k] = max.map((v, i) => Math.round((v - min[i]) * 1000) / 1000);
   return { frames: l.n, spread };
 }
-function assertStable({ frames, spread }, label) {
+function assertStable({ frames, spread }: { frames: number; spread: Record<string, number[]> }, label: string) {
   assert(frames > 10, `${label}: sampler saw only ${frames} frames`);
   for (const [k, s] of Object.entries(spread)) assert(Math.max(...s) <= 0.02, `${label}: ${k} moved/resized by ${s}`);
 }
-async function test(name, fn) {
-  const t0 = Date.now();
-  try {
-    await fn();
-    results.push({ name, ok: true, ms: Date.now() - t0 });
-    console.log(`PASS ${name}`);
-  } catch (e) {
-    results.push({ name, ok: false, error: e.message });
-    console.log(`FAIL ${name}\n  ${e.message.split("\n").slice(0, 6).join("\n  ")}`);
-    process.exitCode = 1;
-  } finally {
-    for (const context of browser.contexts()) await context.close();
-  }
-}
-const reelPixels = (page) => {
+const reelPixels = (page: Page) => {
   // Reel aperture in scene coordinates 157..1443 x 209..677, mapped through the current FIT scale.
   return page
     .evaluate(() => {
-      const r = document.querySelector("canvas").getBoundingClientRect();
+      const r = document.querySelector<HTMLCanvasElement>("canvas")!.getBoundingClientRect();
       return { x: r.x, y: r.y, k: r.width / 1600 };
     })
     .then(({ x, y, k }) =>
       page.screenshot({ clip: { x: x + 157 * k, y: y + 209 * k, width: 1286 * k, height: 468 * k } }),
     );
 };
-const settleAll = async (page) => {
+const settleAll = async (page: Page) => {
   await idle(page);
   await page.waitForFunction(() => {
-    const s = JSON.parse(localStorage.getItem("fruit-salon:v1"));
+    const s = JSON.parse(localStorage.getItem("fruit-salon:v1")!) as SaveV1;
     return (
-      document.querySelector("#balance").textContent === s.balance.toLocaleString("en-GB") &&
-      (!s.lastSpin ||
-        document.querySelector("#payout").textContent === s.lastSpin.outcome.payout.toLocaleString("en-GB"))
+      document.querySelector<HTMLElement>("#balance")!.textContent! === s.balance.toLocaleString("en-GB") &&
+      (!s.lastSpin! ||
+        document.querySelector<HTMLElement>("#payout")!.textContent! ===
+          s.lastSpin!.outcome.payout.toLocaleString("en-GB"))
     );
   });
 };
 
 // 1 ──────────────────────────────────────────────────────────────────────────────────────────────
-await test("one button: SPIN → SKIP → SPIN, same rectangle in every state, pressed and focused", async () => {
+test("one button: SPIN → SKIP → SPIN, same rectangle in every state, pressed and focused", async () => {
   const { context, page } = await open();
   const rect = () => page.locator("#spin").evaluate((e) => JSON.stringify(e.getBoundingClientRect()));
-  assert.equal(await page.locator("#skip-motion").count(), 0);
-  assert.equal(await page.locator("button", { hasText: /skip/i }).count(), 0, "SKIP is not a separate control");
+  expect(await page.locator("#skip-motion").count()).toBe(0);
+  expect(await page.locator("button", { hasText: /skip/i }).count(), "SKIP is not a separate control").toBe(0);
   const r0 = await rect();
-  assert.equal(await page.locator("#spin").innerText(), "SPIN");
-  assert.equal(await page.locator("#spin").getAttribute("aria-label"), "Spin reels");
+  expect(await page.locator("#spin").innerText()).toBe("SPIN");
+  expect(await page.locator("#spin").getAttribute("aria-label")).toBe("Spin reels");
   await force(page, STOPS.small);
   await track(page);
   await page.hover("#spin");
   await page.mouse.down();
-  assert.equal(await rect(), r0, "pressing must not move the button box");
+  expect(await rect(), "pressing must not move the button box").toBe(r0);
   await page.mouse.up();
-  assert.equal(await state(page), "spinning");
-  assert.equal(await page.locator("#spin").innerText(), "SKIP");
-  assert.equal(await page.locator("#spin").getAttribute("aria-label"), "Skip to result");
-  assert.equal(
+  expect(await state(page)).toBe("spinning");
+  expect(await page.locator("#spin").innerText()).toBe("SKIP");
+  expect(await page.locator("#spin").getAttribute("aria-label")).toBe("Skip to result");
+  expect(
     await page.locator(".win-details").isVisible(),
-    false,
     "previous spin's win details are hidden while reels turn",
-  );
-  assert.equal(await page.locator("#spin").isDisabled(), false);
-  assert.equal(await rect(), r0);
-  assert.equal(await page.evaluate(() => document.activeElement.id), "spin", "focus stays on the one button");
+  ).toBe(false);
+  expect(await page.locator("#spin").isDisabled()).toBe(false);
+  expect(await rect()).toBe(r0);
+  expect(await page.evaluate(() => document.activeElement?.id), "focus stays on the one button").toBe("spin");
   await page.waitForTimeout(450);
   await page.click("#spin"); // SKIP
-  await page.waitForFunction(() => document.querySelector("#spin").dataset.state !== "spinning");
-  assert.equal(await state(page), "settled");
-  assert.equal(await page.locator("#spin").innerText(), "SPIN");
-  assert.equal(await rect(), r0);
+  await page.waitForFunction(() => document.querySelector<HTMLButtonElement>("#spin")!.dataset.state !== "spinning");
+  expect(await state(page)).toBe("settled");
+  expect(await page.locator("#spin").innerText()).toBe("SPIN");
+  expect(await rect()).toBe(r0);
   await idle(page);
-  assert.equal(await page.locator("#spin").innerText(), "SPIN");
-  assert.equal(await rect(), r0);
+  expect(await page.locator("#spin").innerText()).toBe("SPIN");
+  expect(await rect()).toBe(r0);
   assertStable(await untrack(page), "button journey");
   await context.close();
 });
 
 // 2 ──────────────────────────────────────────────────────────────────────────────────────────────
-await test("rapid repeated clicks in one task: one wager, one settlement, one announcement, predetermined result", async () => {
+test("rapid repeated clicks in one task: one wager, one settlement, one announcement, predetermined result", async () => {
   const { context, page } = await open();
   await watchAnnouncements(page);
   const before = await saved(page);
   await force(page, STOPS.small);
   await page.evaluate(() => {
-    for (let i = 0; i < 25; i++) document.querySelector("#spin").click();
+    for (let i = 0; i < 25; i++) document.querySelector<HTMLButtonElement>("#spin")!.click();
   });
   await settleAll(page);
   await page.waitForTimeout(300);
   const after = await saved(page);
-  assert.equal(after.nextSpinId, before.nextSpinId + 1);
-  assert.equal(after.balance, before.balance - 5 + 15);
-  assert.deepEqual(after.lastSpin.outcome.stops, STOPS.small);
-  assert.equal((await announcements(page)).length, 1);
-  assert.equal(await page.locator("#balance").innerText(), "100,010");
-  assert.equal(await page.locator("#payout").innerText(), "15");
+  expect(after.nextSpinId).toBe(before.nextSpinId + 1);
+  expect(after.balance).toBe(before.balance - 5 + 15);
+  expect(after.lastSpin!.outcome.stops).toEqual(STOPS.small);
+  expect((await announcements(page)).length).toBe(1);
+  expect(await page.locator("#balance").innerText()).toBe("100,010");
+  expect(await page.locator("#payout").innerText()).toBe("15");
   await context.close();
 });
 
-await test("Space: held key spins once; keyup never skips; fresh Space skips; double-tap Space cannot wager", async () => {
+test("Space: held key spins once; keyup never skips; fresh Space skips; double-tap Space cannot wager", async () => {
   const { context, page } = await open();
   await watchAnnouncements(page);
   await page.focus("#spin");
@@ -266,29 +258,29 @@ await test("Space: held key spins once; keyup never skips; fresh Space skips; do
   for (let i = 0; i < 15; i++) await page.keyboard.down("Space"); // auto-repeat
   await page.keyboard.up("Space");
   await page.waitForTimeout(150);
-  assert.equal(await state(page), "spinning", "the keyup echo must not act as SKIP");
-  assert.equal((await saved(page)).nextSpinId, before.nextSpinId + 1);
+  expect(await state(page), "the keyup echo must not act as SKIP").toBe("spinning");
+  expect((await saved(page)).nextSpinId).toBe(before.nextSpinId + 1);
   await page.waitForTimeout(350); // outside the first-gesture window; a fresh Space now means SKIP
   await page.keyboard.press("Space");
   await page.keyboard.press("Space"); // double-tap: second must be swallowed, not a new wager
   await page.keyboard.press("Space");
   await page.waitForTimeout(100);
-  assert.equal((await saved(page)).nextSpinId, before.nextSpinId + 1, "double-tapping SKIP must not wager");
-  assert.equal(await page.evaluate(() => document.activeElement.id), "spin");
+  expect((await saved(page)).nextSpinId, "double-tapping SKIP must not wager").toBe(before.nextSpinId + 1);
+  expect(await page.evaluate(() => document.activeElement?.id)).toBe("spin");
   await settleAll(page);
   const after = await saved(page);
-  assert.equal(after.balance, before.balance - 5 + 15);
-  assert.equal((await announcements(page)).length, 1);
+  expect(after.balance).toBe(before.balance - 5 + 15);
+  expect((await announcements(page)).length).toBe(1);
   // Enter on the focused button behaves the same, Space on the page body too.
-  await page.evaluate(() => document.activeElement.blur());
+  await page.evaluate(() => (document.activeElement as HTMLElement).blur());
   await force(page, STOPS.loss);
   await page.keyboard.press("Space");
-  assert.equal((await saved(page)).nextSpinId, before.nextSpinId + 2);
+  expect((await saved(page)).nextSpinId).toBe(before.nextSpinId + 2);
   await settleAll(page);
   await context.close();
 });
 
-await test("pointer: SKIP then dismiss celebration without a wager; a distinct activation spins again", async () => {
+test("pointer: SKIP then dismiss celebration without a wager; a distinct activation spins again", async () => {
   const { context, page } = await open();
   const before = await saved(page);
   await force(page, STOPS.big);
@@ -297,34 +289,32 @@ await test("pointer: SKIP then dismiss celebration without a wager; a distinct a
   await page.click("#spin"); // SKIP
   await page.click("#spin", { delay: 20 });
   await page.click("#spin");
-  assert.equal(
-    (await saved(page)).nextSpinId,
+  expect((await saved(page)).nextSpinId, "extra clicks right after SKIP are not a new wager").toBe(
     before.nextSpinId + 1,
-    "extra clicks right after SKIP are not a new wager",
   );
-  assert.equal(await state(page), "settled");
+  expect(await state(page)).toBe("settled");
   await page.waitForTimeout(450);
   await force(page, STOPS.loss);
   await page.click("#spin"); // First activation dismisses the still-active celebration.
-  assert.equal((await saved(page)).nextSpinId, before.nextSpinId + 1);
-  assert.equal(await state(page), "idle");
+  expect((await saved(page)).nextSpinId).toBe(before.nextSpinId + 1);
+  expect(await state(page)).toBe("idle");
   await page.waitForTimeout(400);
   await page.click("#spin"); // A later distinct activation places the next wager.
-  assert.equal((await saved(page)).nextSpinId, before.nextSpinId + 2);
-  assert.equal(await state(page), "spinning");
+  expect((await saved(page)).nextSpinId).toBe(before.nextSpinId + 2);
+  expect(await state(page)).toBe("spinning");
   await settleAll(page);
-  assert.equal((await saved(page)).balance, before.balance - 5 + 70 - 5);
+  expect((await saved(page)).balance).toBe(before.balance - 5 + 70 - 5);
   await context.close();
 });
 
 // 3 ──────────────────────────────────────────────────────────────────────────────────────────────
-await test("skip during acceleration, cruise and deceleration: exact predetermined grid, balance and one announcement", async () => {
+test("skip during acceleration, cruise and deceleration: exact predetermined grid, balance and one announcement", async () => {
   for (const [label, delay] of [
     ["acceleration", 90],
     ["cruise", 500],
     ["deceleration", 900],
     ["settling", 1500],
-  ]) {
+  ] as const) {
     const { context, page } = await open();
     await watchAnnouncements(page);
     await force(page, STOPS.small);
@@ -335,11 +325,11 @@ await test("skip during acceleration, cruise and deceleration: exact predetermin
     await settleAll(page);
     await page.waitForTimeout(250);
     const after = await saved(page);
-    assert.equal(after.nextSpinId, before.nextSpinId + 1, label);
-    assert.equal(after.balance, before.balance + 10, label);
-    assert.deepEqual(after.lastSpin.outcome.stops, STOPS.small, label);
-    assert.equal(await page.locator("#balance").innerText(), "100,010", label);
-    assert.equal((await announcements(page)).length, 1, label);
+    expect(after.nextSpinId, label).toBe(before.nextSpinId + 1);
+    expect(after.balance, label).toBe(before.balance + 10);
+    expect(after.lastSpin!.outcome.stops, label).toEqual(STOPS.small);
+    expect(await page.locator("#balance").innerText(), label).toBe("100,010");
+    expect((await announcements(page)).length, label).toBe(1);
     const animated = await reelPixels(page);
     await page.reload();
     await page.click("#enter-slot");
@@ -351,19 +341,19 @@ await test("skip during acceleration, cruise and deceleration: exact predetermin
   }
 });
 
-await test("SKIP is immediate: reels settle within two frames of the activation", async () => {
+test("SKIP is immediate: reels settle within two frames of the activation", async () => {
   const { context, page } = await open();
   await force(page, STOPS.small);
   await page.click("#spin");
   await page.waitForTimeout(300);
   const timing = await page.evaluate(
     () =>
-      new Promise((done) => {
+      new Promise<{ ms: number; frames: number }>((done) => {
         const t0 = performance.now();
         let frames = 0;
-        document.querySelector("#spin").click();
+        document.querySelector<HTMLButtonElement>("#spin")!.click();
         const check = () => {
-          if (document.querySelector("#spin").dataset.state !== "spinning")
+          if (document.querySelector<HTMLButtonElement>("#spin")!.dataset.state !== "spinning")
             done({ ms: performance.now() - t0, frames });
           else
             requestAnimationFrame(() => {
@@ -378,10 +368,10 @@ await test("SKIP is immediate: reels settle within two frames of the activation"
   await context.close();
 });
 
-await test("30 spins with random skip timing: every wager and credit appears exactly once", async () => {
+test("30 spins with random skip timing: every wager and credit appears exactly once", async () => {
   const { context, page } = await open({ reducedMotion: false });
   let expected = (await saved(page)).balance;
-  const ids = [];
+  const ids: unknown[] = [];
   for (let n = 0; n < 30; n++) {
     const stops = Array.from({ length: 5 }, () => Math.floor(Math.random() * 12));
     await force(page, stops);
@@ -395,28 +385,28 @@ await test("30 spins with random skip timing: every wager and credit appears exa
     }
     await settleAll(page);
     const after = await saved(page);
-    assert.equal(after.nextSpinId, before.nextSpinId + 1, `spin ${n}`);
-    assert.deepEqual(after.lastSpin.outcome.stops, stops, `spin ${n}: predetermined stops`);
-    expected += after.lastSpin.outcome.payout - after.lastSpin.totalStake;
-    assert.equal(after.balance, expected, `spin ${n}: balance`);
-    assert.equal(await page.locator("#balance").innerText(), expected.toLocaleString("en-GB"));
-    ids.push(after.lastSpin.id);
+    expect(after.nextSpinId, `spin ${n}`).toBe(before.nextSpinId + 1);
+    expect(after.lastSpin!.outcome.stops, `spin ${n}: predetermined stops`).toEqual(stops);
+    expected += after.lastSpin!.outcome.payout - after.lastSpin!.totalStake;
+    expect(after.balance, `spin ${n}: balance`).toBe(expected);
+    expect(await page.locator("#balance").innerText()).toBe(expected.toLocaleString("en-GB"));
+    ids.push(after.lastSpin!.id);
     // A skipped spin must not write more often than an unskipped one: one commit at the wager.
     assert((await page.evaluate(() => window.__saves)) - saves <= 2, `spin ${n}: save churn`);
     await page.waitForTimeout(400); // clear the SKIP re-arm window
   }
-  assert.equal(new Set(ids).size, 30);
+  expect(new Set(ids).size).toBe(30);
   await context.close();
 });
 
 // 4 ──────────────────────────────────────────────────────────────────────────────────────────────
-await test("HUD and canvas boxes never move or resize through loss / partial / even / win / jackpot spins (4 viewports, with and without SKIP)", async () => {
+test("HUD and canvas boxes never move or resize through loss / partial / even / win / jackpot spins (4 viewports, with and without SKIP)", async () => {
   for (const [width, height] of [
     [1280, 800],
     [1366, 768],
     [1600, 900],
     [1920, 1080],
-  ]) {
+  ] as const) {
     const { context, page } = await open({ width, height });
     for (const [name, skip] of [
       ["loss", false],
@@ -425,7 +415,7 @@ await test("HUD and canvas boxes never move or resize through loss / partial / e
       ["small", false],
       ["big", true],
       ["jackpot", false],
-    ]) {
+    ] as const) {
       await force(page, STOPS[name]);
       await track(page);
       await page.click("#spin");
@@ -444,14 +434,14 @@ await test("HUD and canvas boxes never move or resize through loss / partial / e
   }
 });
 
-await test("long result text and 40-line result dialog are bounded: HUD unchanged, list scrolls inside the stage", async () => {
+test("long result text and 40-line result dialog are bounded: HUD unchanged, list scrolls inside the stage", async () => {
   const { context, page } = await open({ bet: { lineCount: 40, perLine: 5 } });
   await force(page, STOPS.long);
   await track(page);
   await page.click("#spin");
   await page.waitForTimeout(200);
   await page.click("#spin");
-  await page.waitForFunction(() => document.querySelector("#spin").dataset.state !== "spinning");
+  await page.waitForFunction(() => document.querySelector<HTMLButtonElement>("#spin")!.dataset.state !== "spinning");
   await page.keyboard.press("Escape");
   await settleAll(page);
   const summary = await page.locator(".win-details").innerText();
@@ -460,15 +450,15 @@ await test("long result text and 40-line result dialog are bounded: HUD unchange
   await page.click(".win-details");
   const panel = page.locator(".result-dialog");
   assert(await panel.isVisible());
-  assert.equal(await panel.locator(".win-list button").count(), lines);
+  expect(await panel.locator(".win-list button").count()).toBe(lines);
   const geo = await page.evaluate(() => {
-    const p = document.querySelector(".result-dialog").getBoundingClientRect();
-    const s = document.querySelector("#stage").getBoundingClientRect();
-    const el = document.querySelector(".win-list");
+    const p = document.querySelector<HTMLDialogElement>(".result-dialog")!.getBoundingClientRect();
+    const s = document.querySelector<HTMLElement>("#stage")!.getBoundingClientRect();
+    const el = document.querySelector<HTMLElement>(".win-list")!;
     return {
       inside: p.top >= s.top && p.bottom <= s.bottom && p.left >= s.left && p.right <= s.right,
       scrolls: el.scrollHeight > el.clientHeight,
-      hudBottom: document.querySelector(".slot-hud").getBoundingClientRect().top - p.bottom,
+      hudBottom: document.querySelector<HTMLElement>(".slot-hud")!.getBoundingClientRect().top - p.bottom,
     };
   });
   assert(geo.inside, "panel stays inside the stage");
@@ -476,9 +466,9 @@ await test("long result text and 40-line result dialog are bounded: HUD unchange
   await page.locator(".win-list button").nth(2).hover();
   await page.waitForTimeout(150);
   await page.keyboard.press("Escape");
-  assert.equal((await page.locator(".result-dialog[open]").count()) > 0, false);
+  expect((await page.locator(".result-dialog[open]").count()) > 0).toBe(false);
   await page.waitForTimeout(300);
-  assert.match(await page.locator("#spin-status").innerText(), /Net \+/);
+  expect(await page.locator("#spin-status").innerText()).toMatch(/Net \+/);
   assertStable(await untrack(page), "long result");
   // The spend text is bounded too.
   await context.close();
@@ -486,15 +476,15 @@ await test("long result text and 40-line result dialog are bounded: HUD unchange
   await track(low.page);
   await low.page.click("#spin");
   await low.page.waitForTimeout(500);
-  assert.match(await low.page.locator("#spin-status").innerText(), /Not enough tokens/);
-  assert.match(await low.page.locator("#result-announcement").innerText(), /Not enough tokens/);
-  assert.equal((await saved(low.page)).nextSpinId, 1);
-  assert.equal(await state(low.page), "idle");
+  expect(await low.page.locator("#spin-status").innerText()).toMatch(/Not enough tokens/);
+  expect(await low.page.locator("#result-announcement").innerText()).toMatch(/Not enough tokens/);
+  expect((await saved(low.page)).nextSpinId).toBe(1);
+  expect(await state(low.page)).toBe("idle");
   assertStable(await untrack(low.page), "insufficient funds message");
   await low.context.close();
 });
 
-await test("net is never labelled as a win unless it is one; sign, wording and accessible text agree", async () => {
+test("net is never labelled as a win unless it is one; sign, wording and accessible text agree", async () => {
   const { context, page } = await open();
   await watchAnnouncements(page);
   for (const [name, word, net] of [
@@ -503,52 +493,55 @@ await test("net is never labelled as a win unless it is one; sign, wording and a
     ["even", "Break-even", 0],
     ["small", "Win", 10],
     ["big", "Big win", 65],
-  ]) {
+  ] as const) {
     await force(page, STOPS[name]);
     await page.click("#spin");
-    assert.equal(await page.locator(".win-details").isVisible(), false, `${name}: stale details hidden while spinning`);
-    await page.waitForFunction(() => document.querySelector("#spin").dataset.state !== "spinning");
+    expect(await page.locator(".win-details").isVisible(), `${name}: stale details hidden while spinning`).toBe(false);
+    await page.waitForFunction(() => document.querySelector<HTMLButtonElement>("#spin")!.dataset.state !== "spinning");
     if (name === "big") await page.keyboard.press("Escape");
     await settleAll(page);
     const text = await page.locator("#spin-status").innerText();
     assert(text.startsWith(word), `${name}: "${text}"`);
-    if (net !== 0) assert.match(text, new RegExp(`Net ${net > 0 ? "\\+" : "-"}${Math.abs(net)}$`));
+    if (net !== 0) expect(text).toMatch(new RegExp(`Net ${net > 0 ? "\\+" : "-"}${Math.abs(net)}$`));
     else assert.doesNotMatch(text, /Net/.source === "" ? /x/ : /Net [+-]/);
     if (net <= 0) assert.doesNotMatch(text, /\bwin\b/i);
     const s = await saved(page);
-    assert.equal(s.lastSpin.outcome.payout - s.lastSpin.totalStake, net);
-    assert.match(
-      await page.locator("#result-summary").innerText(),
+    expect(s.lastSpin!.outcome.payout - s.lastSpin!.totalStake).toBe(net);
+    expect(await page.locator("#result-summary").innerText()).toMatch(
       net < 0 ? /Net loss/ : net === 0 ? /Break-even/ : /Net gain/,
     );
-    assert.match(await page.locator("#spin-status").getAttribute("title"), /Stake 5 · Returned \d+ · Net/);
+    expect((await page.locator("#spin-status").getAttribute("title"))!).toMatch(/Stake 5 · Returned \d+ · Net/);
     await page.waitForTimeout(400);
   }
-  assert.equal((await announcements(page)).length, 5);
+  expect((await announcements(page)).length).toBe(5);
   await context.close();
 });
 
 // 5 ──────────────────────────────────────────────────────────────────────────────────────────────
-await test("number-animation interruptions: skip, new spin, back to lounge and reduced motion all end on the saved numbers", async () => {
+test("number-animation interruptions: skip, new spin, back to lounge and reduced motion all end on the saved numbers", async () => {
   const { context, page } = await open();
-  for (const how of ["skip-during-count", "spin-during-count", "motion-toggle", "navigate"]) {
+  for (const how of ["skip-during-count", "spin-during-count", "motion-toggle", "navigate"] as const) {
     await force(page, STOPS.big);
     await track(page);
     await page.click("#spin");
-    await page.waitForFunction(() => document.querySelector("#spin").dataset.state === "settled", null, {
-      timeout: 15000,
-    });
+    await page.waitForFunction(
+      () => document.querySelector<HTMLButtonElement>("#spin")!.dataset.state === "settled",
+      null,
+      {
+        timeout: 15000,
+      },
+    );
     if (how === "skip-during-count") await page.click("#spin", { trial: true });
     if (how === "spin-during-count") {
       await page.waitForTimeout(400);
       await force(page, STOPS.loss);
       const beforeDismiss = await saved(page);
       await page.click("#spin");
-      assert.equal((await saved(page)).nextSpinId, beforeDismiss.nextSpinId);
-      assert.equal((await saved(page)).balance, beforeDismiss.balance);
+      expect((await saved(page)).nextSpinId).toBe(beforeDismiss.nextSpinId);
+      expect((await saved(page)).balance).toBe(beforeDismiss.balance);
       await page.waitForTimeout(400);
       await page.click("#spin");
-      assert.equal((await saved(page)).lastSpin.outcome.payout, 0);
+      expect((await saved(page)).lastSpin!.outcome.payout).toBe(0);
     }
     if (how === "motion-toggle") await page.emulateMedia({ reducedMotion: "reduce" });
     if (how === "navigate") {
@@ -560,8 +553,8 @@ await test("number-animation interruptions: skip, new spin, back to lounge and r
     await settleAll(page);
     await page.emulateMedia({ reducedMotion: "no-preference" });
     const s = await saved(page);
-    assert.equal(await page.locator("#balance").innerText(), s.balance.toLocaleString("en-GB"), how);
-    assert.equal(await page.locator("#payout").innerText(), s.lastSpin.outcome.payout.toLocaleString("en-GB"), how);
+    expect(await page.locator("#balance").innerText(), how).toBe(s.balance.toLocaleString("en-GB"));
+    expect(await page.locator("#payout").innerText(), how).toBe(s.lastSpin!.outcome.payout.toLocaleString("en-GB"));
     if (how !== "navigate") assertStable(await untrack(page), `count interruption: ${how}`);
     else await untrack(page);
     await page.waitForTimeout(450);
@@ -569,7 +562,7 @@ await test("number-animation interruptions: skip, new spin, back to lounge and r
   await context.close();
 });
 
-await test("reload and navigation restore the last result without a new wager; mid-spin reload keeps the committed spin", async () => {
+test("reload and navigation restore the last result without a new wager; mid-spin reload keeps the committed spin", async () => {
   const { context, page } = await open();
   await force(page, STOPS.small);
   await page.click("#spin");
@@ -579,31 +572,31 @@ await test("reload and navigation restore the last result without a new wager; m
   await page.click("#enter-slot");
   await page.locator("#spin").waitFor();
   await page.waitForTimeout(500);
-  assert.deepEqual(await saved(page), mid, "reload must not wager or settle again");
-  assert.equal(await state(page), "idle");
-  assert.equal(await page.locator("#balance").innerText(), mid.balance.toLocaleString("en-GB"));
-  assert.equal(await page.locator("#payout").innerText(), "15");
-  assert.match(await page.locator("#spin-status").innerText(), /^Last spin · Net \+10$/);
-  assert.match(await page.locator(".win-details").innerText(), /winning line/);
-  assert.equal(await page.locator("#result-announcement").innerText(), "");
+  expect(await saved(page), "reload must not wager or settle again").toEqual(mid);
+  expect(await state(page)).toBe("idle");
+  expect(await page.locator("#balance").innerText()).toBe(mid.balance.toLocaleString("en-GB"));
+  expect(await page.locator("#payout").innerText()).toBe("15");
+  expect(await page.locator("#spin-status").innerText()).toMatch(/^Last spin · Net \+10$/);
+  expect(await page.locator(".win-details").innerText()).toMatch(/winning line/);
+  expect(await page.locator("#result-announcement").innerText()).toBe("");
   for (let i = 0; i < 3; i++) {
     await page.click("#back");
     await page.locator("#enter-slot").waitFor();
     await page.click("#enter-slot");
     await page.locator("#spin").waitFor();
   }
-  assert.deepEqual(await saved(page), { ...mid, lastAccrualAtMs: (await saved(page)).lastAccrualAtMs });
+  expect(await saved(page)).toEqual({ ...mid, lastAccrualAtMs: (await saved(page)).lastAccrualAtMs });
   await context.close();
 });
 
 // 6 ──────────────────────────────────────────────────────────────────────────────────────────────
-await test("responsive scaling: the HUD occupies the same scene rectangle at every size; resizing mid-spin changes nothing", async () => {
+test("responsive scaling: the HUD occupies the same scene rectangle at every size; resizing mid-spin changes nothing", async () => {
   const { context, page } = await open({ width: 1280, height: 800 });
   const design = () =>
     page.evaluate(() => {
-      const k = document.querySelector("#ui").getBoundingClientRect();
+      const k = document.querySelector<HTMLElement>("#ui")!.getBoundingClientRect();
       const s = k.width / 1600;
-      const out = {};
+      const out: Record<string, number[]> = {};
       for (const q of [
         ".slot-hud",
         "#spin",
@@ -612,20 +605,20 @@ await test("responsive scaling: the HUD occupies the same scene rectangle at eve
         ".balance-block",
         ".returned-block",
         ".bet-block",
-      ]) {
-        const r = document.querySelector(q).getBoundingClientRect();
+      ] as const) {
+        const r = document.querySelector<HTMLElement>(q)!.getBoundingClientRect();
         out[q] = [(r.x - k.x) / s, (r.y - k.y) / s, r.width / s, r.height / s].map((n) => Math.round(n * 10) / 10);
       }
       return out;
     });
   const base = await design();
-  assert.deepEqual(base[".slot-hud"], [125, 723, 1350, 144]);
+  expect(base[".slot-hud"]).toEqual([125, 723, 1350, 144]);
   for (const [w, h] of [
     [1366, 768],
     [1600, 900],
     [1920, 1080],
     [1280, 800],
-  ]) {
+  ] as const) {
     await page.setViewportSize({ width: w, height: h });
     await page.waitForTimeout(150);
     const d = await design();
@@ -633,10 +626,10 @@ await test("responsive scaling: the HUD occupies the same scene rectangle at eve
       for (const [i, v] of base[q].entries())
         assert(Math.abs(v - d[q][i]) <= 0.6, `${w}x${h} ${q}: ${d[q]} vs ${base[q]}`);
     const text = await page.evaluate(() => {
-      const k = document.querySelector("#ui").getBoundingClientRect().width / 1600;
-      return [...document.querySelectorAll(".hud-label,.hud-note,.bet-row label,.bet-row .total span")].map(
-        (e) => parseFloat(getComputedStyle(e).fontSize) * k,
-      );
+      const k = document.querySelector<HTMLElement>("#ui")!.getBoundingClientRect().width / 1600;
+      return [
+        ...document.querySelectorAll<HTMLElement>(".hud-label,.hud-note,.bet-row label,.bet-row .total span"),
+      ].map((e) => parseFloat(getComputedStyle(e).fontSize) * k);
     });
     assert(Math.min(...text) >= 12.9, `${w}x${h}: text under 13 CSS px: ${Math.min(...text)}`);
   }
@@ -647,7 +640,7 @@ await test("responsive scaling: the HUD occupies the same scene rectangle at eve
     [1920, 1080],
     [1366, 768],
     [1600, 900],
-  ]) {
+  ] as const) {
     await page.setViewportSize({ width: w, height: h });
     await page.waitForTimeout(120);
   }
@@ -655,63 +648,61 @@ await test("responsive scaling: the HUD occupies the same scene rectangle at eve
   const r = await untrack(page);
   // Only scale-driven moves are allowed; compare in scene units instead.
   const d = await design();
-  assert.deepEqual(d[".slot-hud"], base[".slot-hud"]);
+  expect(d[".slot-hud"]).toEqual(base[".slot-hud"]);
   assert(r.frames > 10);
   await context.close();
 });
 
-await test("reduced motion (OS and in-game): no SKIP stage, no reel motion or counting, HUD still", async () => {
-  for (const mode of ["os", "setting"]) {
+test("reduced motion (OS and in-game): no SKIP stage, no reel motion or counting, HUD still", async () => {
+  for (const mode of ["os", "setting"] as const) {
     const { context, page } = await open({ os: mode === "os", reducedMotion: mode === "setting" });
     await force(page, STOPS.small);
     await track(page);
     const before = await saved(page);
     await page.click("#spin");
     await page.waitForTimeout(100);
-    assert.notEqual(await state(page), "spinning", `${mode}: result is immediate`);
-    assert.equal(await page.locator("#balance").innerText(), (before.balance + 10).toLocaleString("en-GB"));
-    assert.equal(await page.locator("#payout").innerText(), "15");
+    expect(await state(page), `${mode}: result is immediate`).not.toBe("spinning");
+    expect(await page.locator("#balance").innerText()).toBe((before.balance + 10).toLocaleString("en-GB"));
+    expect(await page.locator("#payout").innerText()).toBe("15");
     if (mode === "os")
-      assert.equal(
-        await page.evaluate(() => getComputedStyle(document.querySelector("#spin"), "::before").transitionDuration),
-        "0s",
-      );
+      expect(
+        await page.evaluate(
+          () => getComputedStyle(document.querySelector<HTMLButtonElement>("#spin")!, "::before").transitionDuration,
+        ),
+      ).toBe("0s");
     await settleAll(page);
-    assert.equal((await saved(page)).nextSpinId, before.nextSpinId + 1);
+    expect((await saved(page)).nextSpinId).toBe(before.nextSpinId + 1);
     assertStable(await untrack(page), `reduced motion ${mode}`);
     await context.close();
   }
 });
 
-await test("keyboard and assistive semantics: labelled groups, focus ring, Tab order, result trigger Space does not spin", async () => {
+test("keyboard and assistive semantics: labelled groups, focus ring, Tab order, result trigger Space does not spin", async () => {
   const { context, page } = await open();
-  assert.equal(await page.locator(".slot-hud section").count(), 3);
-  for (const id of ["hud-balance", "hud-returned", "hud-bet"]) assert.equal(await page.locator(`#${id}`).count(), 1);
-  assert.equal(await page.locator("#spin").getAttribute("aria-keyshortcuts"), "Space");
-  assert.equal(await page.locator("#balance-final").innerText(), "100,000 tokens");
+  expect(await page.locator(".slot-hud section").count()).toBe(3);
+  for (const id of ["hud-balance", "hud-returned", "hud-bet"] as const)
+    expect(await page.locator(`#${id}`).count()).toBe(1);
+  expect(await page.locator("#spin").getAttribute("aria-keyshortcuts")).toBe("Space");
+  expect(await page.locator("#balance-final").innerText()).toBe("100,000 tokens");
   await force(page, STOPS.small);
   await page.click("#spin");
   await settleAll(page);
   await page.locator(".win-details").focus();
   const before = (await saved(page)).nextSpinId;
   await page.keyboard.press("Space"); // opens the result dialog, must not start a spin
-  assert.equal((await page.locator(".result-dialog[open]").count()) > 0, true);
+  expect((await page.locator(".result-dialog[open]").count()) > 0).toBe(true);
   await page.keyboard.press("Space");
-  assert.equal((await saved(page)).nextSpinId, before);
+  expect((await saved(page)).nextSpinId).toBe(before);
   await page.keyboard.press("Escape");
   await page.focus("#spin");
   const ring = await page
     .locator("#spin")
     .evaluate((e) => getComputedStyle(e).outlineStyle + getComputedStyle(e).outlineWidth);
-  assert.equal(ring, "solid3px");
+  expect(ring).toBe("solid3px");
   await context.close();
 });
 
-await test("flow: no console errors, no network", async () => {
-  assert.deepEqual(errors, []);
-  assert.deepEqual(network, []);
+test("flow: no console errors, no network", async () => {
+  expect(errors).toEqual([]);
+  expect(network).toEqual([]);
 });
-
-await browser.close();
-writeFileSync(`${evidence}/phase31-tests.json`, JSON.stringify(results, null, 2));
-console.log(`\n${results.filter((r) => r.ok).length}/${results.length} passed`);

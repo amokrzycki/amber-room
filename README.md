@@ -37,18 +37,16 @@ npm run check:offline
 
 Use `npm run format` to format supported files across the repository with Biome. `npm run check` checks formatting and lint rules; `npm run check:fix` applies formatting and safe fixes. You can also run `npm run lint` and `npm run format:check` separately. The build and GitHub Actions require `check` to pass. For formatting on save in VS Code or Cursor, install the recommended Biome extension. Biome does not handle Python scripts or binary files.
 
-Run the offline browser acceptance checks in local Chromium:
+Browser tests live in `tests/e2e/*.spec.ts` and use the Playwright Test runner. Install Chromium once, then run the suite (the command builds the standalone game first):
 
 ```sh
-node scripts/browser-acceptance.mjs
-node scripts/browser-reel-clipping.mjs
-node scripts/browser-save-business.mjs
-node scripts/browser-idle.mjs
-node scripts/browser-performance.mjs
-node scripts/browser-phase3.mjs
+npx playwright install chromium
+npm run test:e2e
 ```
 
-These scripts use an existing `/usr/bin/chromium` installation. Adjust `executablePath` on other systems. They do not install a browser or start a server. The reel-clipping test compares frame pixels using Python/Pillow.
+Use `npm run test:e2e:ui` for the interactive runner, or `npx playwright test tests/e2e/save-business.spec.ts` to run one suite after building. `npm test` runs the separate Vitest unit tests. `npm run typecheck` checks both unit and browser tests.
+
+The suite opens the production build via `file://` with networking disabled. Playwright starts and stops Vite automatically for the isolated opening-hours prototype. Chromium is managed by Playwright; to use an existing browser, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium`. The reel-clipping test also needs Python with Pillow (`python -m pip install Pillow`).
 
 The tests force outcomes by replacing the RNG within their browser environment. They do not use a production control panel or add to the in-game balance. Performance measurements come from headless SwiftShader, not the player's GPU.
 
@@ -74,4 +72,4 @@ The compact winning-line count opens a result-details dialog with its own 5×3 d
 
 P1 is **not enabled in the normal game**. With `npm run dev`, open `/prototypes/opening-hours.html` for the virtual-time accounting lab. It uses `amber-room:prototype:opening-hours:v1`; copying a v1 save never overwrites `fruit-salon:v1`. The normal standalone build contains neither the lab nor its accounting module.
 
-See [P1 model, migration and integration recommendation](docs/phase40-opening-hours.md) and [Phase 3.3 verification](docs/reviews/2026-11-05-phase33-closure.md). Reproduce with `npm test`, `node scripts/browser-phase33.mjs`, `node scripts/browser-phase32.mjs`, `node scripts/browser-idle-baseline.mjs` (after building), and `node scripts/browser-opening-hours.mjs` (with the dev server running). Chromium uses `/usr/bin/chromium`.
+See [P1 model, migration and integration recommendation](docs/phase40-opening-hours.md) and [Phase 3.3 verification](docs/reviews/2026-11-05-phase33-closure.md). Reproduce with `npm test` and `npm run test:e2e`.

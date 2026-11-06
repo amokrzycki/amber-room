@@ -1,121 +1,122 @@
-// Phase 3.2 browser checks on dist/index.html (offline file://): lounge link in shared nav, font loading and
-// fallback, win marks behind symbols (pixel checks), preview via pointer and keyboard, overlay hit testing.
+import type { SaveV1 } from "../../src/game/model";
+import type { Page } from "@playwright/test";
+import { test } from "./fixtures";
 import assert from "node:assert/strict";
-import { chromium } from "playwright";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+test("fonts and win previews", async ({ browser }) => {
+  // Phase 3.2 browser checks on dist/index.html (offline file://): lounge link in shared nav, font loading and
+  // fallback, win marks behind symbols (pixel checks), preview via pointer and keyboard, overlay hit testing.
 
-const evidence = "docs/evidence/phase32";
-mkdirSync(evidence, { recursive: true });
-const browser = await chromium.launch({
-  executablePath: "/usr/bin/chromium",
-  headless: true,
-  args: ["--no-sandbox", "--enable-unsafe-swiftshader", "--use-gl=angle", "--use-angle=swiftshader"],
-});
-const results = [];
-const errors = [];
-const requests = [];
-const check = (name, ok, detail) => {
-  results.push({ name, ok: !!ok, detail });
-  assert(ok, `${name}${detail ? ` — ${JSON.stringify(detail)}` : ""}`);
-};
+  const evidence = "docs/evidence/phase32";
+  mkdirSync(evidence, { recursive: true });
+  const results: Record<string, unknown>[] = [];
+  const errors: string[] = [];
+  const requests: string[] = [];
+  const check = (name: string, ok: unknown, detail?: unknown) => {
+    results.push({ name, ok: !!ok, detail });
+    assert(ok, `${name}${detail ? ` — ${JSON.stringify(detail)}` : ""}`);
+  };
 
-async function open(width, height) {
-  const context = await browser.newContext({ viewport: { width, height }, offline: true });
-  const page = await context.newPage();
-  page.on("pageerror", (e) => errors.push(e.message));
-  page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
-  page.on("request", (r) => /^https?:/.test(r.url()) && requests.push(r.url()));
-  await page.addInitScript(() => {
-    const rng = crypto.getRandomValues.bind(crypto);
-    window.__stops = [];
-    crypto.getRandomValues = (a) => {
-      if (window.__stops.length && a instanceof Uint32Array) {
-        a[0] = window.__stops.shift();
-        return a;
-      }
-      return rng(a);
-    };
-    if (!localStorage.getItem("fruit-salon:v1"))
-      localStorage.setItem(
-        "fruit-salon:v1",
-        JSON.stringify({
-          version: 1,
-          balance: 100000,
-          businesses: { barLevel: 0, extraMachines: 0, decorLevel: 0 },
-          lastAccrualAtMs: Date.now() + 86400000,
-          remainderUnits: 0,
-          nextSpinId: 1,
-          lastSpin: null,
-          selectedBet: { lineCount: 5, perLine: 1 },
-          settings: { muted: true, reducedMotion: false, effectsIntensity: 0.4 },
-        }),
-      );
-  });
-  await page.goto(`file://${resolve("dist/index.html")}`);
-  await page.click("#enter-slot");
-  await page.locator("#spin").waitFor();
-  await page.waitForTimeout(400);
-  return { page, context };
-}
-const save = (page) => page.evaluate(() => JSON.parse(localStorage.getItem("fruit-salon:v1")));
-const settle = async (page, stops) => {
-  await page.evaluate((s) => (window.__stops = [...s]), stops);
-  await page.click("#spin");
-  await page.waitForFunction(() => document.querySelector("#spin").dataset.state === "idle", null, { timeout: 15000 });
-  await page.waitForTimeout(300);
-};
-// Reel cell centres in scene px (1600x900 viewport maps 1:1).
-const cx = (c) => 157 + 127 + c * 258;
-const cy = (r) => 209 + 78 + r * 156;
-const isMint = (r, g, b) => g > 90 && b > 90 && r < 75 && Math.abs(g - b) < 45 && g > r + 45;
-const isBrass = (r, g, b) => r > 80 && r > g && g > b * 1.3;
-async function pixels(page, rect) {
-  const buf = await page.screenshot({ clip: rect });
-  return page.evaluate(
-    async ([b64]) => {
-      const img = new Image();
-      img.src = `data:image/png;base64,${b64}`;
-      await img.decode();
-      const c = new OffscreenCanvas(img.width, img.height).getContext("2d");
-      c.drawImage(img, 0, 0);
-      return Array.from(c.getImageData(0, 0, img.width, img.height).data);
-    },
-    [buf.toString("base64")],
-  );
-}
-const mintCount = (data) => {
-  let n = 0;
-  for (let i = 0; i < data.length; i += 4) if (isMint(data[i], data[i + 1], data[i + 2])) n++;
-  return n;
-};
+  async function open(width: number, height: number) {
+    const context = await browser.newContext({ viewport: { width, height }, offline: true });
+    const page = await context.newPage();
+    page.on("pageerror", (e) => errors.push(e.message));
+    page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+    page.on("request", (r) => /^https?:/.test(r.url()) && requests.push(r.url()));
+    await page.addInitScript(() => {
+      const rng = crypto.getRandomValues.bind(crypto);
+      window.__stops = [];
+      crypto.getRandomValues = (a) => {
+        if (window.__stops.length && a instanceof Uint32Array) {
+          a[0] = window.__stops.shift()!;
+          return a;
+        }
+        return rng(a);
+      };
+      if (!localStorage.getItem("fruit-salon:v1")!)
+        localStorage.setItem(
+          "fruit-salon:v1",
+          JSON.stringify({
+            version: 1,
+            balance: 100000,
+            businesses: { barLevel: 0, extraMachines: 0, decorLevel: 0 },
+            lastAccrualAtMs: Date.now() + 86400000,
+            remainderUnits: 0,
+            nextSpinId: 1,
+            lastSpin: null,
+            selectedBet: { lineCount: 5, perLine: 1 },
+            settings: { muted: true, reducedMotion: false, effectsIntensity: 0.4 },
+          }),
+        );
+    });
+    await page.goto(`file://${resolve("dist/index.html")}`);
+    await page.click("#enter-slot");
+    await page.locator("#spin").waitFor();
+    await page.waitForTimeout(400);
+    return { page, context };
+  }
+  const save = (page: Page) => page.evaluate(() => JSON.parse(localStorage.getItem("fruit-salon:v1")!) as SaveV1);
+  const settle = async (page: Page, stops: readonly number[]) => {
+    await page.evaluate((s) => (window.__stops = [...s]), stops);
+    await page.click("#spin");
+    await page.waitForFunction(
+      () => document.querySelector<HTMLButtonElement>("#spin")!.dataset.state === "idle",
+      null,
+      { timeout: 15000 },
+    );
+    await page.waitForTimeout(300);
+  };
+  // Reel cell centres in scene px (1600x900 viewport maps 1:1).
+  const cx = (c: number) => 157 + 127 + c * 258;
+  const cy = (r: number) => 209 + 78 + r * 156;
+  const isMint = (r: number, g: number, b: number) => g > 90 && b > 90 && r < 75 && Math.abs(g - b) < 45 && g > r + 45;
+  const isBrass = (r: number, g: number, b: number) => r > 80 && r > g && g > b * 1.3;
+  async function pixels(page: Page, rect: { x: number; y: number; width: number; height: number }) {
+    const buf = await page.screenshot({ clip: rect });
+    return page.evaluate(
+      async ([b64]) => {
+        const img = new Image();
+        img.src = `data:image/png;base64,${b64}`;
+        await img.decode();
+        const c = new OffscreenCanvas(img.width, img.height).getContext("2d")!;
+        c.drawImage(img, 0, 0);
+        return Array.from(c.getImageData(0, 0, img.width, img.height).data);
+      },
+      [buf.toString("base64")],
+    );
+  }
+  const mintCount = (data: number[]) => {
+    let n = 0;
+    for (let i = 0; i < data.length; i += 4) if (isMint(data[i], data[i + 1], data[i + 2])) n++;
+    return n;
+  };
 
-try {
   // 1. Lounge link lives in the shared navigation at every supported size and never touches its neighbours.
   for (const [w, h] of [
     [1280, 800],
     [1366, 768],
     [1600, 900],
     [1920, 1080],
-  ]) {
+  ] as const) {
     const { page, context } = await open(w, h);
     const geo = await page.evaluate(() => {
-      const r = (q) => document.querySelector(q).getBoundingClientRect().toJSON();
+      const r = (q: string) => document.querySelector<HTMLElement>(q)!.getBoundingClientRect().toJSON();
       const stage = r("#stage");
       return {
         stage,
         back: r("#back"),
         brand: r(".brand"),
-        buttons: [...document.querySelectorAll(".topbar nav button:not(#back)")].map((b) =>
+        buttons: [...document.querySelectorAll<HTMLElement>(".topbar nav button:not(#back)")].map((b) =>
           b.getBoundingClientRect().toJSON(),
         ),
         bar: r(".topbar"),
         machine: r(".machine-name"),
-        inNav: !!document.querySelector(".topbar nav > #back"),
-        inCabinet: !!document.querySelector(".slot-hud #back"),
-        label: document.querySelector("#back").getAttribute("aria-label"),
-        text: document.querySelector("#back").textContent.trim(),
-        displayed: document.querySelector("#back").getBoundingClientRect().height,
+        inNav: !!document.querySelector<HTMLElement>(".topbar nav > #back")!,
+        inCabinet: !!document.querySelector<HTMLElement>(".slot-hud #back")!,
+        label: document.querySelector<HTMLButtonElement>("#back")!.getAttribute("aria-label"),
+        text: document.querySelector<HTMLButtonElement>("#back")!.textContent!.trim(),
+        displayed: document.querySelector<HTMLButtonElement>("#back")!.getBoundingClientRect().height,
       };
     });
     check(
@@ -141,7 +142,7 @@ try {
       sans: document.fonts.check('400 18px "Source Sans 3"'),
       statuses: [...document.fonts].map((f) => `${f.family}:${f.status}`),
       plate: (() => {
-        const e = document.querySelector(".machine-name");
+        const e = document.querySelector<HTMLElement>(".machine-name")!;
         return {
           family: getComputedStyle(e).fontFamily,
           fits: e.scrollWidth <= e.clientWidth,
@@ -149,7 +150,7 @@ try {
           box: e.clientWidth,
         };
       })(),
-      figures: getComputedStyle(document.querySelector("#balance")).fontVariantNumeric,
+      figures: getComputedStyle(document.querySelector<HTMLElement>("#balance")!).fontVariantNumeric,
     }));
     check(
       `${w}x${h} fonts loaded`,
@@ -166,7 +167,7 @@ try {
       // Fallback: with the display face unavailable, Georgia must still fit the 360px nameplate.
       await page.addStyleTag({ content: `:root{--font-display:"Not Installed",Georgia,serif}` });
       const fb = await page.evaluate(() => {
-        const e = document.querySelector(".machine-name");
+        const e = document.querySelector<HTMLElement>(".machine-name")!;
         return {
           fits: e.scrollWidth <= e.clientWidth,
           w: e.scrollWidth,
@@ -182,9 +183,13 @@ try {
     await page.evaluate(() => (window.__stops = [1, 0, 0, 0, 0]));
     await page.click("#spin");
     check(`${w}x${h} back disabled while spinning`, await page.locator("#back").isDisabled());
-    await page.waitForFunction(() => document.querySelector("#spin").dataset.state === "idle", null, {
-      timeout: 15000,
-    });
+    await page.waitForFunction(
+      () => document.querySelector<HTMLButtonElement>("#spin")!.dataset.state === "idle",
+      null,
+      {
+        timeout: 15000,
+      },
+    );
     check(`${w}x${h} back enabled again`, await page.locator("#back").isEnabled());
     const mid = await save(page);
     check(
@@ -230,13 +235,12 @@ try {
   );
   check(
     "Escape restores result trigger focus",
-    await page.locator(".win-details").evaluate((e) => e === document.activeElement),
+    await page.locator(".win-details").evaluate((e) => e === document.activeElement!),
   );
   await context.close();
-} finally {
-  await browser.close();
-}
-check("no page errors", errors.length === 0, errors);
-check("no network requests", requests.length === 0, requests);
-writeFileSync(`${evidence}/phase32-tests.json`, JSON.stringify(results, null, 2));
-console.log(`phase32: ${results.filter((r) => r.ok).length}/${results.length} checks passed`);
+
+  check("no page errors", errors.length === 0, errors);
+  check("no network requests", requests.length === 0, requests);
+  writeFileSync(`${evidence}/phase32-tests.json`, JSON.stringify(results, null, 2));
+  console.log(`phase32: ${results.filter((r) => r.ok).length}/${results.length} checks passed`);
+});

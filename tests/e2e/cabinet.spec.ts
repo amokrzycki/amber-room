@@ -1,27 +1,24 @@
-import { chromium } from "playwright";
+import type { SaveV1 } from "../../src/game/model";
+import { expect } from "@playwright/test";
+import { test } from "./fixtures";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+test("cabinet geometry and rendering", async ({ browser }) => {
+  const label = "after";
+  const artifact = "dist/index.html";
+  const evidence = "docs/evidence/phase2";
+  await mkdir(evidence, { recursive: true });
+  const layouts: unknown[] = [],
+    errors: string[] = [],
+    network: string[] = [];
 
-const [label = "after", artifact = "dist/index.html"] = process.argv.slice(2);
-assert(["before", "after"].includes(label));
-const evidence = "docs/evidence/phase2";
-await mkdir(evidence, { recursive: true });
-const browser = await chromium.launch({
-  executablePath: "/usr/bin/chromium",
-  headless: true,
-  args: ["--no-sandbox", "--enable-unsafe-swiftshader", "--use-gl=angle", "--use-angle=swiftshader"],
-});
-const layouts = [],
-  errors = [],
-  network = [];
-try {
   for (const [width, height] of [
     [1280, 800],
     [1366, 768],
     [1600, 900],
     [1920, 1080],
-  ]) {
+  ] as const) {
     const context = await browser.newContext({ viewport: { width, height }, offline: true });
     const page = await context.newPage();
     page.on("pageerror", (error) => errors.push(error.message));
@@ -33,7 +30,7 @@ try {
       window.__stops = [];
       crypto.getRandomValues = (array) => {
         if (window.__stops.length && array instanceof Uint32Array) {
-          array[0] = window.__stops.shift();
+          array[0] = window.__stops.shift()!;
           return array;
         }
         return random(array);
@@ -44,12 +41,12 @@ try {
     await page.screenshot({ path: `${evidence}/${label}-lounge-${width}x${height}.png` });
     await page.click("#enter-slot");
     await page.locator("#spin").waitFor();
-    const capture = async (state) => {
+    const capture = async (state: string) => {
       const layout = await page.evaluate(() => {
-        const stage = document.querySelector("#stage").getBoundingClientRect();
-        const scale = document.querySelector("#ui").getBoundingClientRect().width / 1600;
+        const stage = document.querySelector<HTMLElement>("#stage")!.getBoundingClientRect();
+        const scale = document.querySelector<HTMLElement>("#ui")!.getBoundingClientRect().width / 1600;
         const elements = [
-          ...document.querySelectorAll(
+          ...document.querySelectorAll<HTMLElement>(
             ".slot-hud,.balance-block,.returned-block,.bet-block,#spin,#spin-status,#balance,#payout,#stake,#per-line,#line-count,#back",
           ),
         ];
@@ -57,7 +54,7 @@ try {
           const r = element.getBoundingClientRect();
           return {
             element: element.id || [...element.classList].pop(),
-            text: element.textContent,
+            text: element.textContent!,
             font: parseFloat(getComputedStyle(element).fontSize) * scale,
             rect: r.toJSON(),
             inside:
@@ -75,12 +72,12 @@ try {
       for (const e of layout) {
         assert(e.inside && e.fits, `${label} ${width} ${state}: ${e.element} clipped`);
       }
-      const byName = (name) => layout.find((e) => e.element === name).rect;
+      const byName = (name: string) => layout.find((e) => e.element === name)?.rect;
       for (const [a, b] of [
         ["balance-block", "returned-block"],
         ["returned-block", "bet-block"],
         ["balance-block", "bet-block"],
-      ]) {
+      ] as const) {
         const x = byName(a),
           y = byName(b);
         assert(
@@ -100,41 +97,43 @@ try {
       ["win", [3, 0, 0, 0, 0], 15],
       ["jackpot", [9, 9, 9, 9, 0], 108],
       ["long-result", [9, 10, 10, 10, 9], 13055],
-    ]) {
+    ] as const) {
       if (state === "long-result") {
         await page.selectOption("#line-count", "40");
         await page.selectOption("#per-line", "5");
       }
-      await page.evaluate((values) => {
+      await page.evaluate((values: readonly number[]) => {
         window.__stops = [...values];
       }, stops);
       await page.click("#spin");
-      assert.equal(await page.locator("#spin").getAttribute("data-state"), "spinning");
-      assert.equal(await page.locator("#spin").innerText(), "SKIP");
+      expect(await page.locator("#spin").getAttribute("data-state")).toBe("spinning");
+      expect(await page.locator("#spin").innerText()).toBe("SKIP");
       assert(await page.locator("#line-count").isDisabled());
       assert(await page.locator("#per-line").isDisabled());
       assert(await page.locator("#back").isDisabled());
       await page.waitForTimeout(400);
       if (state === "loss") await capture("spinning-disabled");
-      await page.waitForFunction(() => !document.querySelector("#back").disabled);
+      await page.waitForFunction(() => !document.querySelector<HTMLButtonElement>("#back")!.disabled);
       if (state === "jackpot") await capture("celebrating");
       await page.waitForFunction(
         () =>
-          document.querySelector("#spin").textContent === "SPIN" &&
-          document.querySelector("#spin").dataset.state === "idle" &&
-          document.querySelector("#payout").textContent ===
-            JSON.parse(localStorage.getItem("fruit-salon:v1")).lastSpin.outcome.payout.toLocaleString("en-GB"),
+          document.querySelector<HTMLButtonElement>("#spin")!.textContent! === "SPIN" &&
+          document.querySelector<HTMLButtonElement>("#spin")!.dataset.state === "idle" &&
+          document.querySelector<HTMLElement>("#payout")!.textContent! ===
+            (JSON.parse(localStorage.getItem("fruit-salon:v1")!) as SaveV1).lastSpin!.outcome.payout.toLocaleString(
+              "en-GB",
+            ),
       );
-      assert.equal(await page.locator("#payout").innerText(), payout.toLocaleString("en-GB"));
-      assert.equal(await page.locator("#spin").isDisabled(), false);
+      expect(await page.locator("#payout").innerText()).toBe(payout.toLocaleString("en-GB"));
+      expect(await page.locator("#spin").isDisabled()).toBe(false);
       await capture(state);
     }
     await page.focus("#spin");
     await capture("keyboard-focus");
     await context.close();
   }
-  assert.deepEqual(errors, []);
-  assert.deepEqual(network, []);
+  expect(errors).toEqual([]);
+  expect(network).toEqual([]);
   await writeFile(
     `${evidence}/${label}-checks.json`,
     JSON.stringify(
@@ -153,6 +152,4 @@ try {
   console.log(
     `PASS ${label}: ${layouts.length} state/size captures; deterministic outcomes, disabled controls, focus, bounds and overlap; no network/errors.`,
   );
-} finally {
-  await browser.close();
-}
+});
