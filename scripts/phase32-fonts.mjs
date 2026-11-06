@@ -92,7 +92,7 @@ try {
       });
       await page.waitForTimeout(300);
       if (dsf === 1) {
-        await page.locator(".win-details summary").click();
+        await page.locator(".win-details").click();
         await page.waitForTimeout(100);
         await shot("slot-win");
         await page.keyboard.press("Escape");

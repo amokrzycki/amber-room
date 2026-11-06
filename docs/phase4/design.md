@@ -12,16 +12,16 @@ Read against repository HEAD `c4e831a6c17f623b664517ba695d418689ae37fb`, with a 
 
 ### Actions and consequences [V]
 
-| Action | Financial consequence | Persistent/experiential consequence |
-| --- | --- | --- |
-| Return or wait in either scene | Earn current hourly income, subject to accounting gaps below | Wallet saved; no visitor simulation, stock, staff, operating costs or demand |
-| Buy bar tier | Pay 500 / 1,000 / 2,000; +12/h each | Three small bar details; first tier makes the bar fully visible |
-| Buy extra machine | Pay 750 / 1,500 / 3,000; +20/h each | Up to three additional machine sprites; these are **not playable machines** |
-| Buy furnishings tier | Pay 300 / 900 / 1,800; +0/h | Sequential rug, plants, fixed Amber Room brass plaque; no name entry |
-| Buy the room a round | Pay 50; no bonus, income or odds effect; bar ownership not required | Brief cheer/toast/light response, no enduring progression |
-| Choose lines/bet and deliberately spin | Stake subtracted, full payout added in one pre-animation transaction | Persist last result; no spin XP, quests, collection, bar revenue or unlock |
-| Dismiss celebration / inspect lines / move between views | No additional wager or payout | Existing keyboard controls, result diagram and adjustable audio/motion |
-| Export/import local save | Validated state replacement, not a token source within a single ledger | Portable local backup; no server authority, multi-device merge or cumulative play history |
+| Action                                                   | Financial consequence                                                  | Persistent/experiential consequence                                                       |
+| -------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Return or wait in either scene                           | Earn current hourly income, subject to accounting gaps below           | Wallet saved; no visitor simulation, stock, staff, operating costs or demand              |
+| Buy bar tier                                             | Pay 500 / 1,000 / 2,000; +12/h each                                    | Three small bar details; first tier makes the bar fully visible                           |
+| Buy extra machine                                        | Pay 750 / 1,500 / 3,000; +20/h each                                    | Up to three additional machine sprites; these are **not playable machines**               |
+| Buy furnishings tier                                     | Pay 300 / 900 / 1,800; +0/h                                            | Sequential rug, plants, fixed Amber Room brass plaque; no name entry                      |
+| Buy the room a round                                     | Pay 50; no bonus, income or odds effect; bar ownership not required    | Brief cheer/toast/light response, no enduring progression                                 |
+| Choose lines/bet and deliberately spin                   | Stake subtracted, full payout added in one pre-animation transaction   | Persist last result; no spin XP, quests, collection, bar revenue or unlock                |
+| Dismiss celebration / inspect lines / move between views | No additional wager or payout                                          | Existing keyboard controls, result diagram and adjustable audio/motion                    |
+| Export/import local save                                 | Validated state replacement, not a token source within a single ledger | Portable local backup; no server authority, multi-device merge or cumulative play history |
 
 Sources: [business.ts](../../src/game/business.ts), [SalonScene.ts](../../src/view/SalonScene.ts), [session.ts](../../src/game/session.ts), [save.ts](../../src/game/save.ts), [SlotScene.ts](../../src/view/SlotScene.ts), [ui.ts](../../src/view/ui.ts). No implementation has visitors purchasing spins: passive machine yield is an abstract constant.
 
@@ -39,11 +39,11 @@ At base/full rate, a capped visit yields **512 / 1,280**. Daily attendance captu
 
 Payback is marginal price / marginal gain, **earning hours**, not total-room income or calendar time.
 
-| Upgrade tier | Price | Gain/h | Payback earning h | Days at daily 8h credit | Days at every-two-day visits, average 4h/day |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Bar 1 / 2 / 3 | 500 / 1,000 / 2,000 | 12 each | 41.67 / 83.33 / 166.67 | 5.21 / 10.42 / 20.83 | 10.42 / 20.83 / 41.67 |
-| Machine 1 / 2 / 3 | 750 / 1,500 / 3,000 | 20 each | 37.5 / 75 / 150 | 4.69 / 9.38 / 18.75 | 9.38 / 18.75 / 37.5 |
-| Furnishings 1 / 2 / 3 | 300 / 900 / 1,800 | 0 | Never financially repays | — | — |
+| Upgrade tier          |               Price |  Gain/h |        Payback earning h | Days at daily 8h credit | Days at every-two-day visits, average 4h/day |
+| --------------------- | ------------------: | ------: | -----------------------: | ----------------------: | -------------------------------------------: |
+| Bar 1 / 2 / 3         | 500 / 1,000 / 2,000 | 12 each |   41.67 / 83.33 / 166.67 |    5.21 / 10.42 / 20.83 |                        10.42 / 20.83 / 41.67 |
+| Machine 1 / 2 / 3     | 750 / 1,500 / 3,000 | 20 each |          37.5 / 75 / 150 |     4.69 / 9.38 / 18.75 |                          9.38 / 18.75 / 37.5 |
+| Furnishings 1 / 2 / 3 |   300 / 900 / 1,800 |       0 | Never financially repays |                       — |                                            — |
 
 These are amortization periods, not unlock times. At the start the first bar or machine can be bought immediately. Furniture competes for working capital: under the stated daily policies, furniture-first completes the current room on day 15 versus day 11 for an ROI-target investor. The difference includes foregone reinvestment, not just the 3,000-token purchase cost.
 
@@ -54,12 +54,12 @@ Five identical 12-stop strips; three visible symbols per reel; 40 fixed unique l
 Exact enumeration of **248,832 joint stops** gives RTP **76.289223251% for every legal bet**. Expected net loss is **23.710776749% of turnover**. More lines change the distribution, not RTP. Lines are correlated; modeling them as independent would understate/otherwise distort risk.
 
 | Lines at 1/line | Mean payout | Payout standard deviation | Zero return | Net-profitable spin | Maximum payout |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| 1 | 0.763 | 5.433 | 89.24% | 10.76% | 2,000 |
-| 5, default | 3.814 | 12.736 | 60.42% | 19.26% | 2,080 |
-| 10 | 7.629 | 18.938 | 37.27% | 22.37% | 2,218 |
-| 20 | 15.258 | 29.122 | 14.12% | 21.54% | 2,392 |
-| 40 | 30.516 | 47.034 | 4.51% | 23.26% | 2,611 |
+| --------------- | ----------: | ------------------------: | ----------: | ------------------: | -------------: |
+| 1               |       0.763 |                     5.433 |      89.24% |              10.76% |          2,000 |
+| 5, default      |       3.814 |                    12.736 |      60.42% |              19.26% |          2,080 |
+| 10              |       7.629 |                    18.938 |      37.27% |              22.37% |          2,218 |
+| 20              |      15.258 |                    29.122 |      14.12% |              21.54% |          2,392 |
+| 40              |      30.516 |                    47.034 |       4.51% |              23.26% |          2,611 |
 
 Per-line wager 2 or 5 multiplies the payout, stake and standard deviation by 2 or 5, and variance by 4 or 25. Default expected loss: **1.18554/spin**, **118.55/100 spins**. Maximum bet: 200 stake, **47.4216 expected loss/spin**, maximum payout **13,055**. In 100 independent default spins the net standard deviation is about 127.36 tokens, with a strongly right-skewed distribution; a normal approximation is not a reliable tail model.
 
@@ -79,11 +79,11 @@ Existing rewards are the room art additions, cabinet presentation, result feedba
 
 ## 2. Choose a direction
 
-| Direction | Main promise / decisions | What it would require | Strongest objection |
-| --- | --- | --- | --- |
-| **A. Cozy idle lounge** | Build a small personal room; choose when to invest versus enjoy it; optional slots funded by that room | Make existing purchases interact and make room changes personally legible; accept a finite ending | Strategy remains light; it cannot credibly promise a 30-day management game |
-| B. Arcade tycoon | Operate a venue; choose capacity, service and demand allocations | Genuine constraints, utilization, visitor behavior or operating choices; new simulation and feedback | At current scale it risks opaque multipliers or maintenance chores. A scalar income selector would be fake tycoon play |
-| C. Hybrid | Arcade actions and management reinforce each other | A valuable active input separate from luck, or rewards tied to wagering | Rebates, spin quotas and outcome collections incentivize token churn/RNG; non-wager tasks introduce another game. An optional bonus easily becomes the optimal chore |
+| Direction               | Main promise / decisions                                                                               | What it would require                                                                                | Strongest objection                                                                                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A. Cozy idle lounge** | Build a small personal room; choose when to invest versus enjoy it; optional slots funded by that room | Make existing purchases interact and make room changes personally legible; accept a finite ending    | Strategy remains light; it cannot credibly promise a 30-day management game                                                                                          |
+| B. Arcade tycoon        | Operate a venue; choose capacity, service and demand allocations                                       | Genuine constraints, utilization, visitor behavior or operating choices; new simulation and feedback | At current scale it risks opaque multipliers or maintenance chores. A scalar income selector would be fake tycoon play                                               |
+| C. Hybrid               | Arcade actions and management reinforce each other                                                     | A valuable active input separate from luck, or rewards tied to wagering                              | Rebates, spin quotas and outcome collections incentivize token churn/RNG; non-wager tasks introduce another game. An optional bonus easily becomes the optimal chore |
 
 **Preferred hypothesis: A, testing one bounded economy interaction and one visible authorship choice.** [H] This follows the existing private-arcade purpose and allows a player to stop after finishing a satisfying small space. It is not a direction lock or a finding that added systems improve the game. Do not label it a hybrid merely because both views exist. Passive income supports active entertainment; active slots do not owe the player a progression bonus.
 
@@ -142,12 +142,12 @@ After completion: owned room, available income, slots and voluntary rounds. Re-e
 
 See [results](results.md) for all requested day checkpoints, ledgers, milestones, cap sensitivity and stochastic ranges. Key results, with all prices unchanged:
 
-| No-spin ROI-target policy | Frequent | Daily | Every two days |
-| --- | ---: | ---: | ---: |
-| Current room complete | 4.25 d | 11 d | 22 d |
-| Furnished hospitality, existing 8h cap | 4 d | 10 d | 20 d |
-| Same, 24h cap comparator | 3.5 d | 4 d | 8 d |
-| Same, 48h cap comparator | 3.5 d | 4 d | 4 d |
+| No-spin ROI-target policy              | Frequent | Daily | Every two days |
+| -------------------------------------- | -------: | ----: | -------------: |
+| Current room complete                  |   4.25 d |  11 d |           22 d |
+| Furnished hospitality, existing 8h cap |      4 d |  10 d |           20 d |
+| Same, 24h cap comparator               |    3.5 d |   4 d |            8 d |
+| Same, 48h cap comparator               |    3.5 d |   4 d |            4 d |
 
 **Do not integrate a cap increase in this minimum expansion.** It is a useful counterfactual, but the 24/48h variants turn the current catalogue into a very short economic tutorial and create much larger post-completion balances. At 48h, 1,485/1,680 daily fixed purchase orders finish equally fast (day 4); the economy becomes less sensitive to sequencing. No cadence modes or attendance-reset budgets are recommended. This is not a claim that the current eight-hour behavior is ideal: it is a recorded unresolved tension with relaxed, occasional play, and a separate owner choice after the core-loop experiment.
 
@@ -171,13 +171,13 @@ Financially no-play is best for a fixed policy and expected future wealth; occas
 
 The [separate reviewer](independent-review.md) **rejected the formula for production on current evidence**, found no mathematical defect overturning the broad model comparison, and challenged whether either mechanic creates valued play. **Accept that rejection.** A is the preferred direction to investigate, not an implementation recommendation. No candidate has passed a human gate.
 
-| Review finding | Disposition / resulting change |
-| --- | --- |
-| High: coupling may only move the solved shopping order; many sequences tie | Accepted. Formula is experiment-only. Compare to an unchanged-economy condition with the same improved purchase explanation; require player-valued tradeoffs, not arithmetic comprehension alone |
-| High: eight-hour attendance advantage conflicts with cozy identity | Accepted. Current cap is retained only as a modeling/control condition, not endorsed as the final cadence policy. Fairness/tab-open incentives must be resolved before production, independently of coupling |
-| Medium: three cosmetic choices and custom text are speculative | Accepted. Cut the expansion to one reversible rug choice for testing. No custom text or three-tier variant implementation in this minimum scope |
-| Medium: cozy identity may be shop copy rather than experienced ownership | Accepted. Use unlabeled current/proposed finished rooms; do not credit the direction with a personal-room identity until players perceive it |
-| Low: sample assumptions/optimality need careful language and sensitivity | Accepted. Heuristic, fixed-order family, finite sample and floor-mapping limits are explicit. Do not base design approval on precise seed-specific tails. Additional seed-range/unbiased-sampler sensitivity belongs before treating tail differences as tuning evidence; it was not run here |
+| Review finding                                                             | Disposition / resulting change                                                                                                                                                                                                                                                                |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| High: coupling may only move the solved shopping order; many sequences tie | Accepted. Formula is experiment-only. Compare to an unchanged-economy condition with the same improved purchase explanation; require player-valued tradeoffs, not arithmetic comprehension alone                                                                                              |
+| High: eight-hour attendance advantage conflicts with cozy identity         | Accepted. Current cap is retained only as a modeling/control condition, not endorsed as the final cadence policy. Fairness/tab-open incentives must be resolved before production, independently of coupling                                                                                  |
+| Medium: three cosmetic choices and custom text are speculative             | Accepted. Cut the expansion to one reversible rug choice for testing. No custom text or three-tier variant implementation in this minimum scope                                                                                                                                               |
+| Medium: cozy identity may be shop copy rather than experienced ownership   | Accepted. Use unlabeled current/proposed finished rooms; do not credit the direction with a personal-room identity until players perceive it                                                                                                                                                  |
+| Low: sample assumptions/optimality need careful language and sensitivity   | Accepted. Heuristic, fixed-order family, finite sample and floor-mapping limits are explicit. Do not base design approval on precise seed-specific tails. Additional seed-range/unbiased-sampler sensitivity belongs before treating tail differences as tuning evidence; it was not run here |
 
 The owner selects direction and scope before implementation. The model's inequalities are evidence for interactions, not evidence of engagement. A negative experiment is a valid Phase 4 result; rejection does not authorize a bigger feature list.
 

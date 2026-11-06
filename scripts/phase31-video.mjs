@@ -90,10 +90,10 @@ await page.click("#spin");
 await page.waitForTimeout(1500);
 await say(`SETTLED: SPIN again · returned 15, net +10 · ${await hud()}`);
 await page.waitForTimeout(1500);
-// 2. Win details disclosure and reel marks.
-await page.click(".win-details summary");
-await say("Win details: optional disclosure; hover previews a line on the reels");
-await page.locator(".win-list button").first().hover();
+// 2. Win details modal and its result diagram.
+await page.click(".win-details");
+await say("Win details: select a winning line in the result diagram");
+await page.locator(".win-list button").first().click();
 await page.waitForTimeout(1500);
 await page.keyboard.press("Escape");
 // 3. Partial return, natural stop (no skip).
@@ -126,8 +126,8 @@ await page.click("#spin");
 await page.waitForTimeout(800);
 await page.keyboard.press("Escape");
 await page.waitForFunction(() => document.querySelector("#spin").dataset.state === "idle", null, { timeout: 15000 });
-await page.click(".win-details summary");
-await say(`${await page.locator(".win-details summary").innerText()}: panel scrolls, HUD unchanged · ${await hud()}`);
+await page.click(".win-details");
+await say(`${await page.locator(".win-details").innerText()}: panel scrolls, HUD unchanged · ${await hud()}`);
 await page.waitForTimeout(2500);
 await context.close();
 await browser.close();
