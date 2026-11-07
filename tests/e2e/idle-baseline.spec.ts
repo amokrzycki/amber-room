@@ -1,32 +1,32 @@
-// Controlled browser accounting, invoking the actual installed 1s callback at simulated delivery times.
-// This characterizes delayed/throttled delivery; it does not claim a natural 48h background browser run.
-import assert from "node:assert/strict";
-import { chromium } from "playwright";
+import type { SaveV1 } from "../../src/game/model";
+import { expect } from "@playwright/test";
+import { test } from "./fixtures";
 import { resolve } from "node:path";
 import { mkdirSync, writeFileSync } from "node:fs";
-const browser = await chromium.launch({
-  executablePath: "/usr/bin/chromium",
-  headless: true,
-  args: ["--no-sandbox", "--enable-unsafe-swiftshader", "--use-gl=angle", "--use-angle=swiftshader"],
-});
-const results = [];
-try {
+test("delayed income delivery and reload", async ({ browser }) => {
+  // Controlled browser accounting, invoking the actual installed 1s callback at simulated delivery times.
+  // This characterizes delayed/throttled delivery; it does not claim a natural 48h background browser run.
+  const results: Record<string, unknown>[] = [];
+
   for (const [name, hidden, gapHours, calls, expected] of [
     ["visible 48h, hourly delivery", false, 1, 48, 3072],
     ["visible 48h, 12-hour delayed delivery", false, 12, 4, 2048],
     ["visible 48h, single delayed delivery", false, 48, 1, 512],
     ["hidden 48h then visible", true, 1, 48, 512],
-  ]) {
+  ] as const) {
     const context = await browser.newContext({ offline: true });
     const page = await context.newPage();
     await page.addInitScript(() => {
-      window.__now = Number(sessionStorage.getItem("virtualNow")) || 1000000;
+      window.__now = Number(sessionStorage.getItem("virtualNow")!) || 1000000;
       Date.now = () => window.__now;
       const interval = window.setInterval.bind(window);
-      window.setInterval = (fn, ms, ...args) => {
-        if (ms === 1000) window.__incomeTick = fn;
-        return interval(fn, ms, ...args);
-      };
+      Object.defineProperty(window, "setInterval", {
+        configurable: true,
+        value: (fn: TimerHandler, ms?: number, ...args: unknown[]) => {
+          if (ms === 1000 && typeof fn === "function") window.__incomeTick = () => fn(...args);
+          return interval(fn, ms, ...args);
+        },
+      });
       window.__hidden = false;
       Object.defineProperty(document, "hidden", { get: () => window.__hidden });
     });
@@ -34,7 +34,7 @@ try {
     await page.locator("#enter-slot").waitFor();
     const result = await page.evaluate(
       ({ hidden, gapHours, calls }) => {
-        const read = () => JSON.parse(localStorage.getItem("fruit-salon:v1"));
+        const read = () => JSON.parse(localStorage.getItem("fruit-salon:v1")!) as SaveV1;
         window.__now += 1000;
         window.__incomeTick();
         const before = read();
@@ -55,15 +55,15 @@ try {
       },
       { hidden, gapHours, calls },
     );
-    assert.equal(result.after.balance - result.before.balance, expected, name);
-    assert.equal(result.repeated.balance, result.after.balance, "duplicate visibility/ticks cannot repay");
-    if (hidden) assert.equal(result.intermediate.balance, result.before.balance);
+    expect(result.after.balance - result.before.balance, name).toBe(expected);
+    expect(result.repeated.balance, "duplicate visibility/ticks cannot repay").toBe(result.after.balance);
+    if (hidden) expect(result.intermediate.balance).toBe(result.before.balance);
     // A reload with the persisted accounting checkpoint must not repay the same interval.
     await page.evaluate((now) => sessionStorage.setItem("virtualNow", String(now)), result.now);
     await page.reload();
     await page.locator("#enter-slot").waitFor();
-    const reloaded = await page.evaluate(() => JSON.parse(localStorage.getItem("fruit-salon:v1")));
-    assert.equal(reloaded.balance, result.after.balance);
+    const reloaded = await page.evaluate(() => JSON.parse(localStorage.getItem("fruit-salon:v1")!) as SaveV1);
+    expect(reloaded.balance).toBe(result.after.balance);
     results.push({
       name,
       earned: expected,
@@ -72,9 +72,8 @@ try {
     });
     await context.close();
   }
-} finally {
-  await browser.close();
-}
-mkdirSync("docs/evidence/phase40", { recursive: true });
-writeFileSync("docs/evidence/phase40/baseline-browser.json", JSON.stringify(results, null, 2));
-console.log(JSON.stringify(results));
+
+  mkdirSync("docs/evidence/phase40", { recursive: true });
+  writeFileSync("docs/evidence/phase40/baseline-browser.json", JSON.stringify(results, null, 2));
+  console.log(JSON.stringify(results));
+});

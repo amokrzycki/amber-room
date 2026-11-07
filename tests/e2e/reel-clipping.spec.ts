@@ -1,37 +1,32 @@
-import { chromium } from "playwright";
+import { expect } from "@playwright/test";
+import { test } from "./fixtures";
 import assert from "node:assert/strict";
 import { mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
-const directory = "docs/evidence/reel-clipping";
-mkdirSync(directory, { recursive: true });
-const browser = await chromium.launch({
-  executablePath: "/usr/bin/chromium",
-  headless: true,
-  args: ["--no-sandbox", "--enable-unsafe-swiftshader", "--use-gl=angle", "--use-angle=swiftshader"],
-});
-try {
+test("moving reels stay inside the cabinet", { tag: "@local" }, async ({ browser }) => {
+  const directory = "docs/evidence/reel-clipping";
+  mkdirSync(directory, { recursive: true });
+
   const context = await browser.newContext({ viewport: { width: 1600, height: 900 }, offline: true });
   const page = await context.newPage();
-  const warnings = [],
-    errors = [];
+  const warnings: string[] = [],
+    errors: string[] = [];
   page.on("console", (m) => {
     if (m.type() === "warning") warnings.push(m.text());
   });
   page.on("pageerror", (e) => errors.push(e.message));
+  await page.clock.install();
   await page.goto(`file://${resolve("dist/index.html")}`);
   await page.locator("#enter-slot").waitFor();
   await page.click("#enter-slot");
   await page.locator("#spin").waitFor();
   await page.screenshot({ path: `${directory}/idle.png` });
+  await page.clock.pauseAt(new Date(Date.now() + 100));
   await page.click("#spin");
   for (let frame = 0; frame < 4; frame++) {
-    await page.waitForTimeout(80);
-    assert.equal(
-      await page.locator("#spin").getAttribute("data-state"),
-      "spinning",
-      "Capture must sample moving reels",
-    );
+    await page.clock.runFor(80);
+    expect(await page.locator("#spin").getAttribute("data-state"), "Capture must sample moving reels").toBe("spinning");
     await page.screenshot({ path: `${directory}/moving-${frame}.png` });
   }
   execFileSync(
@@ -56,11 +51,9 @@ assert changed_inside, 'Reels must actually move; a frozen screen cannot prove c
     { stdio: "pipe" },
   );
   assert(!warnings.some((w) => /not supported in WebGL|mask/i.test(w)), warnings.join("\n"));
-  assert.deepEqual(errors, []);
+  expect(errors).toEqual([]);
   console.log(
     "PASS: four moving frames, upper/lower cabinet unchanged, reel pixels moving, no unsupported-mask warning.",
   );
   await context.close();
-} finally {
-  await browser.close();
-}
+});

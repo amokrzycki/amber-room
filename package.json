@@ -14,7 +14,11 @@
     "lint": "biome lint --error-on-warnings .",
     "check": "biome check --error-on-warnings .",
     "check:fix": "biome check --write .",
-    "prebuild": "npm run check"
+    "prebuild": "npm run check",
+    "test:e2e": "npm run build && playwright test",
+    "test:e2e:ci": "npm run build && playwright test --grep-invert @local",
+    "test:e2e:local": "npm run build && playwright test --grep @local",
+    "test:e2e:ui": "npm run build && playwright test --ui"
   },
   "dependencies": {
     "phaser": "4.2.1"
