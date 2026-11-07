@@ -566,7 +566,7 @@ h2 {
 }
 #spin {
   align-self: start;
-  margin-top: 25px; /* centred on the 50px control row beside it */
+  margin-top: 22px; /* Leave room for the cap to depress 3px inside the fixed HUD row. */
   justify-self: end;
   position: relative;
   width: 220px;

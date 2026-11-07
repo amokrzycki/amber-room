@@ -1,3 +1,5 @@
+> Browser checks described below were migrated from `scripts/browser-*.mjs` to `tests/e2e/*.spec.ts`. Run the current suite with `npm run test:e2e`; historical command names below record the original verification.
+
 # Dowody wykonania
 
 Stan początkowy: dokumentacja bez kodu, czysty git, gałąź mvp. Node 26.12.1, Chromium i ffmpeg dostępne. Odbiór feelingu przez użytkownika i pomiar na jego komputerze: oczekują.

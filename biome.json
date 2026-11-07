@@ -198,6 +198,22 @@
           }
         }
       }
+    },
+    {
+      "includes": ["tests/e2e/**/*.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noNonNullAssertion": "off"
+          },
+          "complexity": {
+            "useOptionalChain": "off"
+          },
+          "performance": {
+            "useDomNodeTextContent": "off"
+          }
+        }
+      }
     }
   ],
   "html": {
