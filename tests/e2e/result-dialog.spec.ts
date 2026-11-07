@@ -4,6 +4,7 @@ import { test } from "./fixtures";
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+test.use({ trace: { mode: "retain-on-failure", screenshots: false, snapshots: false } });
 test("result dialog and input regressions", async ({ browser }) => {
   // Offline browser regression: result dialog, gestures, lifecycle, saves, geometry and warm win marks.
   const out = "docs/evidence/phase33";
@@ -32,6 +33,12 @@ test("result dialog and input regressions", async ({ browser }) => {
           return a;
         }
         return original(a);
+      };
+      console.info("[save-diagnostic] before-seed", location.href, localStorage.getItem("fruit-salon:v1"));
+      const setItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (key, value) {
+        console.info("[save-diagnostic] setItem", location.href, key, value, new Error().stack);
+        return setItem.call(this, key, value);
       };
       if (!localStorage.getItem("fruit-salon:v1")!)
         localStorage.setItem(
@@ -200,7 +207,11 @@ test("result dialog and input regressions", async ({ browser }) => {
         check(`${width} ${name}: viewing results never settles twice`, (await saved(page)).balance === save.balance);
       }
       const settled = await saved(page);
+      await page.evaluate(() =>
+        console.info("[save-diagnostic] before-reload", localStorage.getItem("fruit-salon:v1")),
+      );
       await page.reload();
+      await page.evaluate(() => console.info("[save-diagnostic] after-reload", localStorage.getItem("fruit-salon:v1")));
       await page.click("#enter-slot");
       await page.locator("#spin").waitFor();
       check(

@@ -4,6 +4,7 @@ import { test } from "./fixtures";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+test.use({ trace: { mode: "retain-on-failure", screenshots: false, snapshots: false } });
 test("input, settlement and accessibility", async ({ browser }) => {
   const evidence = "docs/evidence/phase2.1";
   await mkdir(evidence, { recursive: true });
@@ -48,6 +49,12 @@ test("input, settlement and accessibility", async ({ browser }) => {
           return array;
         }
         return random(array);
+      };
+      console.info("[save-diagnostic] before-seed", location.href, localStorage.getItem("fruit-salon:v1"));
+      const setItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (key, value) {
+        console.info("[save-diagnostic] setItem", location.href, key, value, new Error().stack);
+        return setItem.call(this, key, value);
       };
       // A valid future accrual checkpoint isolates token accounting from passive income.
       if (!localStorage.getItem("fruit-salon:v1")!)
@@ -154,7 +161,9 @@ test("input, settlement and accessibility", async ({ browser }) => {
     expect((await save(page)).nextSpinId).toBe(settled.nextSpinId);
     expect(await page.locator("#salon-balance").innerText()).toBe("1,010");
     if (!process.env.CI) await page.screenshot({ path: `${evidence}/after-cash-out-${width}x${height}.png` });
+    await page.evaluate(() => console.info("[save-diagnostic] before-reload", localStorage.getItem("fruit-salon:v1")));
     await page.reload();
+    await page.evaluate(() => console.info("[save-diagnostic] after-reload", localStorage.getItem("fruit-salon:v1")));
     await page.click("#enter-slot");
     await ready(page);
     expect((await save(page)).balance).toBe(settled.balance);
@@ -197,7 +206,9 @@ test("input, settlement and accessibility", async ({ browser }) => {
     });
     await page.click("#spin");
     const during = await save(page);
+    await page.evaluate(() => console.info("[save-diagnostic] before-reload", localStorage.getItem("fruit-salon:v1")));
     await page.reload();
+    await page.evaluate(() => console.info("[save-diagnostic] after-reload", localStorage.getItem("fruit-salon:v1")));
     await page.click("#enter-slot");
     await ready(page);
     expect(await save(page)).toEqual(during);
