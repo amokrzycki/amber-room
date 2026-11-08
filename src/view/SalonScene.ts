@@ -4,35 +4,33 @@ import { catalog, purchase, buyRound, hourlyIncome, type Item } from "../game/bu
 import { preloadAssets } from "./assets";
 import { createAudio, type GameAudio } from "./audio";
 import { mountUI } from "./ui";
-import { livingLounge } from "../runtimeMode";
-import { createLoungeSave, readRug, resetLounge, writeRug, type RugStyle } from "../../prototypes/living-lounge-state";
-import { exportSave } from "../game/save";
-import { drawLivingLounge, loungeReward } from "./livingLounge";
-const playtest = import.meta.env.DEV && livingLounge;
+import { isPlaytest } from "../runtimeMode";
+import { LivingLoungePlaytest } from "./playtest";
+
+const playtest = isPlaytest();
+
 export class SalonScene extends Phaser.Scene {
-  private audio!: GameAudio;
-  private room: Phaser.GameObjects.Container | undefined;
-  private ui!: ReturnType<typeof mountUI>;
-  private lounge: ReturnType<typeof drawLivingLounge> | undefined;
-  private confirmedRug: RugStyle = "claret";
-  private previewRug: RugStyle | undefined;
-  private rugWarning = "";
+  audio!: GameAudio;
+  room: Phaser.GameObjects.Container | undefined;
+  ui!: ReturnType<typeof mountUI>;
+  private playtest?: LivingLoungePlaytest;
+
   constructor() {
     super("salon");
   }
+
   init() {
     this.room = undefined;
-    this.lounge = undefined;
-    this.previewRug = undefined;
     if (playtest) {
-      const rug = readRug({ getItem: (key) => window.localStorage.getItem(key) });
-      this.confirmedRug = rug.style;
-      this.rugWarning = rug.warning;
+      this.playtest = new LivingLoungePlaytest(this);
+      this.playtest.init();
     }
   }
+
   preload() {
     if (!this.textures.exists("cherry")) preloadAssets(this);
   }
+
   create() {
     accrue();
     document.querySelector("#loading")?.remove();
@@ -45,41 +43,43 @@ export class SalonScene extends Phaser.Scene {
       this,
       this.audio,
       `<div class="salon-copy"><p class="eyebrow">YOUR LITTLE CORNER OF THE NIGHT</p><h1>The Amber<br>Room</h1><p>A warm light. A familiar rhythm.<br>Your lounge keeps its own hours.</p></div><button class="enter-button primary" id="enter-slot">Play The Orchard <span>→</span></button><div class="salon-wallet"><span>YOUR TOKENS</span><strong id="salon-balance"></strong><small id="income"></small></div><aside class="shop"><p class="eyebrow">MAKE IT YOURS</p><h2>A good room.<br>A better evening.</h2><p class="shop-intro">Small upgrades. Make yourself at home.</p><div id="purchases">${(Object.entries(catalog) as [Item, (typeof catalog)[Item]][]).map(([item, entry]) => `<article class="purchase"><div class="purchase-head"><h3>${entry.name}</h3><small id="level-${item}"></small></div><p id="benefit-${item}"></p><button id="buy-${item}" data-item="${item}" aria-describedby="benefit-${item}"></button></article>`).join("")}<button class="toast-button" id="round" aria-describedby="round-purpose">Buy the room a round <strong>50 tokens</strong></button><p id="round-purpose">Celebration only · no bonus or income.</p></div><p id="salon-message" role="status"></p></aside>`,
-      { extraWarning: () => this.rugWarning },
+      { extraWarning: () => this.playtest?.rugWarning ?? "" },
     );
     const root = this.ui.root;
-    if (playtest) this.mountPlaytest();
+    this.playtest?.mount();
+
     root.querySelector("#enter-slot")!.addEventListener("click", () => {
       this.audio.play("press");
       this.scene.start("slot");
     });
+
     root.querySelectorAll<HTMLButtonElement>("[data-item]").forEach((button) => {
       button.addEventListener("click", () => {
         const item = button.dataset.item as Item;
-        if (playtest) this.cancelRug(false);
+        this.playtest?.onBeforePurchase();
         const result = purchase(owner.state.save, item, Date.now());
         owner.commit({ ...owner.state, save: result.save });
         if (result.ok) {
           this.audio.play("salon-toast");
-          this.drawRoom(playtest ? item : undefined);
-          if (playtest) this.reveal(item);
+          this.drawRoom(item);
+          this.playtest?.reveal(item);
         }
         root.querySelector("#salon-message")!.textContent = result.ok
-          ? playtest
-            ? this.purchaseMessage(item)
-            : "A little more yours."
+          ? (this.playtest?.purchaseMessage(item) ?? "A little more yours.")
           : result.reason === "max-level"
             ? "All set. This upgrade is complete."
             : "Not enough tokens yet. Your lounge keeps earning.";
         this.refresh();
       });
     });
+
     root.querySelector("#round")!.addEventListener("click", () => {
       const result = buyRound(owner.state.save, Date.now());
       owner.commit({ ...owner.state, save: result.save });
       if (result.ok) {
         this.audio.play("salon-toast");
         this.audio.play("salon-cheer");
+        this.playtest?.settleReveal();
         if (!playtest && !owner.state.save.settings.reducedMotion && owner.state.save.settings.effectsIntensity > 0) {
           const glow = this.add.rectangle(
             525,
@@ -97,13 +97,10 @@ export class SalonScene extends Phaser.Scene {
         : "A round costs 50 tokens.";
       this.refresh();
     });
+
     this.refresh();
     const key = (e: KeyboardEvent) => {
-      if (playtest && e.key === "Escape" && this.previewRug !== undefined) {
-        e.preventDefault();
-        this.cancelRug();
-        return;
-      }
+      if (this.playtest?.onKeyDown(e)) return;
       if (
         e.code === "Space" &&
         !e.repeat &&
@@ -119,7 +116,7 @@ export class SalonScene extends Phaser.Scene {
     window.addEventListener("keydown", key);
     const visibility = () => {
       if (document.hidden) {
-        if (playtest) this.settleReveal();
+        this.playtest?.settleReveal();
         this.audio.silence();
       } else this.audio.resume();
     };
@@ -130,14 +127,12 @@ export class SalonScene extends Phaser.Scene {
       window.removeEventListener("keydown", key);
       window.removeEventListener("salon-state", income);
       document.removeEventListener("visibilitychange", visibility);
-      if (playtest) {
-        this.settleReveal();
-        this.previewRug = undefined;
-      }
+      this.playtest?.shutdown();
       this.audio.dispose();
     });
   }
-  private refresh() {
+
+  refresh() {
     const s = owner.state.save,
       root = this.ui.root;
     root.querySelector("#salon-balance")!.textContent = number(s.balance);
@@ -147,22 +142,7 @@ export class SalonScene extends Phaser.Scene {
         complete = level === 3,
         cost = entry.prices.at(level) ?? 0;
       root.querySelector(`#level-${item}`)!.textContent = `${level} / 3`;
-      root.querySelector(`#benefit-${item}`)!.textContent = playtest
-        ? complete
-          ? item === "decor"
-            ? "All furnishings in place · cosmetic only; no income."
-            : `Total +${level * entry.gain} tokens/hour net · odds unchanged.`
-          : `${loungeReward(item, level + 1)}${item === "decor" ? "." : ` · +${entry.gain} tokens/hour net.`}`
-        : item === "decor"
-          ? [
-              "A woven rug. Cosmetic only; no income.",
-              "Greenery. Cosmetic only; no income.",
-              "Your name in brass. Cosmetic only; no income.",
-              "Every detail in place. Cosmetic only.",
-            ][level]
-          : complete
-            ? "The room is working at its best."
-            : `+${entry.gain} tokens / hour net · odds stay the same`;
+      root.querySelector(`#benefit-${item}`)!.textContent = this.benefitText(item, level, complete, entry);
       const button = root.querySelector(`#buy-${item}`) as HTMLButtonElement;
       button.innerHTML = complete
         ? "Complete ✓"
@@ -170,150 +150,27 @@ export class SalonScene extends Phaser.Scene {
       button.disabled = complete || s.balance < cost;
     }
     (root.querySelector("#round") as HTMLButtonElement).disabled = s.balance < 50;
-    if (playtest) {
-      (root.querySelector("#style-rug") as HTMLButtonElement).disabled = s.businesses.decorLevel < 1;
-      root.querySelector("#rug-purpose")!.textContent =
-        s.businesses.decorLevel < 1 ? "Unlocks with first furnishing." : "Free · appearance only.";
-    }
+    this.playtest?.refresh(root);
     this.ui.warning();
   }
-  private purchaseMessage(item: Item) {
-    const entry = catalog[item],
-      level = owner.state.save.businesses[entry.field];
-    return `${entry.name} ${level}/3 · ${loungeReward(item, level)}${item === "decor" ? "." : ` · +${entry.gain} tokens/hour; ${entry.name.toLowerCase()} total +${level * entry.gain}/hour net.`}`;
-  }
-  private settleReveal() {
-    if (!this.lounge) return;
-    for (const group of Object.values(this.lounge.groups)) {
-      this.tweens.killTweensOf(group);
-      group.setAlpha(1);
+
+  private benefitText(item: Item, level: number, complete: boolean, entry: (typeof catalog)[Item]): string {
+    if (this.playtest) return this.playtest.benefitText(item, level, complete, entry);
+    if (item === "decor") {
+      return [
+        "A woven rug. Cosmetic only; no income.",
+        "Greenery. Cosmetic only; no income.",
+        "Your name in brass. Cosmetic only; no income.",
+        "Every detail in place. Cosmetic only.",
+      ][level];
     }
+    if (complete) return "The room is working at its best.";
+    return `+${entry.gain} tokens / hour net · odds stay the same`;
   }
-  private reveal(item: Item) {
-    this.settleReveal();
-    const settings = owner.state.save.settings;
-    if (
-      document.hidden ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-      settings.reducedMotion ||
-      settings.effectsIntensity === 0
-    )
-      return;
-    const group = this.lounge!.groups[item];
-    group.setAlpha(0.35);
-    this.tweens.add({ targets: group, alpha: 1, duration: 240, ease: "Cubic.Out" });
-  }
-  private cancelRug(focus = true) {
-    this.settleReveal();
-    if (this.previewRug === undefined) return;
-    this.previewRug = undefined;
-    this.ui.root.querySelector<HTMLElement>("#rug-chooser")!.hidden = true;
-    this.ui.root.querySelector("#style-rug")!.setAttribute("aria-expanded", "false");
-    this.drawRoom("decor");
-    if (focus) this.ui.root.querySelector<HTMLButtonElement>("#style-rug")!.focus();
-  }
-  private mountPlaytest() {
-    const root = this.ui.root;
-    root.querySelector(".shop h2")!.textContent = "A good room. A better evening.";
-    root
-      .querySelector("#buy-decor")!
-      .insertAdjacentHTML(
-        "afterend",
-        `<button id="style-rug" aria-expanded="false" aria-controls="rug-chooser" aria-describedby="rug-purpose">Style rug</button><p id="rug-purpose">Free appearance choice · unlocks with the rug.</p><div id="rug-chooser" role="group" aria-label="Preview rug appearance" hidden><div class="rug-choices"><button data-rug="claret" aria-pressed="false">Claret weave</button><button data-rug="moss" aria-pressed="false">Moss weave</button></div><p>Preview only · no cost or income change.</p><div class="rug-actions"><button id="rug-apply">Apply</button><button id="rug-cancel">Cancel</button></div></div>`,
-      );
-    root.querySelector("#style-rug")!.addEventListener("click", () => {
-      this.settleReveal();
-      if (this.previewRug !== undefined) return this.cancelRug();
-      this.previewRug = this.confirmedRug;
-      root.querySelector<HTMLElement>("#rug-chooser")!.hidden = false;
-      root.querySelector("#style-rug")!.setAttribute("aria-expanded", "true");
-      root.querySelectorAll<HTMLButtonElement>("[data-rug]").forEach((button) => {
-        button.setAttribute("aria-pressed", String(button.dataset.rug === this.previewRug));
-      });
-      root.querySelector<HTMLButtonElement>(`[data-rug=${this.previewRug}]`)!.focus();
-    });
-    root.querySelectorAll<HTMLButtonElement>("[data-rug]").forEach((button) => {
-      button.addEventListener("click", () => {
-        this.previewRug = button.dataset.rug as RugStyle;
-        root.querySelectorAll<HTMLButtonElement>("[data-rug]").forEach((choice) => {
-          choice.setAttribute("aria-pressed", String(choice === button));
-        });
-        this.drawRoom("decor");
-      });
-    });
-    root.querySelector("#rug-cancel")!.addEventListener("click", () => this.cancelRug());
-    root.querySelector("#rug-apply")!.addEventListener("click", () => {
-      if (this.previewRug === undefined) return;
-      const result = writeRug({ setItem: (key, value) => window.localStorage.setItem(key, value) }, this.previewRug);
-      if (result.ok) {
-        this.confirmedRug = this.previewRug;
-        this.rugWarning = "";
-        root.querySelector("#salon-message")!.textContent =
-          `${this.confirmedRug === "claret" ? "Claret" : "Moss"} weave saved · cosmetic only; no cost or income change.`;
-        this.cancelRug();
-      } else this.rugWarning = "Rug appearance not saved. Try Apply again or Cancel to restore the last confirmed rug.";
-      this.ui.warning();
-    });
-    root.addEventListener(
-      "click",
-      (event) => {
-        if ((event.target as Element).closest("[data-action]")) this.cancelRug(false);
-      },
-      true,
-    );
-    root.addEventListener("input", () => this.settleReveal());
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const settle = () => this.settleReveal();
-    motion.addEventListener("change", settle);
-    this.events.once("shutdown", () => motion.removeEventListener("change", settle));
-    root
-      .querySelector(".topbar nav")!
-      .insertAdjacentHTML("beforeend", '<button id="reset-playtest">Reset playtest</button>');
-    root.querySelector("#reset-playtest")!.addEventListener("click", () => {
-      if (
-        !window.confirm(
-          "Reset Living Lounge playtest? This replaces prototype progress and rug appearance with the 20,000-token starting wallet. Production progress stays unchanged.",
-        )
-      )
-        return;
-      this.settleReveal();
-      const now = Date.now();
-      try {
-        // shortcut: two storage keys are not atomic; report partial failure until a migration adds transactional storage.
-        resetLounge(window.localStorage, now);
-        owner.import(exportSave(createLoungeSave(now)));
-        this.confirmedRug = "claret";
-        this.rugWarning = "";
-        this.cancelRug(false);
-        this.drawRoom();
-        this.refresh();
-        if (owner.warning) throw new Error(owner.warning);
-        root.querySelector("#salon-message")!.textContent =
-          "Playtest reset · 20,000 tokens, no upgrades, Claret weave.";
-      } catch {
-        root.querySelector("#salon-message")!.textContent =
-          "Reset failed. Storage may contain a partial reset. Export current progress before reloading; the rug may not have reset.";
-      }
-    });
-  }
-  private drawRoom(item?: Item) {
-    if (import.meta.env.DEV && livingLounge) {
-      this.settleReveal();
-      if (!item) this.room?.destroy();
-      const lounge = drawLivingLounge(
-        this,
-        owner.state.save.businesses,
-        this.previewRug ?? this.confirmedRug,
-        item && this.lounge ? { ...this.lounge, item } : undefined,
-      );
-      this.lounge = lounge;
-      this.room = lounge.room;
-      if (!item || item === "machine")
-        lounge.groups.machine.getByName("lounge-cabinet-personal").on("pointerdown", () => {
-          this.ui.unlock();
-          this.audio.play("press");
-          this.scene.start("slot");
-        });
+
+  drawRoom(item?: Item) {
+    if (this.playtest) {
+      this.playtest.drawRoom(item);
       return;
     }
     this.room?.destroy();

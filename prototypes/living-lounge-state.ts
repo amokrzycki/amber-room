@@ -73,6 +73,8 @@ export function writeRug(storage: Pick<Storage, "setItem">, style: RugStyle): { 
 }
 
 export function resetLounge(storage: Storage, nowMs: number): void {
-  storage.setItem(LOUNGE_SAVE_KEY, exportSave(createLoungeSave(nowMs)));
+  // Appearance first (idempotent, cosmetic); progress second (the destructive write).
+  // If progress fails, appearance is already claret and the next load's damaged-save protection reconciles.
   storage.setItem(LOUNGE_APPEARANCE_KEY, JSON.stringify({ version: 1, rug: "claret" }));
+  storage.setItem(LOUNGE_SAVE_KEY, exportSave(createLoungeSave(nowMs)));
 }

@@ -364,12 +364,12 @@ test("second reset write failure warns about a partial reset and leaves the sess
   await expect(page.locator("#salon-balance")).toHaveText("19,700");
   expect((await roomState(page)).rug).toBe("lounge-rug-moss");
   const partial = await stored(page);
-  expect(JSON.parse(partial.progress!).businesses.decorLevel).toBe(0);
+  expect(JSON.parse(partial.progress!).businesses.decorLevel).toBe(1);
   expect(JSON.parse(partial.appearance!).rug).toBe("moss");
   await page.reload();
   await page.locator("#enter-slot").waitFor();
-  await expect(page.locator("#salon-balance")).toHaveText("20,000");
-  await expect(page.locator("#level-decor")).toHaveText("0 / 3");
+  await expect(page.locator("#salon-balance")).toHaveText("19,700");
+  await expect(page.locator("#level-decor")).toHaveText("1 / 3");
   expect(JSON.parse((await stored(page)).appearance!).rug).toBe("moss");
   await expect(page.locator("#salon-message")).not.toContainText("Playtest reset");
   await page.click("#buy-decor");

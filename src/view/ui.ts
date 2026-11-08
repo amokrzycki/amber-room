@@ -5,8 +5,8 @@ import { owner, number } from "../runtime";
 import { machine } from "../game/machine";
 import { audioMix, type GameAudio } from "./audio";
 import { symbolNames } from "./spinResult";
-import { livingLounge } from "../runtimeMode";
-const playtest = import.meta.env.DEV && livingLounge;
+import { isPlaytest } from "../runtimeMode";
+const playtest = isPlaytest();
 export function download(raw: string, name: string) {
   const url = URL.createObjectURL(new Blob([raw], { type: "application/json" }));
   const a = document.createElement("a");

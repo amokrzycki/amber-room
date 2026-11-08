@@ -189,14 +189,16 @@ it("exposes a second-write reset failure without claiming an atomic reset", () =
     [LOUNGE_APPEARANCE_KEY]: '{"version":1,"rug":"moss"}',
   });
   storage.setItem.mockImplementation((key, value) => {
-    if (key === LOUNGE_APPEARANCE_KEY) throw new Error("appearance quota");
+    if (key === LOUNGE_SAVE_KEY) throw new Error("progress quota");
     data.set(key, value);
   });
-  expect(() => resetLounge(storage, now)).toThrow("appearance quota");
+  expect(() => resetLounge(storage, now)).toThrow("progress quota");
+  // Appearance was written first (idempotent, cosmetic) and succeeded.
+  expect(readRug(storage)).toEqual({ style: "claret", warning: "" });
+  // Progress was not written; the damaged original is preserved for SaveOwner's protection.
   const reloaded = new SaveOwner(createLoungeStorage(storage, now), now);
-  expect(reloaded.state.save.balance).toBe(20000);
-  expect(reloaded.state.save.businesses).toEqual({ barLevel: 0, extraMachines: 0, decorLevel: 0 });
-  expect(readRug(storage)).toEqual({ style: "moss", warning: "" });
+  expect(reloaded.originalRaw).toBe("{damaged");
+  expect(reloaded.warning).toContain("Damaged save protected");
 });
 
 it("keeps runtime mode off until explicitly enabled", async () => {
