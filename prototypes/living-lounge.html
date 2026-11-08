@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#171214">
+    <title>Living Lounge · Development playtest · Amber Room</title>
+    <style>
+    #playtest-label {
+      position: fixed;
+      inset: 0 0 auto;
+      margin: 0;
+      padding: 6px;
+      color: #fff2cc;
+      background: #171214;
+      text-align: center;
+      font: 14px / 20px var(--font-ui);
+    }
+    body #stage {
+      top: calc(50% + 16px);
+      width: min(100vw, calc((100vh - 32px) * 16 / 9));
+    }
+    .living-lounge .shop {
+      top: 104px;
+    }
+    .living-lounge .shop > .eyebrow,
+    .living-lounge .salon-copy > .eyebrow {
+      display: none;
+    }
+    .living-lounge .shop h2 {
+      font-size: 28px;
+      margin: 0 0 4px;
+    }
+    .living-lounge .shop-intro {
+      display: none;
+    }
+    .living-lounge .purchase {
+      padding: 6px 0;
+    }
+    .living-lounge .purchase p {
+      margin: 4px 0;
+      line-height: 1.25;
+    }
+    .living-lounge .purchase button {
+      padding: 8px 12px;
+    }
+    .living-lounge #style-rug {
+      margin-top: 8px;
+      width: auto;
+    }
+    .living-lounge #rug-purpose {
+      display: inline;
+      margin-left: 10px;
+    }
+    .living-lounge #rug-chooser {
+      margin-top: 6px;
+    }
+    .living-lounge .rug-choices,
+    .living-lounge .rug-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .living-lounge .rug-choices button,
+    .living-lounge .rug-actions button {
+      width: auto;
+    }
+    .living-lounge [data-rug][aria-pressed="true"] {
+      border-color: #d8af55;
+      background: #452633;
+    }
+    .living-lounge #rug-apply {
+      border-color: #d8af55;
+    }
+    .living-lounge #salon-message {
+      margin: 8px 0 0;
+    }
+    .living-lounge .shop .toast-button {
+      margin-top: 8px;
+      padding: 8px 12px;
+    }
+    .living-lounge .save-warning {
+      left: 43px;
+      max-width: 950px;
+      background: #171214;
+      padding: 2px 6px;
+    }
+    .living-lounge .save-warning:empty {
+      display: none;
+    }
+    </style>
+  </head>
+  <body>
+    <p id="playtest-label">
+      Living Lounge · Development playtest · 20,000-token starting wallet · Prototype progress only
+    </p>
+    <main id="stage">
+      <div id="game" aria-label="Game view"></div>
+      <div id="ui"></div>
+    </main>
+    <div id="loading">Living Lounge playtest · Warming up the lights…</div>
+    <script type="module" src="./living-lounge.ts"></script>
+  </body>
+</html>

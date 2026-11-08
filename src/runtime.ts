@@ -1,5 +1,7 @@
 import { SaveOwner } from "./game/save";
 import { accrueIncome } from "./game/business";
+import { livingLounge } from "./runtimeMode";
+import { createLoungeSave, createLoungeStorage } from "../prototypes/living-lounge-state";
 let storage: Pick<Storage, "getItem" | "setItem">;
 try {
   storage = window.localStorage;
@@ -13,7 +15,11 @@ try {
     },
   };
 }
-export const owner = new SaveOwner(storage, Date.now());
+const nowMs = Date.now();
+const loungeMode = import.meta.env.DEV && livingLounge;
+export const owner = new SaveOwner(loungeMode ? createLoungeStorage(storage, nowMs) : storage, nowMs);
+// Keep SaveOwner's storage warning and damaged-original protection while accelerating only an unavailable load.
+if (loungeMode && owner.warning && owner.originalRaw === undefined) owner.state.save = createLoungeSave(nowMs);
 export const number = (n: number) => n.toLocaleString("en-GB");
 export function accrue(nowMs = Date.now()) {
   try {

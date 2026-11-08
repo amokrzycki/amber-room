@@ -5,6 +5,8 @@ import { owner, number } from "../runtime";
 import { machine } from "../game/machine";
 import { audioMix, type GameAudio } from "./audio";
 import { symbolNames } from "./spinResult";
+import { livingLounge } from "../runtimeMode";
+const playtest = import.meta.env.DEV && livingLounge;
 export function download(raw: string, name: string) {
   const url = URL.createObjectURL(new Blob([raw], { type: "application/json" }));
   const a = document.createElement("a");
@@ -15,22 +17,34 @@ export function download(raw: string, name: string) {
 }
 const backToLounge = `<button type="button" class="nav-back" id="back" aria-label="Back to lounge"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="M13 8H3m4.5-4.5L3 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Lounge</button>`;
 /** `back` adds the lounge link to the shared navigation; only the machine view has somewhere to go back to. */
-export function mountUI(scene: Phaser.Scene, audio: GameAudio, content: string, options: { back?: boolean } = {}) {
+export function mountUI(
+  scene: Phaser.Scene,
+  audio: GameAudio,
+  content: string,
+  options: { back?: boolean; extraWarning?: () => string } = {},
+) {
   const root = document.createElement("section");
-  root.className = "screen";
+  root.className = playtest ? "screen living-lounge" : "screen";
   root.innerHTML = `<header class="topbar"><span class="brand"><i>◆</i> AMBER ROOM <small>PRIVATE ARCADE</small></span><nav>${options.back ? backToLounge : ""}<button data-action="table">Lines & payouts</button><button data-action="settings">Settings & save</button></nav></header>${content}<p class="save-warning" role="status"></p><dialog class="panel-dialog"><button class="close" aria-label="Close">×</button><div class="dialog-body"></div></dialog>`;
   document.querySelector("#ui")!.append(root);
   const dialog = root.querySelector("dialog")!;
   const body = dialog.querySelector(".dialog-body")!;
   root.querySelector(".close")!.addEventListener("click", () => dialog.close());
   const warning = () => {
-    root.querySelector(".save-warning")!.textContent = owner.warning;
+    root.querySelector(".save-warning")!.textContent = [owner.warning, options.extraWarning?.()]
+      .filter(Boolean)
+      .join(" ");
   };
   warning();
   const settings = () => {
     const s = owner.state.save.settings;
     body.innerHTML = `<h2>Make yourself at home</h2><label class="setting"><input type="checkbox" id="muted" ${s.muted ? "checked" : ""}> Mute all audio</label><label class="setting" for="music-volume">Music / room ambience <input id="music-volume" type="range" min="0" max="1" step="0.05" value="${audioMix.music}"></label><label class="setting" for="effects-volume">Machine effects <input id="effects-volume" type="range" min="0" max="1" step="0.05" value="${audioMix.effects}"></label><p class="fine">Volume levels last for this session.</p><label class="setting"><input type="checkbox" id="motion" ${s.reducedMotion ? "checked" : ""}> Reduce motion & lights</label><label class="setting" for="intensity">Effect intensity <input id="intensity" type="range" min="0" max="1" step="0.05" value="${s.effectsIntensity}"></label><hr><h3>Keep your progress</h3><p>Your progress stays on this device. Export a backup before moving this HTML file.</p><div class="save-actions"><button id="export">Export JSON</button><label class="file-button">Import JSON<input type="file" id="import" accept=".json,application/json"></label>${owner.originalRaw !== undefined ? '<button id="original">Download damaged original</button>' : ""}</div><p id="import-status" role="status"></p><p class="fine">One currency: play tokens. A private game, with no accounts or real money.</p><details class="font-licenses"><summary>Typeface credits & licenses</summary><pre></pre></details>`;
     body.querySelector(".font-licenses pre")!.textContent = `${marcellusLicense}\n\n${sourceLicense}`;
+    if (playtest) {
+      body.querySelector("h3")!.textContent = "Keep your prototype progress";
+      body.querySelector("h3 + p")!.textContent =
+        "Living Lounge prototype progress stays separate from your game. Export/import affects prototype progress only; rug appearance is not included in the game backup. The confirmed rug stays on this device until changed or reset.";
+    }
     const change = () => {
       owner.commit({
         ...owner.state,
@@ -53,10 +67,20 @@ export function mountUI(scene: Phaser.Scene, audio: GameAudio, content: string, 
     });
     body
       .querySelector("#export")!
-      .addEventListener("click", () => download(JSON.stringify(owner.state.save, null, 2), "amber-room-save.json"));
+      .addEventListener("click", () =>
+        download(
+          JSON.stringify(owner.state.save, null, 2),
+          playtest ? "amber-room-living-lounge-prototype-progress.json" : "amber-room-save.json",
+        ),
+      );
     body
       .querySelector("#original")
-      ?.addEventListener("click", () => download(owner.originalRaw!, "amber-room-damaged-original.json"));
+      ?.addEventListener("click", () =>
+        download(
+          owner.originalRaw!,
+          playtest ? "amber-room-living-lounge-prototype-damaged-original.json" : "amber-room-damaged-original.json",
+        ),
+      );
     body.querySelector("#import")!.addEventListener("change", async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;

@@ -2,7 +2,9 @@ import { expect, it } from "vitest";
 // @ts-expect-error Node build check intentionally stays a standalone .mjs script.
 import { checkOffline } from "../scripts/check-offline.mjs";
 import { execFileSync } from "node:child_process";
-import { writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 it("rejects script, stylesheet, image, font and audio external fixtures", () => {
   for (const tag of [
     '<script src="https://example.test/a.js"></script>',
@@ -22,12 +24,20 @@ it("rejects script, stylesheet, image, font and audio external fixtures", () => 
   expect(checkOffline("<p>no asset</p>", { assets: [{ id: "x", path: "x" }] }, () => Buffer.from("x")).length).toBe(1);
 });
 it("CLI returns code 1 for an external fixture", () => {
-  writeFileSync("/tmp/slots-external-fixture.html", '<script src="https://example.test/test.js"></script>');
-  expect(() =>
-    execFileSync(process.execPath, ["scripts/check-offline.mjs", "/tmp/slots-external-fixture.html"], {
-      stdio: "pipe",
-    }),
-  ).toThrow();
+  const root = process.platform === "win32" ? join(tmpdir(), "opencode") : tmpdir();
+  mkdirSync(root, { recursive: true });
+  const directory = mkdtempSync(join(root, "slots-offline-"));
+  try {
+    const fixture = join(directory, "external.html");
+    writeFileSync(fixture, '<script src="https://example.test/test.js"></script>');
+    expect(() =>
+      execFileSync(process.execPath, ["scripts/check-offline.mjs", fixture], {
+        stdio: "pipe",
+      }),
+    ).toThrow();
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
 });
 it("does not confuse JavaScript url methods with stylesheet URLs", () => {
   expect(
